@@ -1,0 +1,16 @@
+*.agekey
+*.key
+*.pem
+*.db
+*.db-wal
+*.db-shm
+*.tar
+*.tar.gz
+*.log
+config/config.yaml
+data/
+logs/
+snapshot/
+restore-work/
+recovery-keys/
+.auth/

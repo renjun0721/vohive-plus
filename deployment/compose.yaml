@@ -1,0 +1,15 @@
+services:
+  vohive-plus:
+    image: vohive-plus-personal:0.1.1
+    container_name: vohive-plus
+    network_mode: host
+    privileged: true
+    restart: "no"
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - /dev:/dev
+      - /mnt/sata2-4/vohive-plus/config:/app/config
+      - /mnt/sata2-4/vohive-plus/data:/app/data
+      - /mnt/sata2-4/vohive-plus/logs:/app/logs
+    command: ["-c", "/app/config/config.yaml", "--database", "/app/data/vohive-plus-final.db"]

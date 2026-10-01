@@ -1,0 +1,23 @@
+{
+    "luci-app-vohive": {
+        "description": "Grant access to manage VoHive service",
+        "read": {
+            "file": {
+                "/usr/libexec/vohive-luci-info": [ "exec" ]
+            },
+            "ubus": {
+                "file": [ "exec" ],
+                "rc": [ "list" ]
+            }
+        },
+        "write": {
+            "file": {
+                "/usr/libexec/vohive-luci-info": [ "exec" ]
+            },
+            "ubus": {
+                "file": [ "exec" ],
+                "rc": [ "init" ]
+            }
+        }
+    }
+}
