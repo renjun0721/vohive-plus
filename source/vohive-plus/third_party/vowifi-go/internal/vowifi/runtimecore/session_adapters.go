@@ -1,0 +1,290 @@
+package runtimecore
+
+import (
+	"context"
+	"errors"
+	"net"
+	"sync"
+	"time"
+
+	"github.com/iniwex5/vowifi-go/internal/vowifi/events"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/imscore"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/ipsec3gpp"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/smsdelivery"
+)
+
+type eventDispatcherSubscriber struct {
+	ctx      context.Context
+	dispatch events.EventDispatcher
+}
+
+func (subscriber eventDispatcherSubscriber) OnIMSEvent(event events.Event) {
+	if subscriber.dispatch != nil {
+		subscriber.dispatch.Dispatch(subscriber.ctx, event)
+	}
+}
+
+func buildEventBus(ctx context.Context, dispatch events.EventDispatcher) *imscore.EventBus {
+	bus := imscore.NewEventBus()
+	if dispatch != nil {
+		bus.Subscribe(eventDispatcherSubscriber{ctx: ctx, dispatch: dispatch})
+	}
+	return bus
+}
+
+type deliveryStoreAdapter struct{ store smsdelivery.Store }
+
+type deliveryStoreSIPAdapter struct {
+	deliveryStoreAdapter
+	store smsdelivery.SIPResultStore
+}
+
+type deliveryStoreFragmentCapability struct {
+	store smsdelivery.InboundFragmentStore
+}
+
+type deliveryStoreFragmentLifecycleCapability struct {
+	deliveryStoreFragmentCapability
+	lifecycle smsdelivery.InboundFragmentLifecycleStore
+}
+
+type deliveryStoreFragmentAdapter struct {
+	deliveryStoreAdapter
+	deliveryStoreFragmentCapability
+}
+
+type deliveryStoreLifecycleAdapter struct {
+	deliveryStoreAdapter
+	deliveryStoreFragmentLifecycleCapability
+}
+
+type deliveryStoreCompleteAdapter struct {
+	deliveryStoreSIPAdapter
+	deliveryStoreFragmentCapability
+}
+
+type deliveryStoreCompleteLifecycleAdapter struct {
+	deliveryStoreSIPAdapter
+	deliveryStoreFragmentLifecycleCapability
+}
+
+func adaptDeliveryStore(store smsdelivery.Store) imscore.DeliveryStore {
+	if store == nil {
+		return nil
+	}
+	base := deliveryStoreAdapter{store: store}
+	sipResults, hasSIPResults := store.(smsdelivery.SIPResultStore)
+	fragments, hasFragments := store.(smsdelivery.InboundFragmentStore)
+	lifecycle, hasLifecycle := store.(smsdelivery.InboundFragmentLifecycleStore)
+	switch {
+	case hasSIPResults && hasFragments && hasLifecycle:
+		return deliveryStoreCompleteLifecycleAdapter{
+			deliveryStoreSIPAdapter: deliveryStoreSIPAdapter{
+				deliveryStoreAdapter: base, store: sipResults,
+			},
+			deliveryStoreFragmentLifecycleCapability: deliveryStoreFragmentLifecycleCapability{
+				deliveryStoreFragmentCapability: deliveryStoreFragmentCapability{store: fragments},
+				lifecycle:                       lifecycle,
+			},
+		}
+	case hasSIPResults && hasFragments:
+		return deliveryStoreCompleteAdapter{
+			deliveryStoreSIPAdapter: deliveryStoreSIPAdapter{
+				deliveryStoreAdapter: base, store: sipResults,
+			},
+			deliveryStoreFragmentCapability: deliveryStoreFragmentCapability{store: fragments},
+		}
+	case hasSIPResults:
+		return deliveryStoreSIPAdapter{deliveryStoreAdapter: base, store: sipResults}
+	case hasFragments && hasLifecycle:
+		return deliveryStoreLifecycleAdapter{
+			deliveryStoreAdapter: base,
+			deliveryStoreFragmentLifecycleCapability: deliveryStoreFragmentLifecycleCapability{
+				deliveryStoreFragmentCapability: deliveryStoreFragmentCapability{store: fragments},
+				lifecycle:                       lifecycle,
+			},
+		}
+	case hasFragments:
+		return deliveryStoreFragmentAdapter{
+			deliveryStoreAdapter:            base,
+			deliveryStoreFragmentCapability: deliveryStoreFragmentCapability{store: fragments},
+		}
+	default:
+		return base
+	}
+}
+
+func (adapter deliveryStoreFragmentLifecycleCapability) MarkInboundFragmentsDegraded(
+	scope smsdelivery.InboundFragmentScope,
+	at time.Time,
+) error {
+	return adapter.lifecycle.MarkInboundFragmentsDegraded(scope, at)
+}
+
+func (adapter deliveryStoreFragmentCapability) LoadInboundFragments(
+	owner smsdelivery.InboundFragmentOwner,
+) ([]smsdelivery.StoredInboundFragment, error) {
+	return adapter.store.LoadInboundFragments(owner)
+}
+
+func (adapter deliveryStoreFragmentCapability) SaveInboundFragment(
+	scope smsdelivery.InboundFragmentScope,
+	fragment smsdelivery.InboundFragment,
+) (smsdelivery.InboundFragmentSaveResult, error) {
+	return adapter.store.SaveInboundFragment(scope, fragment)
+}
+
+func (adapter deliveryStoreFragmentCapability) DeleteInboundFragments(
+	scope smsdelivery.InboundFragmentScope,
+) error {
+	return adapter.store.DeleteInboundFragments(scope)
+}
+
+func (adapter deliveryStoreFragmentCapability) MarkInboundFragmentAcked(
+	scope smsdelivery.InboundFragmentScope,
+	sequence int,
+	at time.Time,
+) error {
+	return adapter.store.MarkInboundFragmentAcked(scope, sequence, at)
+}
+
+func (adapter deliveryStoreSIPAdapter) MarkSMSDeliveryPartSIPResult(
+	messageID string,
+	partNo, sipCode int,
+	state, errorText string,
+	at time.Time,
+) error {
+	return adapter.store.MarkSMSDeliveryPartSIPResult(
+		messageID, partNo, sipCode, state, errorText, at,
+	)
+}
+
+func (adapter deliveryStoreAdapter) CreateSMSDelivery(messageID, imsi, deviceID, peer, content string, parts int, at time.Time) error {
+	return adapter.store.CreateSMSDelivery(messageID, imsi, deviceID, peer, content, parts, at)
+}
+
+func (adapter deliveryStoreAdapter) UpsertSMSDeliveryPart(messageID string, part int, callID string, rpMR int, state string, at time.Time) error {
+	return adapter.store.UpsertSMSDeliveryPart(messageID, part, callID, rpMR, state, at)
+}
+
+func (adapter deliveryStoreAdapter) MarkSMSDeliveryPartReport(inReplyTo, callID, deviceID string, rpMR int, state string, sipCode, rpCause int, errorText string, at time.Time) (imscore.DeliveryPartMatch, error) {
+	match, err := adapter.store.MarkSMSDeliveryPartReport(
+		inReplyTo, callID, deviceID, rpMR, state, sipCode, rpCause, errorText, at,
+	)
+	return imscore.DeliveryPartMatch{MessageID: match.MessageID, PartNo: match.PartNo, State: match.State, Matched: err == nil && match.MessageID != ""}, err
+}
+
+func (adapter deliveryStoreAdapter) RecomputeSMSDelivery(id string, at time.Time) error {
+	return adapter.store.RecomputeSMSDelivery(id, at)
+}
+
+func (adapter deliveryStoreAdapter) UpdateSMSDeliveryState(messageID, state, lastError string, acknowledgements int, at time.Time) error {
+	return adapter.store.UpdateSMSDeliveryState(messageID, state, lastError, acknowledgements, at)
+}
+
+func (adapter deliveryStoreAdapter) GetSMSDeliveryStatus(id string) (*imscore.DeliveryStatus, error) {
+	status, err := adapter.store.GetSMSDeliveryStatus(id)
+	if err != nil || status == nil {
+		return nil, err
+	}
+	result := &imscore.DeliveryStatus{
+		MessageID: status.MessageID, IMSI: status.IMSI, DeviceID: status.DeviceID,
+		Peer: status.Peer, Content: status.Content, PartsTotal: status.PartsTotal,
+		Acks: status.Acks, State: status.State, LastError: status.LastError,
+		CreatedAt: status.CreatedAt, UpdatedAt: status.UpdatedAt,
+		Parts: make([]imscore.DeliveryPartStatus, 0, len(status.Parts)),
+	}
+	for _, part := range status.Parts {
+		result.Parts = append(result.Parts, imscore.DeliveryPartStatus{
+			PartNo: part.PartNo, CallID: part.CallID, InReplyTo: part.InReplyTo,
+			RPMR: part.RPMR, State: part.State, SIPCode: part.SIPCode,
+			RPCause: part.RPCause, RPCauseText: part.RPCauseText, ErrorText: part.ErrorText,
+			SentAt: part.SentAt, ReportAt: part.ReportAt,
+			CreatedAt: part.CreatedAt, UpdatedAt: part.UpdatedAt,
+		})
+	}
+	return result, nil
+}
+
+type installerIMSNetwork struct {
+	imscore.IMSNetwork
+	mu        sync.Mutex
+	installer imscore.IPSec3GPPInstaller
+	cleanup   func() error
+}
+
+type managedIMSNetwork interface {
+	imscore.IMSNetwork
+	InstallIPSec3GPP(ipsec3gpp.Policy) error
+	RemoveIPSec3GPP() error
+	IMSNetworkDiagnostics() map[string]any
+	Close() error
+}
+
+type protectedUDPNetwork interface {
+	ListenProtectedUDP(*net.UDPAddr) (net.PacketConn, error)
+}
+
+type protectedUDPInstallerIMSNetwork struct {
+	*installerIMSNetwork
+	protectedUDPNetwork
+}
+
+func newInstallerIMSNetwork(
+	network imscore.IMSNetwork,
+	installer imscore.IPSec3GPPInstaller,
+) managedIMSNetwork {
+	managed := &installerIMSNetwork{IMSNetwork: network, installer: installer}
+	protected, ok := network.(protectedUDPNetwork)
+	if !ok {
+		return managed
+	}
+	return &protectedUDPInstallerIMSNetwork{
+		installerIMSNetwork: managed,
+		protectedUDPNetwork: protected,
+	}
+}
+
+func (network *installerIMSNetwork) InstallIPSec3GPP(value ipsec3gpp.Policy) error {
+	network.mu.Lock()
+	defer network.mu.Unlock()
+	if network.installer == nil {
+		_, err := (&imscore.MissingIPSec3GPPInstaller{}).InstallIPSec3GPP(
+			context.Background(), value,
+		)
+		return err
+	}
+	previous := network.cleanup
+	network.cleanup = nil
+	if previous != nil {
+		if err := previous(); err != nil {
+			return err
+		}
+	}
+	cleanup, err := network.installer.InstallIPSec3GPP(context.Background(), value)
+	if err != nil {
+		return err
+	}
+	network.cleanup = cleanup
+	return nil
+}
+
+func (network *installerIMSNetwork) RemoveIPSec3GPP() error {
+	network.mu.Lock()
+	cleanup := network.cleanup
+	network.cleanup = nil
+	network.mu.Unlock()
+	if cleanup == nil {
+		return nil
+	}
+	return cleanup()
+}
+
+func (network *installerIMSNetwork) Close() error {
+	cleanupErr := network.RemoveIPSec3GPP()
+	closer, _ := network.IMSNetwork.(interface{ Close() error })
+	if closer == nil {
+		return cleanupErr
+	}
+	return errors.Join(cleanupErr, closer.Close())
+}

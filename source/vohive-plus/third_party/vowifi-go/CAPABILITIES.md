@@ -1,0 +1,69 @@
+# VoWiFi Runtime Capabilities
+
+This file records what the reconstructed runtime executes on production paths.
+It distinguishes real network behavior from compatibility APIs that cannot
+perform their historical action with the arguments they expose.
+
+## Implemented Network Paths
+
+| Area | Runtime behavior |
+| --- | --- |
+| SWu | Establishes and tears down the IKE/IPsec tunnel through the selected ePDG. Authentication and transport errors are returned to the caller. A failed established-session reauthentication terminates the runtime with its real error so the host can release and rebuild it. |
+| IMS registration | Sends REGISTER over the protected IMS transport, performs AKA, retains the route and security agreement, handles registration-event SUBSCRIBE/NOTIFY, refreshes before expiry, and reports terminal refresh errors. |
+| SIP transport | Correlates responses by Call-ID, CSeq, method, and top Via branch. TCP and UDP receivers dispatch requests and close their transactions and sockets during shutdown. |
+| SMS readiness | Becomes ready only when IMS registration, an inbound SIP receiver, and SMSC discovery are all ready. Losing any prerequisite clears readiness. |
+| Outbound SMS | Encodes SMS-SUBMIT and RP-DATA, sends a real SIP MESSAGE transaction, accepts only a final 2xx response, and tracks RP/TP delivery outcomes when requested. |
+| Inbound SMS | Validates SIP MESSAGE and 3GPP payloads, decodes RP-DATA and SMS-DELIVER, responds over the inbound SIP path, publishes the message event, and sends RP acknowledgement or error. |
+| Multipart SMS | Splits outbound text, reassembles inbound parts by sender/reference, rejects conflicting duplicates, expires incomplete groups, and persists delivery updates. |
+| USSI/USSD | Uses real INVITE, ACK, INFO, and BYE transactions and routes inbound INFO/BYE to the active session. |
+| Voice signaling and media | Uses real outbound and inbound INVITE/ACK/BYE/CANCEL transactions. New inbound calls are exposed through the runtime gateway, ring with `180`, can be answered or rejected over the retained network transaction, renegotiate SDP, and relay RTP in both directions with payload-type mapping. The legacy timed call allocates a non-zero IMS RTP endpoint and transmits 20 ms PCMU media until BYE. Dialogs, timers, sockets, and runtime bindings are released on failure, cancel, or hangup. Two connected user calls can stay live; `SwitchCall` changes focus. Hold/resume sends a TS 24.610 re-INVITE. |
+| Conference factory / conference-info | `MergeConference` INVITEs the factory URI, REFERs both connected user calls into the focus, and SUBSCRIBEs `Event: conference`. Missing factory URI returns `ErrConferenceFactoryUnavailable`. NOTIFY `conference-info` is parsed. |
+| Consultative transfer (ECT) | `TransferConsultative` sends an in-dialog REFER with `Refer-To` `Replaces`, waits for NOTIFY sipfrag, then BYEs both local dialogs. Missing dialog tags returns `ErrECTRequiresReplaces` instead of a silent blind transfer. |
+| Inbound Replaces | INVITE Replaces is parsed; matched dialogs are terminated. |
+| XCAP / Ut (TS 24.623) | XCAP simservs GET/PUT with If-Match. A distinct `xcap_apn` starts slot `xcap` on the same ePDG after IMS; Ut HTTP dials that PDN and does not fall back to IMS. USSI is still not Ut. |
+| Second SWu / extra PDN | Default remains one IMS session. `RunSession` calls `attachAdditionalPDNs` when `xcap_apn` differs. A failed extra PDN is stopped without tearing down IMS. |
+| Overlapping IKE reauth | New IKE_SA_INIT/IKE_AUTH while the old SA forwards; INITIAL_CONTACT omitted until cutover. |
+| E911 | Uses the carrier entitlement endpoint over real HTTP, propagates transport and HTTP failures, and executes multi-round TS.43 EAP-AKA/AKA' identity, challenge, notification, authentication-reject, synchronization, and reauthentication exchanges before opening the carrier websheet. |
+
+## Explicit Capability Boundaries
+
+- Inbound voice consumers must provide a real client SDP answer through
+  `voicehost.Gateway.AnswerIncomingCall`. The gateway also exposes callbacks
+  and polling for pending calls. Reject, no-answer, and CANCEL paths send an
+  explicit final response to the original INVITE.
+- `Agent.Dial`, `Agent.DialContext`, and the legacy timed `SimulateCall` API
+  preserve the old self-contained call mode: they allocate an RTP relay before
+  sending INVITE, advertise the relay's non-zero IMS port, require PCMU in the
+  network SDP answer, and send PCMU comfort media until hangup. Local client
+  calls use `HandleClientInvite`, which injects the client's SDP and relays RTP
+  in both directions.
+- The client side of the RTP relay is advertised on `127.0.0.1`; the media
+  client therefore runs on the same host as the runtime. IMS-side media binds
+  to the registered IMS address and uses ephemeral non-zero ports.
+- Compatibility handles that contain only a Call-ID cannot retransmit PRACK.
+  They return an explicit context error instead of reporting success.
+- The legacy gateway packet-capture methods have no output target parameter.
+  They return an explicit configuration error; per-call capture remains
+  available when the caller supplies a writable output.
+- The optional LAN-side voice bridge starts only after a caller injects a real
+  packet connection and remote address. Queueing a packet is distinct from
+  network delivery; asynchronous write failures remain available through the
+  bridge error accessor.
+- The legacy global dataplane cleanup function lacks an owning session or
+  interface identifier and therefore returns an explicit error. Production
+  cleanup is performed by the runtime-owned SWu session during shutdown.
+- E911 entitlement requires a configured carrier endpoint and a real SIM AKA
+  provider when the carrier sends an authentication challenge. Unsupported or
+  incomplete challenges return an explicit error; they do not open a websheet
+  as though authentication succeeded.
+
+## Not Implemented On The Production Path
+
+| Area | Status |
+| --- | --- |
+| OMA-DM / ANDSF / TS.32 | Architecture choice: static presets only. Annex B fields are YAML/API configuration. |
+| Emergency originating | Construction exists; `AllowEmergencyRegistration` and `AllowEmergencyCalls` stay off. No PSAP call. |
+| Phone merge/transfer UI | Voice `MergeConference` / `TransferConsultative` exist. HTTP phone API has hold/resume/switch only; no merge or transfer endpoint. |
+
+No SMS, registration, USSI, or voice transaction reports network success
+before receiving the corresponding final SIP response.

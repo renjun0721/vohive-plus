@@ -1,0 +1,15 @@
+#!/bin/sh
+printf 'Service: '
+if /etc/init.d/vohive enabled >/dev/null 2>&1; then
+    printf 'enabled'
+else
+    printf 'disabled'
+fi
+printf '\n\nProcess:\n'
+ps w | grep '[v]ohive' || true
+printf '\nPort 7575:\n'
+netstat -lntp 2>/dev/null | grep -E 'vohive|:7575' || true
+printf '\nFiles:\n'
+ls -l /usr/local/bin/vohive /usr/local/bin/vohive-run /etc/init.d/vohive /root/vohive/config/config.yaml 2>/dev/null || true
+printf '\nRecent logs:\n'
+logread 2>/dev/null | grep -i 'vohive' | tail -n 120 || true

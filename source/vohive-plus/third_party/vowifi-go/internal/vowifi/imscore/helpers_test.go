@@ -1,0 +1,304 @@
+package imscore
+
+import (
+	"errors"
+	"fmt"
+	"io"
+	"net"
+	"strings"
+	"syscall"
+	"testing"
+	"time"
+
+	"github.com/iniwex5/vowifi-go/internal/vowifi/policy"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/profile"
+	"github.com/iniwex5/vowifi-go/runtimehost/identity"
+)
+
+func TestSIPStatusText(t *testing.T) {
+	cases := []struct {
+		code int
+		want string
+	}{
+		{180, "Ringing"},
+		{200, "OK"},
+		{401, "Unauthorized"},
+		{486, "Busy Here"},
+		{503, "Service Unavailable"},
+	}
+	for _, c := range cases {
+		if got := SIPStatusText(c.code); got != c.want {
+			t.Errorf("SIPStatusText(%d) = %q, want %q", c.code, got, c.want)
+		}
+	}
+}
+
+func TestCountryISO2FromMCC(t *testing.T) {
+	if got := CountryISO2FromMCC("310"); got != "US" {
+		t.Errorf("310 -> %q, want US", got)
+	}
+	if got := CountryISO2FromMCC("460"); got != "CN" {
+		t.Errorf("460 -> %q, want CN", got)
+	}
+	if got := CountryISO2FromMCC("262"); got != "DE" {
+		t.Errorf("262 -> %q, want DE", got)
+	}
+	if got := CountryISO2FromMCC("204"); got != "NL" {
+		t.Errorf("204 -> %q, want NL", got)
+	}
+	if got := CountryISO2FromMCC("515"); got != "PH" {
+		t.Errorf("515 -> %q, want PH", got)
+	}
+	if got := CountryISO2FromMCC("208"); got != "FR" {
+		t.Errorf("208 -> %q, want FR", got)
+	}
+	if got := CountryISO2FromMCC("454"); got != "HK" {
+		t.Errorf("454 -> %q, want HK", got)
+	}
+	if got := CountryISO2FromMCC("440"); got != "JP" {
+		t.Errorf("440 -> %q, want JP", got)
+	}
+	if got := CountryISO2FromMCC("248"); got != "EE" {
+		t.Errorf("248 -> %q, want EE", got)
+	}
+	if got := CountryISO2FromMCC("621"); got != "NG" {
+		t.Errorf("621 -> %q, want NG", got)
+	}
+	if got := CountryISO2FromMCC("502"); got != "MY" {
+		t.Errorf("502 -> %q, want MY", got)
+	}
+}
+
+func TestIsFatalNetworkError(t *testing.T) {
+	fatal := []error{
+		errors.New("connection refused"), errors.New("network is unreachable"),
+		errors.New("use of closed network connection"), errors.New("no route to host"),
+		errors.New("connection reset by peer"), errors.New("broken pipe"),
+		io.EOF, net.ErrClosed, fmt.Errorf("wrapped reset: %w", syscall.ECONNRESET),
+	}
+	for _, e := range fatal {
+		if !IsFatalNetworkError(e) {
+			t.Errorf("%v should be fatal", e)
+		}
+	}
+	if IsFatalNetworkError(errors.New("i/o timeout")) {
+		t.Error("timeout should not be fatal")
+	}
+	if IsFatalNetworkError(errors.New("permission denied")) {
+		t.Error("unlisted network failure should not be fatal")
+	}
+	if IsFatalNetworkError(nil) {
+		t.Error("nil should not be fatal")
+	}
+}
+
+func TestGenerateStablePAccessNetworkInfo(t *testing.T) {
+	pani := GenerateStablePAccessNetworkInfo("user@example.com")
+	if pani != `IEEE-802.11; i-wlan-node-id="b6c9a289323b"` {
+		t.Errorf("pani = %q", pani)
+	}
+	withCountry := AppendPAccessNetworkCountry(pani, "US")
+	if withCountry != pani+";country=US" {
+		t.Errorf("appended = %q", withCountry)
+	}
+	if got := AppendPAccessNetworkCountry(withCountry, "GB"); got != withCountry {
+		t.Errorf("duplicate country = %q", got)
+	}
+}
+
+func TestGeneratePAccessNetworkInfoPrefersRealBSSID(t *testing.T) {
+	got := GeneratePAccessNetworkInfo("user@example.com", "AA:BB:CC:DD:EE:FF")
+	if got != `IEEE-802.11; i-wlan-node-id="aabbccddeeff"` {
+		t.Fatalf("real BSSID PANI = %q", got)
+	}
+	if GeneratePAccessNetworkInfo("user@example.com", "") != GenerateStablePAccessNetworkInfo("user@example.com") {
+		t.Fatal("empty BSSID should fall back to identity-derived node id")
+	}
+}
+
+func TestGenerateDefaultCellularNetworkInfoOmitsSyntheticCell(t *testing.T) {
+	if got := GenerateDefaultCellularNetworkInfo("234", "15"); got != "" {
+		t.Fatalf("default CNI = %q, want omitted", got)
+	}
+	got := FormatCellularNetworkInfo("234", "15", "00ab", "1234", 12)
+	if got != "3GPP-E-UTRAN-FDD;utran-cell-id-3gpp=2341500AB1234;cell-info-age=12" {
+		t.Fatalf("real CNI = %q", got)
+	}
+	if FormatCellularNetworkInfo("234", "15", "", "1234", 12) != "" {
+		t.Fatal("CNI with empty TAC should be omitted")
+	}
+}
+
+func TestGenerateStableWlanNodeID(t *testing.T) {
+	id := GenerateStableWlanNodeID("user@example.com")
+	if id != "b6c9a289323b" {
+		t.Errorf("node id = %q", id)
+	}
+	if GenerateStableWlanNodeID("user@example.com") != id {
+		t.Error("node id should be stable")
+	}
+	if GenerateStableWlanNodeID("   ") != "" {
+		t.Error("blank seed should not create a node id")
+	}
+}
+
+func TestGenerateStablePAccessNetworkInfoByIdentity(t *testing.T) {
+	ident := identity.IMSIdentity{
+		IMPI:   "310260123456789@ims.example",
+		IMPU:   "sip:310260123456789@ims.example",
+		Domain: "ims.example",
+	}
+	want := `IEEE-802.11; i-wlan-node-id="ba25793d37ec"`
+	if got := GenerateStablePAccessNetworkInfoByIdentity(ident); got != want {
+		t.Fatalf("identity PANI = %q, want %q", got, want)
+	}
+}
+
+func TestBuildIMSConfigFromCarrier(t *testing.T) {
+	plan := policy.CarrierPlan{IMS: policy.IMSPlan{
+		Domain: "ims.mnc026.mcc310.3gppnetwork.org", Transport: "udp",
+	}}
+	cfg := BuildIMSConfigFromCarrier(
+		"dev-1", "310260123456789", "urn:gsma:imei:35693803-564380-9",
+		"310", "260", "", "vowifi-test", "10.0.0.2", plan,
+	)
+	if cfg.IMPI != "310260123456789@ims.mnc026.mcc310.3gppnetwork.org" {
+		t.Errorf("impi = %q", cfg.IMPI)
+	}
+	if cfg.Domain != "ims.mnc026.mcc310.3gppnetwork.org" {
+		t.Errorf("domain = %q", cfg.Domain)
+	}
+	if cfg.LocalAddr != "10.0.0.2" || cfg.LocalPort != defaultIMSLocalPort {
+		t.Errorf("local address = %q:%d", cfg.LocalAddr, cfg.LocalPort)
+	}
+	// ApplyResolvedIMSIdentityToConfig overwrites.
+	cfg.IMPI = "old"
+	err := ApplyResolvedIMSIdentityToConfig(&cfg, profile.IMSIdentityResult{
+		Applied: true, ActualSource: "isim", IMPI: "user@ims.example",
+		IMPU: "sip:user@ims.example", Domain: "ims.example",
+	}, "310")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.IMPI != "user@ims.example" {
+		t.Errorf("impi after apply = %q", cfg.IMPI)
+	}
+}
+
+func TestServiceStartAndSnapshot(t *testing.T) {
+	cfg := &IMSConfig{
+		DeviceID:    "dev-1",
+		IMSI:        "310260123456789",
+		IMPI:        "310260123456789@ims.example.com",
+		Domain:      "ims.example.com",
+		AKAProvider: stubAKAProvider{},
+	}
+	svc, err := New(cfg)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	svc.Transport().SetSendFn(func(string) error { return nil })
+	svc.mu.Lock()
+	svc.regState = regRegistered
+	svc.mu.Unlock()
+	if !svc.IPSec3GPPEnabled() {
+		t.Error("IPsec should be enabled by default")
+	}
+	svc.SetEnableIPSec3GPP(false)
+	if svc.IPSec3GPPEnabled() {
+		t.Error("IPsec should be disabled after toggle")
+	}
+	st := svc.StatusCurrent()
+	m := st.ToMap()
+	if m["registered"] != true {
+		t.Errorf("ToMap = %+v", m)
+	}
+	snap := svc.SnapshotMap()
+	if snap["reg_state"] != "registered" {
+		t.Errorf("snapshot = %+v", snap)
+	}
+	if svc.SessionState() != "idle" {
+		t.Errorf("session = %q", svc.SessionState())
+	}
+}
+
+func registerResponseForRequest(request string, status int, headers map[string]string) *sipResponse {
+	responseHeaders := make(map[string]string, len(headers)+1)
+	for name, value := range headers {
+		responseHeaders[name] = value
+	}
+	responseHeaders["Via"] = sipHeaderValue(request, "Via")
+	return &sipResponse{
+		StatusCode: status,
+		CallID:     sipHeaderValue(request, "Call-ID"),
+		CSeq:       sipHeaderValue(request, "CSeq"),
+		Headers:    responseHeaders,
+	}
+}
+
+func TestServiceMethods(t *testing.T) {
+	cfg := &IMSConfig{
+		DeviceID:        "dev-1",
+		IMSI:            "310260123456789",
+		IMPI:            "310260123456789@ims.example.com",
+		Domain:          "ims.example.com",
+		AKAProvider:     stubAKAProvider{},
+		EnableIPSec3GPP: disabledBoolPointer(),
+	}
+	svc, err := New(cfg)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	svc.Transport().SetSendFn(func(request string) error {
+		svc.transport.DeliverResponse(registerResponseForRequest(request, 200, nil))
+		return nil
+	})
+	if err := svc.SendRegistrationSubscribe("reg.example.com"); err != nil {
+		t.Fatalf("Subscribe: %v", err)
+	}
+	h := &imscoreDialogHandle{id: "call-1", callID: "call-1", fromTag: "f", toTag: "t"}
+	if err := svc.SendDialogRequestRaw(h, "BYE", ""); err == nil {
+		t.Fatal("SendDialogRequest succeeded without a dialog target")
+	}
+	if err := svc.SendReliableProvisionalPRACKRaw(h); err == nil {
+		t.Fatal("PRACK succeeded without reliable provisional context")
+	}
+	inv := &imscoreServerInviteHandle{id: "call-in"}
+	if err := svc.RejectServerInviteRaw(inv); err == nil {
+		t.Fatal("RejectServerInvite succeeded without inbound request context")
+	}
+	if err := svc.TriggerFastReconnectCurrent(); err != nil {
+		t.Fatalf("TriggerFastReconnect: %v", err)
+	}
+	svc.UpdateLastPingAtTime(time.Now())
+}
+
+func TestSubscribeReturnsNetworkRejection(t *testing.T) {
+	svc, err := New(&IMSConfig{
+		IMSI: "310260123456789", IMPI: "310260123456789@ims.example.com",
+		Domain: "ims.example.com", AKAProvider: stubAKAProvider{},
+		EnableIPSec3GPP: disabledBoolPointer(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	svc.Transport().SetSendFn(func(request string) error {
+		svc.transport.DeliverResponse(registerResponseForRequest(request, 503, nil))
+		return nil
+	})
+	if err := svc.SendRegistrationSubscribe("reg.example.com"); err == nil || !strings.Contains(err.Error(), "503") {
+		t.Fatalf("Subscribe error = %v, want status 503", err)
+	}
+	if err := svc.SendRegistrationSubscribe("reg.example.com\r\nX-Injected: yes"); err == nil {
+		t.Fatal("Subscribe accepted a header-injection URI")
+	}
+}
+
+// testIdentity returns a carrier identity.
+func testIdentity() identity.IMSIdentity {
+	return identity.IMSIdentity{
+		IMPI:   "310260123456789@ims.mnc026.mcc310.3gppnetwork.org",
+		IMPU:   "sip:310260123456789@ims.mnc026.mcc310.3gppnetwork.org",
+		Domain: "ims.mnc026.mcc310.3gppnetwork.org",
+	}
+}

@@ -1,0 +1,352 @@
+// Package events defines the internal IMS event types published on the
+// imscore/voice event bus. Each event carries a DeviceID and a Type string.
+//
+// Reconstructed from the decompiled internal/vowifi/events.
+package events
+
+import "time"
+
+// Event is the common interface implemented by all event types.
+type Event interface {
+	// Type returns the event type string (e.g. "SMSReceived").
+	Type() string
+	// DeviceID returns the device the event belongs to.
+	DeviceID() string
+}
+
+// EventSMSReceived is published when an SMS is received.
+type EventSMSReceived struct {
+	DevID   string
+	Sender  string
+	Content string
+	Time    time.Time
+
+	// TargetURI is an additive projection used by the current inbound SMS path.
+	TargetURI string
+	// FragmentSessionKey is an opaque per-instance identifier that correlates a
+	// degraded multipart notification with its eventual complete message.
+	FragmentSessionKey string
+	Incomplete         bool
+}
+
+// EventSMSSent is published when an SMS is sent.
+type EventSMSSent struct {
+	DevID      string
+	TargetURI  string
+	Content    string
+	Time       time.Time
+	TotalParts int
+}
+
+// EventSMSSendAccepted is published when an SMS send is accepted.
+type EventSMSSendAccepted struct {
+	DevID       string
+	MessageID   string
+	TargetURI   string
+	Content     string
+	PartsTotal  int
+	AcceptedAt  time.Time
+	ExpiresHint int64
+
+	// Time preserves the current projection; AcceptedAt is the original field.
+	Time time.Time
+}
+
+// EventSMSDeliveryUpdated is published when an SMS delivery status updates.
+type EventSMSDeliveryUpdated struct {
+	DevID       string
+	MessageID   string
+	PartNo      int
+	PartsTotal  int
+	State       string
+	SIPCode     int
+	RPCause     int
+	UpdatedAt   time.Time
+	Completed   bool
+	FailureText string
+
+	// Time preserves the current projection; UpdatedAt is the original field.
+	Time time.Time
+}
+
+// EventSMSDeliveryCompleted is published when an SMS delivery completes.
+type EventSMSDeliveryCompleted struct {
+	DevID       string
+	MessageID   string
+	PartsTotal  int
+	CompletedAt time.Time
+
+	// Time preserves the current projection; CompletedAt is the original field.
+	Time time.Time
+}
+
+// EventSMSDeliveryFailed is published when an SMS delivery fails.
+type EventSMSDeliveryFailed struct {
+	DevID               string
+	TargetURI           string
+	Reason              string
+	SIPCode             int
+	RecommendCSFallback bool
+
+	// These fields preserve the current delivery-store projection.
+	MessageID string
+	Error     string
+	Time      time.Time
+}
+
+// EventLocalNumberLearned is published when the local phone number is learned.
+type EventLocalNumberLearned struct {
+	DevID  string
+	IMSI   string
+	Number string
+	Source string
+	Time   time.Time
+}
+
+// EventLogNotify is a log notification event.
+type EventLogNotify struct {
+	DevID   string
+	Message string
+}
+
+// EventUSSDResult is published with a USSD result.
+type EventUSSDResult struct {
+	DevID     string
+	SessionID string
+	Command   string
+	Text      string
+	Status    int
+	Time      time.Time
+
+	// Code and Message preserve the current USSI result projection.
+	Code    string
+	Message string
+}
+
+// EventIncomingCall is published on an incoming call.
+type EventIncomingCall struct {
+	DevID      string
+	CallID     string
+	Caller     string
+	Callee     string
+	ReceivedAt time.Time
+
+	// Time preserves the current projection; ReceivedAt is the original field.
+	Time time.Time
+}
+
+// EventCallRinging is published when a call starts ringing.
+type EventCallRinging struct {
+	DevID  string
+	CallID string
+	Time   time.Time
+}
+
+// EventCallAnswered is published when a call is answered.
+type EventCallAnswered struct {
+	DevID      string
+	CallID     string
+	AnsweredAt time.Time
+
+	// Time preserves the current projection; AnsweredAt is the original field.
+	Time time.Time
+}
+
+// EventCallEnded is published when a call ends.
+type EventCallEnded struct {
+	DevID   string
+	CallID  string
+	Reason  string
+	EndedAt time.Time
+
+	// Time preserves the current projection; EndedAt is the original field.
+	Time time.Time
+}
+
+// EventCallFailed is published when a call fails.
+type EventCallFailed struct {
+	DevID  string
+	CallID string
+	Reason string
+	Time   time.Time
+}
+
+// EventCallCanceled is published when a call is canceled.
+type EventCallCanceled struct {
+	DevID  string
+	CallID string
+	Reason string
+	Time   time.Time
+}
+
+// EventCallMediaUpdated is published when call media is updated.
+type EventCallMediaUpdated struct {
+	DevID     string
+	CallID    string
+	Direction string
+	State     string
+	Time      time.Time
+	Held      bool
+}
+
+// EventCallBusy is published when an inbound INVITE cannot reserve its device.
+type EventCallBusy struct {
+	DevID  string
+	CallID string
+	Caller string
+	Callee string
+	Time   time.Time
+}
+
+// EventCallFinalized is published after media and capture files are closed.
+type EventCallFinalized struct {
+	DevID          string
+	CallID         string
+	PCAPPath       string
+	AudioPath      string
+	AudioCodec     string
+	RecordingError string
+	Time           time.Time
+}
+
+// EventMWIUpdated is published when RFC 3842 Message Waiting Indication changes.
+type EventMWIUpdated struct {
+	DevID           string
+	MessagesWaiting bool
+	VoiceNew        int
+	VoiceOld        int
+	Account         string
+	Time            time.Time
+}
+
+// EventCallWaiting is published when a second inbound INVITE is accepted while
+// another call is already connected.
+type EventCallWaiting struct {
+	DevID      string
+	CallID     string
+	Caller     string
+	Callee     string
+	ActiveID   string
+	ReceivedAt time.Time
+	Time       time.Time
+}
+
+// Type returns "SMSReceived".
+func (e EventSMSReceived) Type() string { return "SMSReceived" }
+
+// DeviceID returns the device ID.
+func (e EventSMSReceived) DeviceID() string { return e.DevID }
+
+// Type returns "SMSSent".
+func (e EventSMSSent) Type() string { return "SMSSent" }
+
+// DeviceID returns the device ID.
+func (e EventSMSSent) DeviceID() string { return e.DevID }
+
+// Type returns "SMSSendAccepted".
+func (e EventSMSSendAccepted) Type() string { return "SMSSendAccepted" }
+
+// DeviceID returns the device ID.
+func (e EventSMSSendAccepted) DeviceID() string { return e.DevID }
+
+// Type returns "SMSDeliveryUpdated".
+func (e EventSMSDeliveryUpdated) Type() string { return "SMSDeliveryUpdated" }
+
+// DeviceID returns the device ID.
+func (e EventSMSDeliveryUpdated) DeviceID() string { return e.DevID }
+
+// Type returns "SMSDeliveryCompleted".
+func (e EventSMSDeliveryCompleted) Type() string { return "SMSDeliveryCompleted" }
+
+// DeviceID returns the device ID.
+func (e EventSMSDeliveryCompleted) DeviceID() string { return e.DevID }
+
+// Type returns "SMSDeliveryFailed".
+func (e EventSMSDeliveryFailed) Type() string { return "SMSDeliveryFailed" }
+
+// DeviceID returns the device ID.
+func (e EventSMSDeliveryFailed) DeviceID() string { return e.DevID }
+
+// Type returns "LocalNumberLearned".
+func (e EventLocalNumberLearned) Type() string { return "LocalNumberLearned" }
+
+// DeviceID returns the device ID.
+func (e EventLocalNumberLearned) DeviceID() string { return e.DevID }
+
+// Type returns "LogNotify".
+func (e EventLogNotify) Type() string { return "LogNotify" }
+
+// DeviceID returns the device ID.
+func (e EventLogNotify) DeviceID() string { return e.DevID }
+
+// Type returns "USSDResult".
+func (e EventUSSDResult) Type() string { return "USSDResult" }
+
+// DeviceID returns the device ID.
+func (e EventUSSDResult) DeviceID() string { return e.DevID }
+
+// Type returns "IncomingCall".
+func (e EventIncomingCall) Type() string { return "IncomingCall" }
+
+// DeviceID returns the device ID.
+func (e EventIncomingCall) DeviceID() string { return e.DevID }
+
+// Type returns "CallRinging".
+func (e EventCallRinging) Type() string { return "CallRinging" }
+
+// DeviceID returns the device ID.
+func (e EventCallRinging) DeviceID() string { return e.DevID }
+
+// Type returns "CallAnswered".
+func (e EventCallAnswered) Type() string { return "CallAnswered" }
+
+// DeviceID returns the device ID.
+func (e EventCallAnswered) DeviceID() string { return e.DevID }
+
+// Type returns "CallEnded".
+func (e EventCallEnded) Type() string { return "CallEnded" }
+
+// DeviceID returns the device ID.
+func (e EventCallEnded) DeviceID() string { return e.DevID }
+
+// Type returns "CallFailed".
+func (e EventCallFailed) Type() string { return "CallFailed" }
+
+// DeviceID returns the device ID.
+func (e EventCallFailed) DeviceID() string { return e.DevID }
+
+// Type returns "CallCanceled".
+func (e EventCallCanceled) Type() string { return "CallCanceled" }
+
+// DeviceID returns the device ID.
+func (e EventCallCanceled) DeviceID() string { return e.DevID }
+
+// Type returns "CallMediaUpdated".
+func (e EventCallMediaUpdated) Type() string { return "CallMediaUpdated" }
+
+// DeviceID returns the device ID.
+func (e EventCallMediaUpdated) DeviceID() string { return e.DevID }
+
+// Type returns "CallBusy".
+func (e EventCallBusy) Type() string { return "CallBusy" }
+
+// DeviceID returns the device ID.
+func (e EventCallBusy) DeviceID() string { return e.DevID }
+
+// Type returns "CallFinalized".
+func (e EventCallFinalized) Type() string { return "CallFinalized" }
+
+// DeviceID returns the device ID.
+func (e EventCallFinalized) DeviceID() string { return e.DevID }
+
+// Type returns "MWIUpdated".
+func (e EventMWIUpdated) Type() string { return "MWIUpdated" }
+
+// DeviceID returns the device ID.
+func (e EventMWIUpdated) DeviceID() string { return e.DevID }
+
+// Type returns "CallWaiting".
+func (e EventCallWaiting) Type() string { return "CallWaiting" }
+
+// DeviceID returns the device ID.
+func (e EventCallWaiting) DeviceID() string { return e.DevID }

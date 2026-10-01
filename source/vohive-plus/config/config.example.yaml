@@ -1,0 +1,93 @@
+server:
+  debug: false
+  port: 7575
+  # 使用 Nginx/Caddy 等外部 HTTPS 反向代理时保持 false。
+  https_enabled: false
+  https_port: 7576
+  webrtc_udp_address: ":7580"
+  # 服务器位于 NAT 后时填写直连本机的域名或公网 IP，并映射公网 7580/UDP。
+  webrtc_public_host: ""
+  tls_data_dir: data/tls
+  # tls_cert_file 与 tls_key_file 同时设置时覆盖自动本地 CA 证书。
+  tls_cert_file: ""
+  tls_key_file: ""
+  # 跨 NAT 时显式配置，例如 ["stun:stun.example.com:3478"]。
+  ice_servers: []
+  sms_rate_limit_disabled: false
+
+system:
+  # 仅 OpenWrt 使用：把已拨号的数据网卡动态映射到 netifd，其他系统必须保持 false。
+  openwrt_dynamic_interfaces: false
+
+web:
+  username: admin
+  # 首次登录后请在控制台修改；保存时会自动替换为 bcrypt 哈希。
+  # 若使用 PROXY_WEB_PASSWORD 注入，需在部署环境中修改，控制台不会覆盖环境变量。
+  password: admin
+
+devices: []
+# PC/SC 读卡器示例（Linux 需要 pcscd 与 libpcsclite.so.1）：
+# - id: reader1
+#   name: USB SIM reader
+#   device_backend: pcsc
+#   esim_transport: pcsc
+#   pcsc_reader_name: Example Reader 00 00
+#   pcsc_usb_path: 1-2
+#   sim_pin_env: HIDECK_SIM_PIN_READER1 # 只保存环境变量名，不要填写 PIN 明文
+
+proxy:
+  instances: []
+
+vowifi:
+  enabled: false
+
+webhook:
+  enabled: false
+
+# Telegram 机器人通过 @BotFather 创建，不使用扫码注册。
+# admin_id 是允许执行命令的 Telegram 数字用户 ID；chat_id 留 0 时，首次授权私聊会自动绑定。
+# 自动绑定目标保存在同目录 notification-state.json。不要提交包含真实 Bot Token 的配置文件。
+telegram:
+  enabled: false
+  bot_token: ""
+  admin_id: 0
+  chat_id: 0
+  recording_mode: voice
+  base_url: ""
+  proxy: ""
+
+# QQ Bot 可在设置页扫码注册，也可手工填写以下字段。
+qq:
+  enabled: false
+  app_id: ""
+  app_secret: ""
+  group_ids: ""
+  direct_ids: ""
+
+# 个人微信使用 iLink 扫码；登录 Token 和会话绑定保存在同目录 notification-state.json。
+weixin:
+  enabled: false
+  base_url: https://ilinkai.weixin.qq.com
+  cdn_base_url: https://novac2c.cdn.weixin.qq.com/c2c
+  allowed_user_ids: []
+  allowed_group_ids: []
+
+# 企业微信长连接机器人，与下方 Webhook 通知渠道相互独立。
+wecom_bot:
+  enabled: false
+  bot_id: ""
+  secret: ""
+  websocket_url: wss://openws.work.weixin.qq.com
+  allowed_user_ids: []
+  allowed_group_ids: []
+
+wecom:
+  enabled: false
+  urls: []
+  payload_template: |-
+    {
+      "msgtype": "text",
+      "text": {
+        "content": {{message}}
+      }
+    }

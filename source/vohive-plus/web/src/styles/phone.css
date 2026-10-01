@@ -1,0 +1,154 @@
+.phone-page { max-width: 1180px; margin: 0 auto; }
+.security-notice { margin-bottom: 16px; padding: 14px 16px; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 14px; border: 1px solid color-mix(in srgb, var(--ui-warning) 38%, var(--ui-border)); border-radius: var(--ui-radius-lg); background: color-mix(in srgb, var(--ui-warning) 8%, var(--ui-surface)); }
+.notice-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: var(--ui-radius-md); background: color-mix(in srgb, var(--ui-warning) 14%, var(--ui-surface)); color: var(--ui-warning); font-size: 20px; }
+.security-notice strong { color: var(--ui-text); font-size: 13px; }
+.security-notice p { margin: 3px 0 0; color: var(--ui-text-muted); font-size: 12px; }
+.phone-error { margin-bottom: 16px; padding: 10px 12px; display: flex; justify-content: space-between; gap: 16px; border: 1px solid color-mix(in srgb, var(--ui-danger) 38%, var(--ui-border)); border-radius: var(--ui-radius-md); background: color-mix(in srgb, var(--ui-danger) 8%, var(--ui-surface)); color: var(--ui-danger); font-size: 12px; }
+.phone-error button { width: 44px; height: 44px; margin: -7px -8px -7px 0; border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 20px; }
+.phone-workspace { min-width: 0; overflow: hidden; animation: phone-workspace-enter 240ms var(--ui-ease-out) both; }
+.phone-grid { display: grid; grid-template-columns: minmax(460px, .95fr) minmax(360px, 1.05fr); align-items: start; }
+.phone-side { min-width: 0; }
+.phone-console { min-height: 680px; overflow: hidden; border-right: 1px solid var(--ui-border); }
+.console-header { min-height: 82px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid var(--ui-border); }
+.console-header > div:first-child > span { color: var(--ui-primary); font-family: "v-mono", monospace; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
+.console-header h2 { margin: 3px 0 0; color: var(--ui-text); font-size: 18px; }
+.device-selector { min-width: 220px; display: grid; gap: 4px; }
+.device-selector label, .number-field label { color: var(--ui-text-muted); font-size: 10px; font-weight: 600; }
+.device-selector :deep(.el-select) { width: 100%; }
+.device-selector :deep(.el-select__wrapper) { min-height: 44px; background: var(--ui-surface); }
+.phone-mode-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.phone-wifi-calling-switch {
+  flex: 1 1 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  background: var(--ui-surface-muted);
+}
+.phone-wifi-calling-switch.is-on {
+  border-color: color-mix(in srgb, var(--ui-primary) 38%, var(--ui-border));
+}
+.phone-wifi-calling-switch span {
+  display: grid;
+  gap: 2px;
+  color: var(--ui-text);
+  font-size: 13px;
+  font-weight: 650;
+}
+.phone-wifi-calling-switch small {
+  color: var(--ui-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+.phone-mode-hint { flex: 1 1 100%; margin: 0; color: var(--ui-text-muted); font-size: 12px; line-height: 1.45; }
+.phone-mode-hint.is-warn { color: var(--ui-warning); }
+.phone-lebara-retry {
+  display: inline-flex;
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.phone-lebara-retry:disabled { opacity: 0.6; cursor: default; }
+.console-loading { min-height: 560px; display: grid; place-items: center; color: var(--ui-text-muted); }
+.media-state { min-height: 36px; padding: 0 10px; display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--ui-border); border-radius: var(--ui-radius-pill); background: var(--ui-surface); color: var(--ui-text-muted); font-size: 11px; font-weight: 600; }
+.media-state > span, .selected-device-status > span { width: 7px; height: 7px; border-radius: 50%; background: var(--ui-text-muted); }
+.media-state.is-connected > span, .media-state.is-connecting > span, .selected-device-status.is-ready > span { background: var(--ui-success); }
+.media-state.is-failed > span { background: var(--ui-danger); }
+.dialer { padding: 22px 22px 28px; display: grid; justify-items: center; gap: 18px; }
+.selected-device-status { min-height: 28px; display: flex; align-items: center; gap: 7px; color: var(--ui-text-muted); font-size: 11px; }
+.number-field { width: 320px; max-width: 100%; display: grid; gap: 5px; }
+.number-field > div { display: flex; border-bottom: 1px solid var(--ui-border); }
+.number-field input { min-width: 0; height: 56px; flex: 1; border: 0; background: transparent; color: var(--ui-text); font-family: "v-mono", monospace; font-size: 27px; text-align: center; outline: 0; }
+.number-field button { width: 48px; border: 0; background: transparent; color: var(--ui-text-muted); cursor: pointer; font-size: 20px; }
+.number-field button:disabled { opacity: .3; }
+.number-field small { color: var(--ui-danger); font-size: 10px; text-align: center; }
+.dial-button, .restore-button, .secondary-button { min-height: 48px; padding: 0 20px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--ui-primary); border-radius: var(--ui-radius-pill); background: var(--ui-primary-solid); color: #fff; cursor: pointer; font-weight: 650; }
+.dial-button:disabled, .restore-button:disabled, .secondary-button:disabled { cursor: not-allowed; opacity: .45; }
+.call-mode-actions { width: 320px; max-width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.call-mode-actions .dial-button { width: 100%; padding: 0 14px; }
+.call-mode-actions .dial-button.is-listen { background: var(--ui-surface); color: var(--ui-primary); }
+.call-mode-help { max-width: 320px; margin: -8px 0 0; color: var(--ui-text-muted); font-size: 11px; line-height: 1.5; text-align: center; }
+.active-call { padding: 28px 24px; display: grid; justify-items: center; gap: 22px; }
+.call-identity { width: 100%; text-align: center; }
+.call-identity > span { color: var(--ui-primary); font-family: "v-mono", monospace; font-size: 9px; font-weight: 700; letter-spacing: .16em; }
+.call-identity strong { margin-top: 8px; display: block; overflow-wrap: anywhere; color: var(--ui-text); font-family: "v-mono", monospace; font-size: clamp(26px, 4vw, 36px); }
+.call-identity strong.is-named { font-family: inherit; }
+.call-identity p { margin: 5px 0 0; color: var(--ui-text-muted); font-variant-numeric: tabular-nums; }
+.call-identity .call-number { font-family: "v-mono", monospace; font-size: 14px; }
+.call-identity .call-attribution { color: var(--ui-primary); font-size: 13px; font-weight: 650; }
+.contact-save { margin-top: 12px; min-height: 36px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--ui-border); border-radius: var(--ui-radius-pill); background: var(--ui-surface); color: var(--ui-text); cursor: pointer; font-size: 12px; }
+.contact-save:disabled { opacity: .45; cursor: default; }
+.callee-hint { color: var(--ui-text-muted) !important; }
+.call-waiting-hint { margin: 8px 0 0; color: var(--ui-warning); font-size: 12px; }
+.call-meta { width: 100%; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--ui-border); border-radius: var(--ui-radius-xl); overflow: hidden; }
+.call-meta div { min-width: 0; padding: 10px; border-right: 1px solid var(--ui-border); text-align: center; }
+.call-meta div:last-child { border-right: 0; }
+.call-meta dt { color: var(--ui-text-muted); font-size: 9px; font-weight: 600; text-transform: uppercase; }
+.call-meta dd { margin: 3px 0 0; overflow: hidden; text-overflow: ellipsis; font-family: "v-mono", monospace; font-size: 11px; white-space: nowrap; }
+.takeover-panel { width: 100%; padding: 16px; border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); background: var(--ui-surface-muted); text-align: center; }
+.takeover-panel p { max-width: 460px; margin: 5px auto 14px; color: var(--ui-text-muted); font-size: 12px; }
+.secondary-button { min-height: 44px; border-color: var(--ui-border); border-radius: var(--ui-radius-pill); background: var(--ui-surface); color: var(--ui-text); }
+.incoming-actions { min-height: 180px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px clamp(12px, 5vw, 48px); }
+.round-action { width: 82px; min-height: 98px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; border: 0; background: transparent; color: var(--ui-text); cursor: pointer; }
+.round-action .el-icon { width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; color: #fff; font-size: 26px; }
+.round-action small { margin-top: -5px; color: var(--ui-text-muted); font-size: 9px; white-space: nowrap; }
+.round-action.is-reject .el-icon { background: var(--ui-danger); }
+.round-action.is-listen .el-icon { background: var(--ui-primary-solid); }
+.round-action.is-answer .el-icon { background: var(--ui-success); }
+.round-action:disabled { cursor: not-allowed; opacity: .45; }
+.restore-button { border-radius: var(--ui-radius-pill); }
+.restore-actions { width: 100%; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+.listen-only-panel { width: 100%; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid color-mix(in srgb, var(--ui-primary) 35%, var(--ui-border)); border-radius: var(--ui-radius-lg); background: color-mix(in srgb, var(--ui-primary) 7%, var(--ui-surface)); }
+.listen-only-panel p { margin: 4px 0 0; color: var(--ui-text-muted); font-size: 12px; }
+.listen-only-panel .secondary-button { flex: 0 0 auto; }
+.active-keypad { width: 100%; padding: 14px 0 2px; border-top: 1px solid var(--ui-border); }
+.active-keypad > p { margin: 0 0 12px; color: var(--ui-text-muted); font-size: 11px; text-align: center; }
+.call-controls { width: 100%; display: flex; justify-content: center; gap: 22px; }
+.control-button { width: 78px; min-height: 82px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 7px; border: 0; background: transparent; color: var(--ui-text-muted); cursor: pointer; font-size: 11px; }
+.control-button .el-icon { width: 52px; height: 52px; display: grid; place-items: center; border: 1px solid var(--ui-border); border-radius: 50%; background: var(--ui-surface-muted); color: var(--ui-text); font-size: 21px; }
+.control-button[aria-pressed="true"] .el-icon { border-color: var(--ui-primary); color: var(--ui-primary); }
+.control-button.is-hangup .el-icon { border-color: var(--ui-danger); background: var(--ui-danger); color: #fff; }
+.control-button:disabled { cursor: not-allowed; opacity: .38; }
+.phone-page button:focus-visible, .phone-page a:focus-visible, .phone-page input:focus-visible { outline: 2px solid var(--ui-primary); outline-offset: 2px; }
+
+@keyframes phone-workspace-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone-workspace { animation-name: phone-workspace-fade; }
+
+  @keyframes phone-workspace-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+@media (max-width: 900px) {
+  .phone-grid { grid-template-columns: 1fr; }
+  .phone-console { min-height: auto; border-right: 0; border-bottom: 1px solid var(--ui-border); }
+}
+
+@media (max-width: 640px) {
+  .security-notice { grid-template-columns: auto 1fr; }
+  .console-header { align-items: stretch; flex-direction: column; }
+  .device-selector { width: 100%; min-width: 0; }
+  .dialer, .active-call { padding: 20px 14px 24px; }
+  .call-meta { grid-template-columns: 1fr; }
+  .call-meta div { border-right: 0; border-bottom: 1px solid var(--ui-border); }
+  .call-meta div:last-child { border-bottom: 0; }
+  .incoming-actions { gap: 12px; }
+  .listen-only-panel { align-items: stretch; flex-direction: column; }
+  .call-controls { gap: 8px; }
+}

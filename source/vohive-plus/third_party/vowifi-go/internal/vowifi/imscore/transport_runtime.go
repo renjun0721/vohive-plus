@@ -1,0 +1,295 @@
+package imscore
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"io"
+	"net"
+	"strings"
+
+	"github.com/emiago/sipgo/sip"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/logging"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/sipkit"
+)
+
+// SMSReceiverStatus is a snapshot of the live SIP receiver.
+type SMSReceiverStatus struct {
+	Active       bool
+	Transport    string
+	LocalAddress string
+}
+
+type inboundSIPResult struct {
+	response     string
+	afterReply   func()
+	onReplyError func()
+}
+
+type inboundSIPDispatch struct {
+	raw         string
+	reply       func(string) error
+	transaction *serverSIPTransaction
+	events      imsEventPublishReceipt
+	peerConn    net.Conn
+}
+
+func (s *Service) receiverStarted() {
+	s.receiverMu.Lock()
+	s.activeReceivers++
+	active := s.activeReceivers > 0
+	startStats := s.activeReceivers == 1
+	s.receiverMu.Unlock()
+	s.setSMSReceiverReady(active)
+	if startStats {
+		s.startInboundStatsLogger(context.Background(), inboundStatsLoggerOptions{
+			Interval: defaultInboundStatsInterval,
+		})
+	}
+}
+
+func (s *Service) receiverStopped() {
+	s.receiverMu.Lock()
+	if s.activeReceivers > 0 {
+		s.activeReceivers--
+	}
+	active := s.activeReceivers > 0
+	s.receiverMu.Unlock()
+	s.setSMSReceiverReady(active)
+}
+
+func (s *Service) receiverStatus() SMSReceiverStatus {
+	if s == nil || s.cfg == nil {
+		return SMSReceiverStatus{}
+	}
+	s.receiverMu.Lock()
+	active := s.activeReceivers > 0
+	s.receiverMu.Unlock()
+	return SMSReceiverStatus{
+		Active: active, Transport: strings.ToLower(strings.TrimSpace(s.cfg.Transport)),
+		LocalAddress: net.JoinHostPort(s.cfg.LocalIP.String(), fmt.Sprint(s.cfg.LocalPort)),
+	}
+}
+
+func (s *Service) handleInboundSIP(ctx context.Context, raw string) (inboundSIPResult, error) {
+	return s.handleInboundSIPWithReply(ctx, raw, nil)
+}
+
+func (s *Service) handleInboundSIPWithReply(ctx context.Context, raw string, reply func(string) error) (inboundSIPResult, error) {
+	return s.handleInboundSIPTransaction(ctx, raw, reply, nil)
+}
+
+func (s *Service) handleInboundSIPTransaction(
+	ctx context.Context,
+	raw string,
+	reply func(string) error,
+	transaction *serverSIPTransaction,
+) (inboundSIPResult, error) {
+	return s.handleInboundSIPDispatch(ctx, inboundSIPDispatch{
+		raw: raw, reply: reply, transaction: transaction,
+	})
+}
+
+func (s *Service) handleInboundSIPDispatch(
+	ctx context.Context,
+	dispatch inboundSIPDispatch,
+) (inboundSIPResult, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	select {
+	case <-ctx.Done():
+		return inboundSIPResult{}, ctx.Err()
+	default:
+	}
+	method := strings.ToUpper(sipRequestMethod(dispatch.raw))
+	if method == "" {
+		return inboundSIPResult{}, errors.New("imscore: invalid inbound SIP message")
+	}
+	switch method {
+	case "NOTIFY":
+		return s.prepareInboundNotification(dispatch.raw)
+	case "OPTIONS":
+		response, err := s.buildInboundOPTIONSResponse(dispatch.raw)
+		return inboundSIPResult{response: response}, err
+	case "MESSAGE":
+		return s.handleInboundSMSFromPeer(dispatch.raw, dispatch.peerConn)
+	case "INFO", "BYE":
+		result, handled, err := s.handleInboundUSSI(dispatch.raw)
+		if handled {
+			return result, err
+		}
+		result, handled, err = s.handleInboundVoice(dispatch)
+		if handled {
+			return result, err
+		}
+		response, responseErr := buildSIPRequestResponse(dispatch.raw, 405)
+		return inboundSIPResult{response: response}, responseErr
+	case "INVITE", "CANCEL", "PRACK", "UPDATE", "REFER":
+		result, handled, err := s.handleInboundVoice(dispatch)
+		if handled {
+			return result, err
+		}
+		response, responseErr := buildSIPRequestResponse(dispatch.raw, 405)
+		return inboundSIPResult{response: response}, responseErr
+	case "ACK":
+		dispatch.transaction = nil
+		result, handled, err := s.handleInboundVoice(dispatch)
+		if handled {
+			return result, err
+		}
+		return inboundSIPResult{}, err
+	default:
+		response, err := buildSIPRequestResponse(dispatch.raw, 405)
+		return inboundSIPResult{response: response}, err
+	}
+}
+
+func (s *Service) dispatchInboundSIP(raw string, reply func(string) error) error {
+	message, err := parseSIPMessage(raw)
+	if err != nil {
+		return fmt.Errorf("imscore: parse inbound SIP: %w", err)
+	}
+	return s.dispatchInboundSIPMessage(message, string(unfoldSIPHeaders([]byte(raw))), reply)
+}
+
+func (s *Service) dispatchInboundSIPMessage(message sip.Message, raw string, reply func(string) error) error {
+	return s.dispatchInboundSIPMessageWithPeer(message, raw, reply, nil)
+}
+
+func (s *Service) dispatchInboundSIPMessageWithPeer(
+	message sip.Message,
+	raw string,
+	reply func(string) error,
+	peer net.Conn,
+) error {
+	s.UpdateLastPingAt()
+	s.signalTCPKeepalivePong()
+	s.inboundSIPParsedMessage.Add(1)
+	switch parsed := message.(type) {
+	case *sip.Response:
+		s.inboundSIPParsedResp.Add(1)
+		cseq := ""
+		if parsed.CSeq() != nil {
+			cseq = parsed.CSeq().Value()
+		}
+		logging.Debug("IMS inbound SIP response",
+			"device", s.DeviceID(), "status", parsed.StatusCode, "reason", parsed.Reason, "cseq", cseq,
+			"warning", sipkit.FirstHeaderValue(parsed, "Warning", true),
+			"accept", sipkit.FirstHeaderValue(parsed, "Accept", true))
+		s.publishIMSEvent(s.buildIMSEventFromResponse(parsed))
+		s.transport.DeliverResponse(newSIPResponse(parsed))
+		return nil
+	case *sip.Request:
+		s.inboundSIPParsedRequest.Add(1)
+		checkpoint, currentPeer := s.captureInboundDownlink(peer)
+		err := s.dispatchInboundSIPRequest(parsed, raw, reply, peer)
+		if err == nil {
+			s.inboundSIPHandledRequest.Add(1)
+			if currentPeer {
+				s.recordCurrentDownlinkRequest(peer, checkpoint)
+			}
+		}
+		return err
+	default:
+		return errors.New("imscore: unsupported inbound SIP message")
+	}
+}
+
+func (s *Service) logInboundSIPRequest(request *sip.Request) {
+	if s == nil || request == nil {
+		return
+	}
+	cseq := ""
+	if request.CSeq() != nil {
+		cseq = request.CSeq().Value()
+	}
+	fields := []any{
+		"device", s.DeviceID(),
+		"method", string(request.Method),
+		"cseq", cseq,
+		"content_type", sipkit.FirstHeaderValue(request, "Content-Type", true),
+		"body_bytes", len(request.Body()),
+	}
+	if s.smsProtocolTraceEnabled() {
+		logging.Info("IMS inbound SIP request", fields...)
+		return
+	}
+	logging.Debug("IMS inbound SIP request", fields...)
+}
+
+func (s *Service) dispatchInboundSIPRequest(
+	request *sip.Request,
+	raw string,
+	reply func(string) error,
+	peer net.Conn,
+) error {
+	s.logInboundSIPRequest(request)
+	s.markSelfRoutedSubscription(request)
+	s.transport.DeliverRequest(raw)
+	transaction, handled, err := s.acceptServerRequest(request, raw, reply)
+	if handled || err != nil {
+		return err
+	}
+	if request.Method == sip.PRACK {
+		return s.handleIMSPRACK(request, transaction)
+	}
+	events := s.publishIMSEvent(s.buildInboundRequestEvent(request, transaction))
+	responseWriter := reply
+	if transaction != nil {
+		responseWriter = transaction.respondRaw
+	}
+	result, err := s.handleInboundSIPDispatch(context.Background(), inboundSIPDispatch{
+		raw: raw, reply: responseWriter, transaction: transaction, events: events, peerConn: peer,
+	})
+	callback := result.onReplyError
+	defer func() { s.scheduleInboundReplyCallback(callback) }()
+	if result.response == "" {
+		if err != nil && transaction != nil {
+			transaction.fail(err, true)
+		}
+		return err
+	}
+	if request.IsAck() {
+		return errors.New("imscore: ACK handler attempted to send a SIP response")
+	}
+	if responseWriter == nil {
+		responseErr := errors.New("imscore: inbound SIP reply path is unavailable")
+		if request.Method == sip.MESSAGE {
+			s.logInboundSMSResponseTrace(raw, result.response, responseErr)
+		}
+		return responseErr
+	}
+	responseErr := responseWriter(result.response)
+	if request.Method == sip.MESSAGE {
+		s.logInboundSMSResponseTrace(raw, result.response, responseErr)
+	}
+	if responseErr != nil {
+		return responseErr
+	}
+	callback = result.afterReply
+	return err
+}
+
+func (s *Service) scheduleInboundReplyCallback(callback func()) {
+	if callback == nil {
+		return
+	}
+	s.networkDone.Add(1)
+	go func() {
+		defer s.networkDone.Done()
+		callback()
+	}()
+}
+
+func (s *Service) writeSIPStream(conn net.Conn, response string) error {
+	if conn == nil {
+		return errors.New("imscore: nil SIP stream")
+	}
+	s.sipWriteMu.Lock()
+	defer s.sipWriteMu.Unlock()
+	if _, err := io.WriteString(conn, response); err != nil {
+		return fmt.Errorf("imscore: write SIP stream: %w", err)
+	}
+	return nil
+}

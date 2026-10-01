@@ -1,0 +1,13 @@
+#!/bin/sh
+ready=0
+while [ "$ready" -lt 30 ]; do
+    if docker info >/dev/null 2>&1; then
+        if [ "$(docker inspect --format '{{.State.Running}}' vohive-plus 2>/dev/null)" = "true" ]; then
+            exec docker attach --sig-proxy=true vohive-plus
+        fi
+        exec docker start -a vohive-plus
+    fi
+    ready=$((ready + 1))
+    sleep 2
+done
+exit 1

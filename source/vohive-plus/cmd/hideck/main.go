@@ -1,0 +1,356 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"flag"
+	"log"
+	"log/slog"
+	"net/http"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"syscall"
+	"time"
+
+	"github.com/iniwex5/quectel-qmi-go/pkg/qmi"
+	"github.com/iniwex5/vowifi-go/runtimehost/carrier"
+	"github.com/iniwex5/vowifi-go/runtimehost/voicehost"
+	"github.com/yibaiba/hideck/internal/api"
+	"github.com/yibaiba/hideck/internal/audiotranscode"
+	"github.com/yibaiba/hideck/internal/config"
+	"github.com/yibaiba/hideck/internal/db"
+	"github.com/yibaiba/hideck/internal/device"
+	"github.com/yibaiba/hideck/internal/notify"
+	"github.com/yibaiba/hideck/internal/openwrt"
+	"github.com/yibaiba/hideck/internal/personal"
+	"github.com/yibaiba/hideck/internal/phone"
+	proxyserver "github.com/yibaiba/hideck/internal/proxy/server"
+	"github.com/yibaiba/hideck/internal/proxy/traffic"
+	"github.com/yibaiba/hideck/internal/upstreamproxy"
+	"github.com/yibaiba/hideck/internal/volte"
+
+	"github.com/yibaiba/hideck/internal/web"
+	"github.com/yibaiba/hideck/pkg/logger"
+)
+
+func main() {
+	const voiceRecordingDirectory = "data/recordings/voice"
+	// Parse flags
+	var configPath string
+	var backendOnly bool
+	var databasePath, migrateFrom string
+	var doctorOnly bool
+	flag.StringVar(&configPath, "c", "config/config.yaml", "config file path")
+	flag.BoolVar(&backendOnly, "backend-only", false, "run as backend-only (disable embedded web UI)")
+	flag.StringVar(&databasePath, "database", "data/vohive-plus.db", "personal edition database path")
+	flag.StringVar(&migrateFrom, "migrate-from", "", "snapshot and migrate a legacy database; never start modems")
+	flag.BoolVar(&doctorOnly, "doctor", false, "read-only host diagnostics; never start modems")
+	flag.Parse()
+	if doctorOnly {
+		if err := json.NewEncoder(os.Stdout).Encode(personal.Doctor()); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+	if migrateFrom != "" {
+		if err := personal.MigrateDatabase(migrateFrom, databasePath, os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
+	// 1. 加载配置
+	if err := config.InitGlobalManager(configPath); err != nil {
+		log.Fatalf("初始化配置管理器失败: %v", err)
+	}
+	cfg := config.GetConfig()
+
+	// 2. 初始化日志
+	logger.Setup(logger.LogConfig{
+		Debug:    cfg.Server.Debug,
+		Filename: "logs/app.log",
+	})
+	// 将内置 slog 重定向到已就绪的系统日志框架
+	slog.SetDefault(slog.New(logger.NewSlogHandler(logger.ZapLogger())))
+	logger.Info("VoHive Plus 个人版启动中（基于 HiDeck）...")
+
+	go func() {
+		disclaimer := `
+======================================================================
+【HiDeck 免责与使用声明】
+1. 本软件仅供个人技术测试与研究交流，严禁任何商业用途。
+2. 严禁将本软件用于任何非法或违规场景。
+3. 本软件涉及底层通信操作，因测试产生的硬件、资费或网络风险由用户自行承担。
+4. 作者不对使用本软件造成的任何直接或间接损失负责。
+======================================================================`
+		logger.Warn(disclaimer)
+		ticker := time.NewTicker(24 * time.Hour)
+		defer ticker.Stop()
+		for range ticker.C {
+			logger.Warn(disclaimer)
+		}
+	}()
+
+	loadResult, err := carrier.LoadCarrierOverridesResult("")
+	if err != nil {
+		carrier.ClearCarrierOverrides()
+		logger.Warn("加载 carrier_overrides 失败，回退内置运营商配置",
+			"path", loadResult.Path,
+			"err", err)
+	} else if loadResult.Missing {
+		//logger.Info("carrier_overrides 文件不存在，使用内置运营商配置", "path", loadResult.Path)
+	} else {
+		logger.Info("carrier_overrides 已加载", "path", loadResult.Path, "entries", loadResult.Count)
+	}
+
+	// 3. 初始化数据库
+	dbPath := databasePath
+	if err := os.MkdirAll(filepath.Dir(dbPath), 0750); err != nil {
+		log.Fatal(err)
+	}
+	if err := db.Init(dbPath); err != nil {
+		log.Fatalf("初始化数据库失败: %v", err)
+	}
+	dbResolvedPath := dbPath
+	if absPath, err := filepath.Abs(dbPath); err == nil {
+		dbResolvedPath = absPath
+	}
+	logger.Info("数据库已初始化", "path", dbPath, "resolved_path", dbResolvedPath)
+	countryResult := upstreamproxy.InitCountryTable(context.Background(), upstreamproxy.CountryTableOptions{
+		CachePath: upstreamproxy.DefaultCountryTableCachePath,
+	})
+	if countryResult.Err != nil {
+		logger.Warn("MCC/MNC 国家表不可用，VoWiFi 国家代理规则将按未知国家直连",
+			"path", countryResult.CachePath,
+			"source_url", countryResult.SourceURL,
+			"source", countryResult.Source,
+			"err", countryResult.Err)
+	} else {
+		logger.Info("MCC/MNC 国家表已加载",
+			"path", countryResult.CachePath,
+			"source", countryResult.Source,
+			"rows", countryResult.RowCount,
+			"countries", countryResult.Countries)
+	}
+	go func() {
+		need, err := db.NeedBackfillSMSContacts()
+		if err != nil {
+			logger.Error("短信联系人回填检查失败", "err", err)
+			return
+		}
+		if !need {
+			return
+		}
+		logger.Info("开始短信联系人回填")
+		if err := db.BackfillSMSPeerAndContacts(1000); err != nil {
+			logger.Error("短信联系人回填失败", "err", err)
+			return
+		}
+		logger.Info("短信联系人回填完成")
+	}()
+
+	// 4. 初始化设备池
+
+	dynamicInterfaceMapper := openwrt.NewMapper(cfg.System.OpenWRTDynamicInterfaces)
+	pool := device.NewPoolWithDynamicInterfaceMapper(cfg, dynamicInterfaceMapper)
+
+	pool.SetPolicyResolver(db.CardPolicyResolver{})
+
+	// 6. 初始化代理实例管理器
+	proxyMgr := proxyserver.NewManager()
+	logger.Info("代理实例管理器已初始化")
+
+	// 7. 初始化语音网关
+	// voiceGW 始终创建，用于管理 VoWiFi Agent（SimulateCall 等）。
+	var notifyMgr *notify.Manager
+	audioTranscoder := audiotranscode.New()
+	voiceGW := voicehost.NewGateway()
+	voiceGW.SetPCAPDirectory(voiceRecordingDirectory)
+	voiceGW.SetAudioTranscoder(audioTranscoder)
+	pool.SetVoiceGateway(voiceGW)
+	notificationStateStore := notify.NewFileRuntimeStateStore(
+		filepath.Join(filepath.Dir(configPath), "notification-state.json"),
+	)
+	notificationManagerOptions := notify.ManagerOptions{
+		StateStore: notificationStateStore, DeferCommandReceiverStart: true,
+	}
+
+	if err := voiceGW.Start(context.Background()); err != nil {
+		logger.Error("语音网关启动失败", "err", err)
+	} else {
+		logger.Info("语音网关已启动")
+
+		// 通知管理器初始化
+		var err error
+		notifyMgr, err = notify.NewManagerWithOptions(cfg, pool, notificationManagerOptions)
+		if err != nil {
+			logger.Warn("通知管理器初始化异常", "err", err)
+		} else {
+			pool.SetNotifier(notifyMgr)
+			voiceGW.SetNotifier(notifyMgr)
+		}
+
+	}
+
+	// 5. 启动工作器 (代理, 短信, 健康检查)
+	_ = pool.StartAll()
+
+	trafficSampler := traffic.New(traffic.Options{Pool: pool, Mgr: proxyMgr})
+	trafficSampler.Start()
+	realtimeTraffic := traffic.NewRealtimeManager(traffic.RealtimeOptions{Pool: pool})
+
+	// 7. 启动 API 服务器
+	// 准备静态文件系统
+	var staticFS http.FileSystem
+	if backendOnly {
+		logger.Info("启用纯后端模式（未挂载前端静态资源）")
+	} else {
+		distFS, err := web.GetFS()
+		if err != nil {
+			log.Fatalf("无法加载嵌入的 Web 文件: %v", err)
+		}
+		staticFS = http.FS(distFS)
+	}
+
+	// 通知管理器如果在上方未初始化，在这里兜底（防止 VoiceGW 未配置/启动的场景）
+	if notifyMgr == nil {
+		var err error
+		notifyMgr, err = notify.NewManagerWithOptions(cfg, pool, notificationManagerOptions)
+		if err != nil {
+			logger.Warn("通知管理器初始化异常", "err", err)
+		} else {
+			pool.SetNotifier(notifyMgr)
+			if voiceGW != nil {
+				voiceGW.SetNotifier(notifyMgr)
+			}
+		}
+	}
+	var callResultNotifier phone.ResultNotifier
+	if notifyMgr != nil {
+		callResultNotifier = notifyMgr
+	}
+	phoneGateway := &volte.Mux{
+		IMS:      voiceGW,
+		Native:   pool.NativeVoLTEController(),
+		IsNative: pool.IsNativeVoLTE,
+	}
+	phoneService, err := phone.NewService(phone.ServiceOptions{
+		Gateway: phoneGateway, Store: db.NewVoiceCallStore(db.DB), Transcoder: audioTranscoder,
+		Notifier: callResultNotifier, RecordingDir: voiceRecordingDirectory,
+		WebRTCUDPAddress: cfg.Server.WebRTCUDPAddress, WebRTCPublicHost: cfg.Server.WebRTCPublicHost,
+		ICEServers:     cfg.Server.ICEServers,
+		RealtimeCodecs: availableRealtimeCodecs(audioTranscoder),
+		NewRealtimeCodec: func(codec, fmtp string) (phone.RealtimeCodec, error) {
+			return audioTranscoder.NewRealtimeCodec(codec, fmtp)
+		},
+		ResolveICCID: pool.CurrentICCIDForDevice,
+	})
+	if err != nil {
+		log.Fatalf("初始化电话媒体服务失败: %v", err)
+	}
+
+	apiServer := api.New(cfg, pool, staticFS, proxyMgr, voiceGW, notifyMgr, configPath)
+	if notifyMgr != nil {
+		notifyMgr.StartCommandReceivers()
+	}
+	apiServer.SetVoiceRecordingDirectory(voiceRecordingDirectory)
+	apiServer.SetPhoneService(phoneService)
+	apiServer.SetRealtimeTraffic(realtimeTraffic)
+
+	syncProxyConfigs := func(reason, deviceID string) {
+		if err := apiServer.SyncProxyConfigs(); err != nil {
+			logger.Warn("同步代理配置失败", "reason", reason, "device_id", deviceID, "err", err)
+			return
+		}
+		logger.Debug("代理配置已同步", "reason", reason, "device_id", deviceID)
+	}
+	pool.OnDataConnected(func(deviceID string) {
+		syncProxyConfigs("qmi_data_connected", deviceID)
+	})
+
+	// 启动后同步代理配置到实例管理器
+	go func() {
+		time.Sleep(500 * time.Millisecond) // 等待 API 服务器初始化
+		syncProxyConfigs("startup", "")
+	}()
+
+	apiErrCh := make(chan error, 1)
+	go func() {
+		if err := apiServer.Run(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			apiErrCh <- err
+		}
+	}()
+
+	logger.Info("所有服务已启动")
+
+	quit := make(chan os.Signal, 2)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	defer signal.Stop(quit)
+
+	// 8. 等待关闭信号
+	var sig os.Signal
+	select {
+	case sig = <-quit:
+		logger.Info("收到关闭信号", "signal", sig.String())
+	case err := <-apiErrCh:
+		logger.Error("API 服务器失败", "err", err)
+	}
+	logger.Info("正在优雅关闭所有服务...")
+
+	// 9. 优雅关闭
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 18*time.Second)
+	defer shutdownCancel()
+
+	done := make(chan struct{})
+	go func() {
+		if err := apiServer.Shutdown(shutdownCtx); err != nil {
+			logger.Error("关闭 API 服务器时出错", "err", err)
+		}
+
+		if notifyMgr != nil {
+			notifyMgr.Close()
+		}
+
+		trafficSampler.Stop()
+
+		if err := proxyMgr.Shutdown(shutdownCtx); err != nil {
+			logger.Error("关闭代理实例时出错", "err", err)
+		}
+
+		// 关闭语音网关
+		if voiceGW != nil {
+			if err := voiceGW.Stop(); err != nil {
+				logger.Error("关闭语音网关时出错", "err", err)
+			}
+		}
+
+		if err := pool.ShutdownContext(shutdownCtx); err != nil {
+			logger.Error("关闭工作器池时出错", "err", err)
+		}
+		qmi.StopStartedProxy()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-quit:
+	case <-time.After(20 * time.Second):
+		logger.Warn("关闭超时，强制退出")
+	}
+
+	logger.Info("再见!")
+}
+
+func availableRealtimeCodecs(transcoder *audiotranscode.Transcoder) []string {
+	available := make([]string, 0, 2)
+	for _, codec := range []string{"AMR-WB", "AMR", "EVS"} {
+		if err := transcoder.ValidateRealtimeCodec(codec); err != nil {
+			logger.Warn("实时语音编解码器不可用", "codec", codec, "err", err)
+			continue
+		}
+		available = append(available, codec)
+	}
+	return available
+}

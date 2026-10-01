@@ -1,0 +1,325 @@
+package imscore
+
+import (
+	"errors"
+	"fmt"
+	"strings"
+
+	"github.com/emiago/sipgo/sip"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/imsendpoint"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/imsheaders"
+)
+
+// SIPDialogProfile is the registered signaling endpoint used by IMS dialogs.
+type SIPDialogProfile struct {
+	LocalURI       string
+	FromTag        string
+	ContactURI     string
+	ContactHeader  string
+	Domain         string
+	LocalAddress   string
+	RemoteAddress  string
+	Transport      string
+	ServiceRoute   string
+	SecurityVerify string
+	PANI           string
+	UserAgent      string
+	InitialCSeq    int
+}
+
+// InboundVoiceRequest is a SIP request routed to the active voice agent.
+type InboundVoiceRequest struct {
+	Method           string
+	CallID           string
+	From             string
+	To               string
+	Contact          string
+	RecordRoute      string
+	CSeq             string
+	ContentType      string
+	SessionExpires   string
+	Body             []byte
+	Request          *sip.Request
+	Responder        InboundVoiceResponder
+	InboundRequest   imsendpoint.InboundRequestHandle
+	ServerInvite     imsendpoint.ServerInviteHandle
+	Dialog           imsendpoint.DialogHandle
+	DialogMatched    bool
+	DialogResponded  bool
+	DialogTerminated bool
+	Session          *imsendpoint.Session
+	ReferTo          string
+	ReferSub         string
+	Supported        string
+	MinSE            string
+	Replaces         string
+	HistoryInfo      string
+	Event            string
+}
+
+// InboundVoiceResponse is one provisional or final response to an inbound
+// voice request.
+type InboundVoiceResponse struct {
+	StatusCode     int
+	ContentType    string
+	Body           []byte
+	Contact        string
+	ToTag          string
+	SessionExpires string
+	AlertInfo      string
+	Reason         string
+}
+
+// InboundVoiceResponder retains the network transaction used by an inbound
+// voice request. Provisional responses may precede exactly one final response.
+type InboundVoiceResponder interface {
+	Respond(InboundVoiceResponse) error
+	LocalTag() string
+}
+
+// InboundVoiceResult controls the SIP response for a handled request.
+type InboundVoiceResult struct {
+	Handled    bool
+	StatusCode int
+}
+
+// VoiceRequestHandler consumes inbound IMS voice dialog requests.
+type VoiceRequestHandler interface {
+	HandleInboundVoiceRequest(InboundVoiceRequest) (InboundVoiceResult, error)
+}
+
+// EventOwnedVoiceRequestHandler lets the v1.5.5 endpoint event consumer own
+// selected methods without racing the additive synchronous handler.
+type EventOwnedVoiceRequestHandler interface {
+	OwnsInboundVoiceMethod(method string) bool
+	InboundVoiceEventSubscription() string
+}
+
+// SetVoiceRequestHandler installs or removes the active voice router.
+func (s *Service) SetVoiceRequestHandler(handler VoiceRequestHandler) {
+	if s == nil {
+		return
+	}
+	s.mu.Lock()
+	s.voiceHandler = handler
+	s.mu.Unlock()
+}
+
+// RegisteredSIPDialogProfile returns the active IMS registration binding.
+func (s *Service) RegisteredSIPDialogProfile() (SIPDialogProfile, error) {
+	return s.reserveRegisteredSIPProfile()
+}
+
+func (s *Service) reserveRegisteredSIPProfile() (SIPDialogProfile, error) {
+	return s.registeredSIPDialogProfile(true)
+}
+
+func (s *Service) snapshotRegisteredSIPProfile() (SIPDialogProfile, error) {
+	return s.registeredSIPDialogProfile(false)
+}
+
+func (s *Service) registeredSIPDialogProfile(reserveCSeq bool) (SIPDialogProfile, error) {
+	if s == nil || s.cfg == nil {
+		return SIPDialogProfile{}, errors.New("imscore: service is not configured")
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.regState != regRegistered {
+		return SIPDialogProfile{}, errors.New("imscore: IMS is not registered")
+	}
+	session := s.regSession
+	if session == nil {
+		return SIPDialogProfile{}, errors.New("imscore: registered SIP session is unavailable")
+	}
+	localURI := strings.TrimSpace(session.publicID)
+	registeredContactUser := strings.TrimSpace(session.contactUser)
+	if localURI == "" {
+		return SIPDialogProfile{}, errors.New("imscore: registered public identity is unavailable")
+	}
+	if registeredContactUser == "" {
+		return SIPDialogProfile{}, errors.New("imscore: registered Contact identity is unavailable")
+	}
+	route := s.registeredSIPRouteLocked()
+	if !route.live {
+		return SIPDialogProfile{}, errors.New("imscore: registered SIP transport is not connected")
+	}
+	if route.clientAddress == "" || route.serverAddress == "" {
+		return SIPDialogProfile{}, errors.New("imscore: registered SIP transport is unavailable")
+	}
+	initialCSeq := 0
+	if reserveCSeq {
+		initialCSeq = s.reserveSIPCSeqLocked(session, route.securityVerify != "")
+	}
+	contactURI, contactHeader := registeredVoiceContact(s.cfg, registeredContactUser, route.serverAddress)
+	// LocalAddress is the Via sent-by: TCP/TLS keeps the actual source
+	// (port-c); UDP IPsec uses port-s. Contact stays on port-s.
+	return SIPDialogProfile{
+		LocalURI: localURI, Domain: strings.TrimSpace(s.cfg.Domain),
+		FromTag: session.fromTag, LocalAddress: route.clientAddress, RemoteAddress: route.remoteAddress,
+		Transport: route.transport, ServiceRoute: route.serviceRoute,
+		ContactURI: contactURI, ContactHeader: contactHeader,
+		SecurityVerify: route.securityVerify, PANI: s.GetPAccessNetworkInfo(),
+		UserAgent: strings.TrimSpace(s.cfg.UserAgent), InitialCSeq: initialCSeq,
+	}, nil
+}
+
+func (s *Service) reserveSIPCSeqLocked(session *registerSession, subscriptionConsumed bool) int {
+	minimum := session.cseq + 1
+	if subscriptionConsumed {
+		minimum += 2
+	}
+	if s.nextSIPCSeq < minimum {
+		s.nextSIPCSeq = minimum
+		return minimum
+	}
+	s.nextSIPCSeq++
+	return s.nextSIPCSeq
+}
+
+func registeredVoiceContact(cfg *IMSConfig, user, address string) (string, string) {
+	// TS 24.229 5.1.2A.1.1: dialog Contact uses the registered address and
+	// the "ob" URI parameter so subsequent in-dialog requests stay on this
+	// flow. Registration-only parameters such as +sip.instance, expires and
+	// reg-id are not copied onto non-REGISTER requests.
+	uri := fmt.Sprintf("sip:%s@%s;ob", user, address)
+	template := cfg.RegisterTemplate
+	if len(template.ContactOrder) == 0 {
+		return uri, "<" + uri + ">"
+	}
+	header := imsheaders.IMSContactURI(uri, imsheaders.IMSContactOptions{
+		AccessType: template.AccessType,
+		ICSIRef:    template.ICSIRef,
+		ParamOrder: dialogContactParamOrder(template.ContactOrder),
+	})
+	return uri, header
+}
+
+func dialogContactParamOrder(order []string) []string {
+	filtered := make([]string, 0, len(order))
+	for _, name := range order {
+		switch strings.ToLower(strings.TrimSpace(name)) {
+		case "sip_instance", "reg_id", "expires", "ob":
+			continue
+		default:
+			filtered = append(filtered, name)
+		}
+	}
+	return filtered
+}
+
+// EventBus returns the service event bus used by lifecycle consumers.
+func (s *Service) EventBus() *EventBus {
+	if s == nil {
+		return nil
+	}
+	return s.bus
+}
+
+func (s *Service) handleInboundVoice(dispatch inboundSIPDispatch) (inboundSIPResult, bool, error) {
+	s.mu.RLock()
+	handler := s.voiceHandler
+	s.mu.RUnlock()
+	if handler == nil {
+		return inboundSIPResult{}, false, nil
+	}
+	method := strings.ToUpper(strings.TrimSpace(sipRequestMethod(dispatch.raw)))
+	owner, eventOwned := handler.(EventOwnedVoiceRequestHandler)
+	if eventOwned && owner.OwnsInboundVoiceMethod(method) &&
+		dispatch.events.enqueuedFor(owner.InboundVoiceEventSubscription()) {
+		return inboundSIPResult{}, true, nil
+	}
+	dialogRead := s.readInboundVoiceDialog(dispatch.raw, dispatch.transaction)
+	body, err := rawSIPBody(dispatch.raw)
+	if err != nil {
+		return inboundSIPResult{}, true, err
+	}
+	request := InboundVoiceRequest{
+		Method: sipRequestMethod(dispatch.raw), CallID: rawSIPHeaderValue(dispatch.raw, "Call-ID"),
+		From: rawSIPHeaderValue(dispatch.raw, "From"), To: rawSIPHeaderValue(dispatch.raw, "To"),
+		Contact: rawSIPHeaderValue(dispatch.raw, "Contact"), RecordRoute: rawSIPHeaderValue(dispatch.raw, "Record-Route"),
+		CSeq: rawSIPHeaderValue(dispatch.raw, "CSeq"), ContentType: rawSIPHeaderValue(dispatch.raw, "Content-Type"),
+		SessionExpires: rawSIPHeaderValue(dispatch.raw, "Session-Expires"),
+		ReferTo:        rawSIPHeaderValue(dispatch.raw, "Refer-To"),
+		ReferSub:       rawSIPHeaderValue(dispatch.raw, "Refer-Sub"),
+		Supported:      rawSIPHeaderValue(dispatch.raw, "Supported"),
+		MinSE:          rawSIPHeaderValue(dispatch.raw, "Min-SE"),
+		Replaces:       rawSIPHeaderValue(dispatch.raw, "Replaces"),
+		HistoryInfo:    rawSIPHeaderValue(dispatch.raw, "History-Info"),
+		Event:          rawSIPHeaderValue(dispatch.raw, "Event"),
+		Body:           body, Responder: newInboundVoiceResponder(dispatch.raw, dispatch.reply),
+		Dialog: dialogRead.handle, DialogMatched: dialogRead.matched,
+		DialogResponded: dialogRead.responded, DialogTerminated: dialogRead.terminated,
+	}
+	if dispatch.transaction != nil && dispatch.transaction.request != nil {
+		request.Request = dispatch.transaction.request.Clone()
+		request.InboundRequest = newInboundRequestHandle(dispatch.transaction.request, dispatch.transaction)
+		if dispatch.transaction.request.IsInvite() {
+			request.ServerInvite = newServerInviteHandle(dispatch.transaction.request, dispatch.transaction)
+		}
+	}
+	result, handlerErr := handler.HandleInboundVoiceRequest(request)
+	err = errors.Join(dialogRead.err, handlerErr)
+	if !result.Handled {
+		return inboundSIPResult{}, false, err
+	}
+	if dialogRead.responded {
+		return inboundSIPResult{}, true, err
+	}
+	if result.StatusCode == 0 {
+		return inboundSIPResult{}, true, err
+	}
+	response, responseErr := buildSIPRequestResponse(dispatch.raw, result.StatusCode)
+	if responseErr != nil {
+		return inboundSIPResult{}, true, responseErr
+	}
+	return inboundSIPResult{response: response}, true, err
+}
+
+func (s *Service) readInboundVoiceDialog(
+	raw string,
+	transaction *serverSIPTransaction,
+) inboundDialogReadResult {
+	message, err := parseSIPMessage(raw)
+	if err != nil {
+		return inboundDialogReadResult{err: err}
+	}
+	request, ok := message.(*sip.Request)
+	if !ok {
+		return inboundDialogReadResult{err: errors.New("inbound voice message is not a request")}
+	}
+	return s.dialogs().readInboundRequest(request, transaction)
+}
+
+func cloneSIPHeaders(headers map[string]string) map[string]string {
+	copy := make(map[string]string, len(headers))
+	for name, value := range headers {
+		copy[name] = value
+	}
+	return copy
+}
+
+func splitSIPHeaderValues(value string) []string {
+	var values []string
+	start, angleDepth := 0, 0
+	for index, char := range value {
+		switch char {
+		case '<':
+			angleDepth++
+		case '>':
+			if angleDepth > 0 {
+				angleDepth--
+			}
+		case ',':
+			if angleDepth == 0 {
+				if item := strings.TrimSpace(value[start:index]); item != "" {
+					values = append(values, item)
+				}
+				start = index + 1
+			}
+		}
+	}
+	if item := strings.TrimSpace(value[start:]); item != "" {
+		values = append(values, item)
+	}
+	return values
+}

@@ -1,0 +1,231 @@
+package imscore
+
+import (
+	"context"
+	"errors"
+	"net"
+	"strconv"
+	"strings"
+
+	"github.com/emiago/sipgo"
+	"github.com/emiago/sipgo/sip"
+)
+
+// outboundModeContext is the immutable signaling-route snapshot captured for
+// one outbound request in v1.5.5.
+type outboundModeContext struct {
+	Kind                    string
+	Mode                    string
+	IPSec3GPP               bool
+	Config                  IMSConfig
+	Generation              uint64
+	SignalingReady          bool
+	SignalingNotReadyReason string
+	LocalIP                 string
+	LocalHost               string
+	LocalPortC              int
+	LocalPortS              int
+	RemoteIP                string
+	RemotePortS             int
+	Registrar               string
+	ServiceRoute            string
+	RouteHeader             string
+	SecVerify               string
+	ContactID               string
+	PANI                    string
+	AOR                     string
+	Transport               string
+	TCPConn                 net.Conn
+	UDPConn                 net.PacketConn
+	Client                  *sipgo.Client
+	SkipGenericRawLog       bool
+	InboundPeer             bool
+	send                    func(context.Context, string) error
+}
+
+func (s *Service) resolveOutboundModeContext(
+	flow string,
+	req *sip.Request,
+) (outboundModeContext, error) {
+	return s.resolveOutboundModeContextForPeer(flow, req, nil)
+}
+
+func (s *Service) resolveOutboundModeContextForPeer(
+	flow string,
+	req *sip.Request,
+	peer net.Conn,
+) (outboundModeContext, error) {
+	if s == nil || s.transport == nil {
+		return outboundModeContext{}, newOutboundModeResolveError(
+			"missing_sip_transport", "outbound transport layer 为空",
+		)
+	}
+	if req == nil {
+		return outboundModeContext{}, errors.New("imscore: nil outbound request")
+	}
+	pani := s.GetPAccessNetworkInfo()
+	peerRegistrar := s.portSRegistrar(peer)
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if s.cfg == nil {
+		return outboundModeContext{}, newOutboundModeResolveError(
+			"missing_ims_config", "IMS config 为空",
+		)
+	}
+	modeCtx := s.outboundModeSnapshotLocked(flow, req, pani)
+	if datagram, ok := peer.(*protectedUDPPeer); ok && !s.currentProtectedUDPPeerLocked(datagram) {
+		return outboundModeContext{}, net.ErrClosed
+	}
+	modeCtx.useInboundPeer(peer)
+	if peerRegistrar != "" {
+		modeCtx.Registrar = peerRegistrar
+	}
+	sender := s.outboundSenderLocked(&modeCtx)
+	if sender == nil {
+		return outboundModeContext{}, newOutboundModeResolveError(
+			"missing_direct_sender", "no direct sender for %s", destinationFromContext(modeCtx),
+		)
+	}
+	if modeCtx.IPSec3GPP && !modeCtx.SignalingReady && modeCtx.Mode != "external" && !modeCtx.InboundPeer {
+		reason := strings.TrimSpace(modeCtx.SignalingNotReadyReason)
+		if reason == "" {
+			reason = "signaling_not_ready"
+		}
+		return outboundModeContext{}, newOutboundModeResolveError(
+			"signaling_not_ready", "resolve outbound mode: %w", signalingRuntimeNotReadyError(reason),
+		)
+	}
+	modeCtx.send = sender
+	return modeCtx, nil
+}
+
+func (modeCtx *outboundModeContext) useInboundPeer(peer net.Conn) {
+	if modeCtx == nil || peer == nil {
+		return
+	}
+	modeCtx.Mode = "tcp"
+	modeCtx.Transport = "TCP"
+	modeCtx.TCPConn = peer
+	modeCtx.UDPConn = nil
+	modeCtx.Client = nil
+	modeCtx.InboundPeer = true
+	modeCtx.RemoteIP, modeCtx.RemotePortS = splitOutboundAddress(peer.RemoteAddr())
+	if datagram, ok := peer.(*protectedUDPPeer); ok {
+		modeCtx.Mode, modeCtx.Transport = "udp", "UDP"
+		modeCtx.TCPConn, modeCtx.UDPConn = nil, datagram.path.client
+		modeCtx.Registrar = datagram.path.registrar
+	}
+}
+
+func (s *Service) outboundModeSnapshotLocked(
+	flow string,
+	req *sip.Request,
+	pani string,
+) outboundModeContext {
+	cfg := cloneOutboundIMSConfig(s.cfg)
+	route := s.registeredSIPRouteLocked()
+	localIP := ""
+	if cfg.LocalIP != nil {
+		localIP = cfg.LocalIP.String()
+	}
+	modeCtx := outboundModeContext{
+		Kind: strings.TrimSpace(flow), Config: cfg, Generation: s.signalingGeneration,
+		SignalingReady: s.signalingReady, SignalingNotReadyReason: s.signalingFailureReason,
+		IPSec3GPP: s.effectiveSecurityModeLocked() == securityModeIPSec,
+		LocalIP:   localIP, LocalHost: strings.TrimSpace(cfg.LocalAddr),
+		LocalPortC: s.protectedClientPort, LocalPortS: s.protectedServerPort,
+		Registrar: strings.TrimSpace(s.registrar), ServiceRoute: route.serviceRoute,
+		RouteHeader: route.serviceRoute, SecVerify: route.securityVerify,
+		PANI: pani, Transport: transportForRequest(cfg.Transport, s.effectiveSecurityModeLocked(), req.Method),
+		TCPConn: s.registrationTCP, UDPConn: s.registrationIO,
+	}
+	if modeCtx.LocalHost == "" {
+		modeCtx.LocalHost = modeCtx.LocalIP
+	}
+	if s.regSession != nil {
+		modeCtx.ContactID = strings.TrimSpace(s.regSession.contactUser)
+		modeCtx.AOR = strings.TrimSpace(s.regSession.publicID)
+	}
+	if modeCtx.Registrar == "" {
+		modeCtx.Registrar = strings.TrimSpace(cfg.Registrar)
+	}
+	if modeCtx.AOR == "" {
+		modeCtx.AOR = firstNonBlank(cfg.publicIdentities()...)
+	}
+	s.populateOutboundRemoteLocked(&modeCtx)
+	if strings.TrimSpace(modeCtx.RouteHeader) == "" {
+		modeCtx.RouteHeader = routeFromRemoteEndpoint(modeCtx.RemoteIP, modeCtx.RemotePortS)
+	}
+	return modeCtx
+}
+
+func (s *Service) populateOutboundRemoteLocked(modeCtx *outboundModeContext) {
+	if modeCtx.TCPConn != nil {
+		modeCtx.Mode = "tcp"
+		modeCtx.RemoteIP, modeCtx.RemotePortS = splitOutboundAddress(modeCtx.TCPConn.RemoteAddr())
+		return
+	}
+	if modeCtx.UDPConn != nil && s.registrationRemote != nil {
+		modeCtx.Mode = "udp"
+		if s.registrationRemote.IP != nil {
+			modeCtx.RemoteIP = s.registrationRemote.IP.String()
+		}
+		modeCtx.RemotePortS = s.registrationRemote.Port
+		return
+	}
+	modeCtx.Mode = "external"
+}
+
+func (s *Service) outboundSenderLocked(modeCtx *outboundModeContext) func(context.Context, string) error {
+	if modeCtx.TCPConn != nil {
+		snapshot := *modeCtx
+		return func(ctx context.Context, raw string) error {
+			s.sipWriteMu.Lock()
+			defer s.sipWriteMu.Unlock()
+			return sendDirectWrite(ctx, snapshot, raw)
+		}
+	}
+	if modeCtx.UDPConn != nil && s.registrationRemote != nil {
+		snapshot := *modeCtx
+		return func(ctx context.Context, raw string) error {
+			if snapshot.InboundPeer {
+				s.sipWriteMu.Lock()
+				defer s.sipWriteMu.Unlock()
+			}
+			return sendDirectWrite(ctx, snapshot, raw)
+		}
+	}
+	s.transport.mu.Lock()
+	sender := s.transport.sendFn
+	s.transport.mu.Unlock()
+	if sender == nil {
+		return nil
+	}
+	return func(_ context.Context, raw string) error { return sender(raw) }
+}
+
+func cloneOutboundIMSConfig(source *IMSConfig) IMSConfig {
+	if source == nil {
+		return IMSConfig{}
+	}
+	cloned := *source
+	cloned.LocalIP = append(net.IP(nil), source.LocalIP...)
+	cloned.IMPUs = append([]string(nil), source.IMPUs...)
+	if source.EnableIPSec3GPP != nil {
+		enabled := *source.EnableIPSec3GPP
+		cloned.EnableIPSec3GPP = &enabled
+	}
+	return cloned
+}
+
+func splitOutboundAddress(address net.Addr) (string, int) {
+	if address == nil {
+		return "", 0
+	}
+	host, port, err := net.SplitHostPort(address.String())
+	if err != nil {
+		return "", 0
+	}
+	parsedPort, _ := strconv.Atoi(port)
+	return strings.Trim(host, "[]"), parsedPort
+}

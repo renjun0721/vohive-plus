@@ -1,0 +1,482 @@
+package imscore
+
+import (
+	"crypto/rand"
+	"crypto/sha256"
+	"errors"
+	"fmt"
+	"io"
+	"net"
+	"strconv"
+	"strings"
+	"syscall"
+	"time"
+
+	"github.com/iniwex5/vowifi-go/internal/vowifi/common"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/logging"
+	"github.com/iniwex5/vowifi-go/runtimehost/identity"
+)
+
+// SIPStatusText returns the standard reason phrase for a SIP status code
+// (RFC 3261 §21).
+func SIPStatusText(code int) string {
+	switch {
+	case code >= 100 && code < 200:
+		switch code {
+		case 100:
+			return "Trying"
+		case 180:
+			return "Ringing"
+		case 181:
+			return "Call Is Being Forwarded"
+		case 182:
+			return "Queued"
+		case 183:
+			return "Session Progress"
+		default:
+			return "Informational"
+		}
+	case code >= 200 && code < 300:
+		if code == 200 {
+			return "OK"
+		}
+		return "Successful"
+	case code >= 300 && code < 400:
+		switch code {
+		case 300:
+			return "Multiple Choices"
+		case 301:
+			return "Moved Permanently"
+		case 302:
+			return "Moved Temporarily"
+		case 305:
+			return "Use Proxy"
+		case 380:
+			return "Alternative Service"
+		default:
+			return "Redirection"
+		}
+	case code >= 400 && code < 500:
+		switch code {
+		case 400:
+			return "Bad Request"
+		case 401:
+			return "Unauthorized"
+		case 402:
+			return "Payment Required"
+		case 403:
+			return "Forbidden"
+		case 404:
+			return "Not Found"
+		case 405:
+			return "Method Not Allowed"
+		case 406:
+			return "Not Acceptable"
+		case 407:
+			return "Proxy Authentication Required"
+		case 408:
+			return "Request Timeout"
+		case 409:
+			return "Conflict"
+		case 410:
+			return "Gone"
+		case 413:
+			return "Request Entity Too Large"
+		case 414:
+			return "Request-URI Too Long"
+		case 415:
+			return "Unsupported Media Type"
+		case 416:
+			return "Unsupported URI Scheme"
+		case 420:
+			return "Bad Extension"
+		case 421:
+			return "Extension Required"
+		case 423:
+			return "Interval Too Brief"
+		case 480:
+			return "Temporarily Unavailable"
+		case 481:
+			return "Call/Transaction Does Not Exist"
+		case 482:
+			return "Loop Detected"
+		case 483:
+			return "Too Many Hops"
+		case 484:
+			return "Address Incomplete"
+		case 485:
+			return "Ambiguous"
+		case 486:
+			return "Busy Here"
+		case 487:
+			return "Request Terminated"
+		case 488:
+			return "Not Acceptable Here"
+		case 491:
+			return "Request Pending"
+		case 493:
+			return "Undecipherable"
+		default:
+			return "Client Error"
+		}
+	default:
+		switch code {
+		case 500:
+			return "Server Internal Error"
+		case 501:
+			return "Not Implemented"
+		case 502:
+			return "Bad Gateway"
+		case 503:
+			return "Service Unavailable"
+		case 504:
+			return "Server Time-out"
+		case 505:
+			return "Version Not Supported"
+		case 513:
+			return "Message Too Large"
+		case 600:
+			return "Busy Everywhere"
+		case 603:
+			return "Decline"
+		case 604:
+			return "Does Not Exist Anywhere"
+		case 606:
+			return "Not Acceptable"
+		default:
+			return fmt.Sprintf("Status %d", code)
+		}
+	}
+}
+
+// CountryISO2FromMCC returns the ISO 3166-1 alpha-2 country code for an MCC.
+func CountryISO2FromMCC(mcc string) string {
+	switch mcc {
+	case "310", "311", "312", "313", "314", "315", "316", "317", "318":
+		return "US"
+	case "302":
+		return "CA"
+	case "334":
+		return "MX"
+	case "460":
+		return "CN"
+	case "440", "441":
+		return "JP"
+	case "450":
+		return "KR"
+	case "208":
+		return "FR"
+	case "262":
+		return "DE"
+	case "234", "235":
+		return "GB"
+	case "248":
+		return "EE"
+	case "222":
+		return "IT"
+	case "214":
+		return "ES"
+	case "204":
+		return "NL"
+	case "228":
+		return "CH"
+	case "232":
+		return "AT"
+	case "206":
+		return "BE"
+	case "505":
+		return "AU"
+	case "530":
+		return "NZ"
+	case "404", "405", "406":
+		return "IN"
+	case "452":
+		return "VN"
+	case "520":
+		return "TH"
+	case "502":
+		return "MY"
+	case "525":
+		return "SG"
+	case "510":
+		return "ID"
+	case "515":
+		return "PH"
+	case "454":
+		return "HK"
+	case "455":
+		return "MO"
+	case "466":
+		return "TW"
+	case "621":
+		return "NG"
+	case "901":
+		return "UNK"
+	default:
+		return "XX"
+	}
+}
+
+// IsFatalNetworkError reports whether an error indicates a fatal network
+// failure that should stop the session (rather than a transient failure).
+func IsFatalNetworkError(err error) bool {
+	if err == nil {
+		return false
+	}
+	for _, target := range []error{
+		io.EOF, net.ErrClosed, syscall.ECONNREFUSED, syscall.ECONNRESET, syscall.EPIPE,
+	} {
+		if errors.Is(err, target) {
+			return true
+		}
+	}
+	message := strings.ToLower(err.Error())
+	for _, fatal := range []string{
+		"network is unreachable",
+		"use of closed network connection",
+		"no route to host",
+		"connection refused",
+		"connection reset by peer",
+		"broken pipe",
+	} {
+		if strings.Contains(message, fatal) {
+			return true
+		}
+	}
+	return false
+}
+
+// GenerateStablePAccessNetworkInfo builds the WLAN P-Access-Network-Info
+// value used by the recovered implementation.
+func GenerateStablePAccessNetworkInfo(seed string) string {
+	return GeneratePAccessNetworkInfo(seed, "")
+}
+
+// GenerateStablePAccessNetworkInfoByIdentity builds PANI from an identity.
+func GenerateStablePAccessNetworkInfoByIdentity(ident identity.IMSIdentity) string {
+	seed := stablePANIGenerationSeed([]string{
+		ident.IMPI,
+		ident.IMPU,
+		ident.Domain,
+		string(ident.ActualSource),
+	})
+	return GenerateStablePAccessNetworkInfo(seed)
+}
+
+// AppendPAccessNetworkCountry appends a country to the PANI value.
+func AppendPAccessNetworkCountry(pani, iso2 string) string {
+	iso2 = strings.ToUpper(strings.TrimSpace(iso2))
+	if iso2 == "" || strings.Contains(strings.ToLower(pani), "country=") {
+		return pani
+	}
+	return pani + ";country=" + iso2
+}
+
+// GenerateStableWlanNodeID derives a stable WLAN node ID from an identity.
+// This host has no 802.11 association, so the value is a locally administered
+// MAC derived from identity rather than a real AP BSSID (TS 24.229 7.2A.4.3
+// NOTE 3). Callers that have a real BSSID should pass it via PAccessNetworkInfo.
+func GenerateStableWlanNodeID(seed string) string {
+	seed = strings.TrimSpace(seed)
+	if seed == "" {
+		return ""
+	}
+	digest := sha256.Sum256([]byte(seed))
+	// Present the stable value as a locally administered unicast MAC address.
+	digest[0] = digest[0]&^byte(1) | byte(2)
+	return fmt.Sprintf("%x", digest[:6])
+}
+
+// GeneratePAccessNetworkInfo prefers a real BSSID when the host can read one.
+func GeneratePAccessNetworkInfo(seed, bssid string) string {
+	nodeID := strings.ReplaceAll(strings.ToLower(strings.TrimSpace(bssid)), ":", "")
+	nodeID = strings.ReplaceAll(nodeID, "-", "")
+	if nodeID == "" {
+		nodeID = GenerateStableWlanNodeID(seed)
+	}
+	if nodeID == "" {
+		return ""
+	}
+	return fmt.Sprintf(`IEEE-802.11; i-wlan-node-id="%s"`, nodeID)
+}
+
+func stablePANIGenerationSeed(candidates []string) string {
+	for _, candidate := range candidates {
+		if seed := strings.TrimSpace(candidate); seed != "" {
+			return seed
+		}
+	}
+	return ""
+}
+
+// GenerateRandomIMEIForModel generates a random IMEI for a device model.
+func GenerateRandomIMEIForModel(model string) string {
+	tac := "35693803"
+	if strings.EqualFold(strings.TrimSpace(model), "iphone15,4") {
+		tac = "86034905"
+	}
+	random := make([]byte, 6)
+	_, _ = rand.Read(random)
+	serial := make([]byte, len(random))
+	for index, value := range random {
+		serial[index] = '0' + value%10
+	}
+	prefix := tac + string(serial)
+	return prefix + string(imeiCheckDigit(prefix))
+}
+
+// GenerateDefaultCellularNetworkInfo omits Cellular-Network-Info when the
+// radio is off and no real cell is available (TS 24.229 R.3.1.1A).
+func GenerateDefaultCellularNetworkInfo(mcc, mnc string) string {
+	return ""
+}
+
+// FormatCellularNetworkInfo builds the header from a real camped cell.
+// Empty TAC or CellID returns an empty string so the header is omitted.
+func FormatCellularNetworkInfo(mcc, mnc, tac, cellID string, ageSeconds int) string {
+	mcc = strings.TrimSpace(mcc)
+	mncValue, err := strconv.Atoi(strings.TrimSpace(mnc))
+	if err != nil || len(mcc) != 3 || mncValue < 0 || mncValue > 999 {
+		return ""
+	}
+	tac = strings.TrimSpace(tac)
+	cellID = strings.TrimSpace(cellID)
+	if tac == "" || cellID == "" {
+		return ""
+	}
+	if ageSeconds < 0 {
+		ageSeconds = 0
+	}
+	identity := fmt.Sprintf("%s%02d%s%s", mcc, mncValue, strings.ToUpper(tac), strings.ToUpper(cellID))
+	return fmt.Sprintf("3GPP-E-UTRAN-FDD;utran-cell-id-3gpp=%s;cell-info-age=%d", identity, ageSeconds)
+}
+
+func imeiCheckDigit(prefix string) byte {
+	sum := 0
+	for index, char := range prefix {
+		digit := int(char - '0')
+		if index%2 == 1 {
+			digit *= 2
+			if digit > 9 {
+				digit -= 9
+			}
+		}
+		sum += digit
+	}
+	return byte('0' + (10-sum%10)%10)
+}
+
+// ResolveIMSIdentitySourceByCapabilities preserves the capability-only helper
+// added by the reconstructed runtime.
+func ResolveIMSIdentitySourceByCapabilities(pref string, hasISIM, hasUSIM bool) string {
+	switch strings.ToLower(strings.TrimSpace(pref)) {
+	case "usim":
+		return "usim"
+	case "imei":
+		return "imei"
+	case "isim":
+		fallthrough
+	default:
+		if hasISIM {
+			return "isim"
+		}
+		if hasUSIM {
+			return "usim"
+		}
+		return "imei"
+	}
+}
+
+// LogEPDGSnapshot logs an ePDG selection snapshot.
+func LogEPDGSnapshot(deviceID, epdg, source string) {
+	logging.Info("ePDG selection", "device", deviceID, "epdg", epdg, "source", source)
+}
+
+// mccMncFromIdentity derives MCC/MNC from an IMSI in an identity.
+func mccMncFromIdentity(ident identity.IMSIdentity) (mcc, mnc string) {
+	imsi := ident.IMPI
+	if i := strings.IndexByte(imsi, '@'); i > 0 {
+		imsi = imsi[:i]
+	}
+	if len(imsi) >= 5 {
+		mcc = imsi[:3]
+		mnc = imsi[3:5]
+	}
+	if len(mnc) == 2 {
+		mnc = "0" + mnc
+	}
+	return mcc, mnc
+}
+
+// BuildCompatibilityIMSConfig preserves the convenience constructor added by
+// the reconstructed runtimehost API.
+func BuildCompatibilityIMSConfig(deviceID string, ident identity.IMSIdentity, epdgAddr string) *IMSConfig {
+	mcc, mnc := mccMncFromIdentity(ident)
+	domain := ident.Domain
+	if domain == "" {
+		domain = fmt.Sprintf("ims.mnc%s.mcc%s.3gppnetwork.org", mnc, mcc)
+	}
+	impi := ident.IMPI
+	if impi == "" {
+		impi = deviceID + "@" + domain
+	}
+	impu := strings.TrimSpace(ident.IMPU)
+	if impu == "" {
+		impu = "sip:" + impi
+	}
+	return &IMSConfig{
+		DeviceID:  deviceID,
+		IMSI:      mcc + mnc + "0000000",
+		IMPI:      impi,
+		IMPU:      impu,
+		Domain:    domain,
+		Realm:     domain,
+		EPDGAddr:  epdgAddr,
+		Transport: "udp",
+		Expires:   3600 * time.Second,
+		TraceID:   newTraceID(),
+	}
+}
+
+// ApplyRuntimeIMSIdentityToConfig applies the runtimehost identity projection.
+func ApplyRuntimeIMSIdentityToConfig(cfg *IMSConfig, ident identity.IMSIdentity) {
+	if cfg == nil {
+		return
+	}
+	if ident.IMPI != "" {
+		cfg.IMPI = ident.IMPI
+	}
+	if ident.IMPU != "" {
+		cfg.IMPU = ident.IMPU
+		cfg.IMPUs = nil
+	}
+	if ident.Domain != "" {
+		cfg.Domain = ident.Domain
+	}
+	if cfg.Realm == "" {
+		cfg.Realm = cfg.Domain
+	}
+	if cfg.IMSI == "" {
+		imsi := ident.IMPI
+		if i := strings.IndexByte(imsi, '@'); i > 0 {
+			imsi = imsi[:i]
+		}
+		cfg.IMSI = imsi
+	}
+}
+
+// SetupService wires the IMS service surface for a device.
+func SetupService(deviceID string, cfg *IMSConfig) (*Service, error) {
+	return New(cfg)
+}
+
+// StartSessionIMSCore starts the IMS core session for a prepared identity.
+func StartSessionIMSCore(deviceID string, ident identity.IMSIdentity, epdgAddr string) (*Service, error) {
+	cfg := BuildCompatibilityIMSConfig(deviceID, ident, epdgAddr)
+	return New(cfg)
+}
+
+// newTraceID returns a random trace id.
+func newTraceID() string {
+	return common.NewTraceID()
+}

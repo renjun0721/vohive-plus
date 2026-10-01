@@ -1,0 +1,799 @@
+package voice
+
+import (
+	"context"
+	"fmt"
+	"net"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/iniwex5/vowifi-go/internal/vowifi/events"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/imscore"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/voice/callstate"
+)
+
+const testClientSDP = "v=0\r\no=- 1 1 IN IP4 127.0.0.1\r\ns=client\r\nc=IN IP4 127.0.0.1\r\nt=0 0\r\nm=audio 32000 RTP/AVP 0\r\n"
+
+const testIMSAnswerSDP = "v=0\r\no=- 2 2 IN IP4 127.0.0.1\r\ns=ims\r\nc=IN IP4 127.0.0.1\r\nt=0 0\r\nm=audio 33000 RTP/AVP 0\r\n"
+
+// newTestAgent builds an agent with a fake IMS service.
+func newTestAgent(t *testing.T) *Agent {
+	t.Helper()
+	return newVoiceTestAgent(t, startVoiceTestRegistrar(t))
+}
+
+func newVoiceTestAgent(t *testing.T, registrar *net.UDPConn) *Agent {
+	t.Helper()
+	plainSIP := false
+	cfg := &imscore.IMSConfig{
+		DeviceID:        "dev-1",
+		IMSI:            "310260123456789",
+		IMPI:            "310260123456789@ims.example.com",
+		Domain:          "ims.example.com",
+		LocalIP:         net.IPv4(127, 0, 0, 1),
+		Registrar:       registrar.LocalAddr().String(),
+		AKAProvider:     stubAKA{},
+		EnableIPSec3GPP: &plainSIP,
+	}
+	svc, err := imscore.New(cfg)
+	if err != nil {
+		t.Fatalf("imscore.New: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	if err := svc.Register(ctx); err != nil {
+		t.Fatalf("imscore.Register: %v", err)
+	}
+	return NewAgent("dev-1", svc, nil)
+}
+
+func startVoiceTestRegistrar(t *testing.T) *net.UDPConn {
+	return startVoiceTestRegistrarWithInviteStatus(t, 200)
+}
+
+func startVoiceTestRegistrarWithInviteStatus(t *testing.T, inviteStatus int) *net.UDPConn {
+	return startVoiceTestRegistrarWithAnswer(t, inviteStatus, testIMSAnswerSDP)
+}
+
+func startVoiceTestRegistrarWithAnswer(t *testing.T, inviteStatus int, answerSDP string) *net.UDPConn {
+	t.Helper()
+	return startScriptedVoiceRegistrar(t, func(request string) (int, string, string) {
+		if strings.HasPrefix(request, "INVITE ") {
+			extra := "To: <sip:callee@ims.example.com>;tag=remote\r\nContact: <sip:callee@ims.example.com>\r\n"
+			if inviteStatus >= 200 && inviteStatus < 300 {
+				return inviteStatus, extra + "Content-Type: application/sdp\r\n", answerSDP
+			}
+			return inviteStatus, extra, ""
+		}
+		return 200, "", ""
+	})
+}
+
+func startScriptedVoiceRegistrar(t *testing.T, respond func(string) (int, string, string)) *net.UDPConn {
+	t.Helper()
+	conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)})
+	if err != nil {
+		t.Fatalf("ListenUDP: %v", err)
+	}
+	t.Cleanup(func() { _ = conn.Close() })
+	go func() {
+		buffer := make([]byte, 64*1024)
+		for {
+			n, remote, readErr := conn.ReadFromUDP(buffer)
+			if readErr != nil {
+				return
+			}
+			request := string(buffer[:n])
+			if strings.HasPrefix(request, "ACK ") {
+				continue
+			}
+			extra := ""
+			body := ""
+			status := 200
+			if strings.HasPrefix(request, "REGISTER ") {
+				extra = "P-Associated-URI: <sip:+15551234567@ims.example.com>\r\n"
+			}
+			if respond != nil {
+				status, extra, body = respond(request)
+				if strings.HasPrefix(request, "REGISTER ") && !strings.Contains(extra, "P-Associated-URI:") {
+					extra = "P-Associated-URI: <sip:+15551234567@ims.example.com>\r\n" + extra
+				}
+			}
+			response := fmt.Sprintf("SIP/2.0 %d %s\r\nVia: %s\r\nCall-ID: %s\r\nCSeq: %s\r\n%sContent-Length: %d\r\n\r\n%s",
+				status, imscore.SIPStatusText(status), voiceTestHeader(request, "Via"),
+				voiceTestHeader(request, "Call-ID"), voiceTestHeader(request, "CSeq"), extra, len(body), body)
+			_, _ = conn.WriteToUDP([]byte(response), remote)
+		}
+	}()
+	return conn
+}
+
+func newVoiceTestAgentWithInviteStatus(t *testing.T, status int) *Agent {
+	t.Helper()
+	registrar := startVoiceTestRegistrarWithInviteStatus(t, status)
+	plainSIP := false
+	svc, err := imscore.New(&imscore.IMSConfig{
+		DeviceID: "dev-reject", IMSI: "310260123456789",
+		IMPI: "310260123456789@ims.example.com", IMPU: "sip:310260123456789@ims.example.com",
+		Domain: "ims.example.com", LocalIP: net.IPv4(127, 0, 0, 1),
+		Registrar: registrar.LocalAddr().String(), AKAProvider: stubAKA{}, EnableIPSec3GPP: &plainSIP,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	if err := svc.Register(ctx); err != nil {
+		t.Fatal(err)
+	}
+	return NewAgent("dev-reject", svc, nil)
+}
+
+func voiceTestHeader(message, name string) string {
+	for _, line := range strings.Split(message, "\r\n") {
+		key, value, ok := strings.Cut(line, ":")
+		if ok && strings.EqualFold(strings.TrimSpace(key), name) {
+			return strings.TrimSpace(value)
+		}
+	}
+	return ""
+}
+
+// stubAKA is a deterministic AKA provider.
+type stubAKA struct{}
+
+func (stubAKA) CalculateAKA(rand16, autn16 []byte) (imscore.AKAResult, error) {
+	return imscore.AKAResult{
+		RES: []byte{0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33},
+		CK:  []byte{0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11},
+		IK:  []byte{0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22},
+	}, nil
+}
+
+func TestCallStateMachine(t *testing.T) {
+	agent := newTestAgent(t)
+	call := NewCall(agent, callstate.DirectionOutbound, "call-1", "+8613800000000")
+
+	if call.CallState() != callstate.StateInit {
+		t.Errorf("initial state = %s, want Init", call.CallState())
+	}
+	if err := call.TransitionChecked(callstate.StateEarlyMedia); err == nil {
+		t.Error("Init->EarlyMedia should be invalid")
+	}
+	for _, want := range []callstate.State{
+		callstate.StateCalling,
+		callstate.StateRinging,
+		callstate.StateEarlyMedia,
+		callstate.StatePreconditionWait,
+		callstate.StateConnected,
+		callstate.StateTerminating,
+		callstate.StateTerminated,
+	} {
+		if err := call.TransitionChecked(want); err != nil {
+			t.Fatalf("Transition(%s): %v", want, err)
+		}
+	}
+	if !call.IsTerminalState() {
+		t.Error("Terminated should be terminal")
+	}
+	if call.IsConnected() {
+		t.Error("ended call should not be connected")
+	}
+}
+
+func TestCallDuration(t *testing.T) {
+	agent := newTestAgent(t)
+	call := NewCall(agent, callstate.DirectionOutbound, "call-1", "13800000000")
+	call.SetStartTime(time.Now().Add(-5 * time.Second))
+	if d := call.CallDuration(); d < 4*time.Second || d > 6*time.Second {
+		t.Errorf("duration = %v, want ~5s", d)
+	}
+}
+
+func TestAgentDialLifecycle(t *testing.T) {
+	agent := newTestAgent(t)
+	if err := agent.StartCurrent(); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+	defer agent.Stop()
+
+	var got []string
+	agent.SetNotifier(func(ev events.Event) {
+		got = append(got, ev.Type())
+	})
+
+	call, err := agent.HandleClientInvite("+8613800000000", testClientSDP)
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	if call.CallState() != callstate.StateConnected || !call.IsACKSent() {
+		t.Errorf("state = %s ack=%t, want Connected with ACK", call.CallState(), call.IsACKSent())
+	}
+	if !agent.IsBusy() {
+		t.Error("agent should be busy after dial")
+	}
+	if err := agent.HangupCurrent(call.CallID()); err != nil {
+		t.Fatalf("Hangup: %v", err)
+	}
+	if call.CallState() != callstate.StateTerminated {
+		t.Errorf("state = %s, want Terminated after hangup", call.CallState())
+	}
+	if agent.IsBusy() {
+		t.Error("agent should not be busy after hangup")
+	}
+}
+
+func TestAgentSimulateCall(t *testing.T) {
+	imsMedia, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer imsMedia.Close()
+	answer := fmt.Sprintf("v=0\r\no=- 2 2 IN IP4 127.0.0.1\r\ns=ims\r\nc=IN IP4 127.0.0.1\r\nt=0 0\r\nm=audio %d RTP/AVP 0\r\n", imsMedia.LocalAddr().(*net.UDPAddr).Port)
+	agent := newVoiceTestAgent(t, startVoiceTestRegistrarWithAnswer(t, 200, answer))
+	if err := agent.StartCurrent(); err != nil {
+		t.Fatal(err)
+	}
+	defer agent.Stop()
+	call, err := agent.SimulateCallNumber("+8613800000000")
+	if err != nil {
+		t.Fatalf("SimulateCall: %v", err)
+	}
+	relay := call.RTPRelay()
+	if relay == nil || relay.IMSPort() <= 0 {
+		t.Fatalf("relay = %+v", relay)
+	}
+	if offer := call.imsLocalSDPValue(); strings.Contains(offer, "m=audio 0 ") || !strings.Contains(offer, fmt.Sprintf("m=audio %d RTP/AVP", relay.IMSPort())) {
+		t.Fatalf("simulated call offer has no real relay endpoint: %q", offer)
+	}
+	packet := make([]byte, 256)
+	if err := imsMedia.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	n, remote, err := imsMedia.ReadFromUDP(packet)
+	if err != nil {
+		t.Fatalf("read simulated RTP: %v", err)
+	}
+	if n != 172 || packet[1]&0x7f != 0 || remote.Port != relay.IMSPort() {
+		t.Fatalf("RTP n=%d pt=%d remote=%v relay_port=%d", n, packet[1]&0x7f, remote, relay.IMSPort())
+	}
+	refresh := imscore.SIPResponse{
+		StatusCode: 200,
+		Headers:    map[string]string{"Content-Type": "application/sdp"},
+		Body:       []byte(answer),
+	}
+	if err := agent.updateRemoteMedia(call, refresh); err != nil {
+		t.Fatalf("simulated media refresh: %v", err)
+	}
+	if err := agent.HangupCurrent(call.CallID()); err != nil {
+		t.Fatalf("Hangup: %v", err)
+	}
+}
+
+func TestAgentDialRejectionClearsActiveCall(t *testing.T) {
+	agent := newVoiceTestAgentWithInviteStatus(t, 486)
+	if err := agent.StartCurrent(); err != nil {
+		t.Fatal(err)
+	}
+	defer agent.Stop()
+	if _, err := agent.HandleClientInvite("+8613800000000", testClientSDP); err == nil || !strings.Contains(err.Error(), "486") {
+		t.Fatalf("Dial error = %v", err)
+	}
+	if agent.IsBusy() || agent.SnapshotCurrent().ActiveCall != nil {
+		t.Fatalf("rejected call remained active: %+v", agent.SnapshotCurrent())
+	}
+}
+
+func TestAgentStopReleasesCallWhenBYEFails(t *testing.T) {
+	agent := newTestAgent(t)
+	if err := agent.StartCurrent(); err != nil {
+		t.Fatal(err)
+	}
+	call, err := agent.HandleClientInvite("+8613800000000", testClientSDP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	installDialogFailure(agent, "forced write failure")
+	if err := agent.Stop(); err == nil || !strings.Contains(err.Error(), "forced write failure") {
+		t.Fatalf("Stop error = %v", err)
+	}
+	if agent.IsBusy() || call.noAnswerTimer != nil || call.Timers.SessionTimer != nil {
+		t.Fatalf("call was not released: state=%s busy=%t", call.CallState(), agent.IsBusy())
+	}
+	select {
+	case <-call.Done:
+	default:
+		t.Fatal("call done channel remains open")
+	}
+}
+
+func TestAgentHangupReleasesCallWhenBYEFails(t *testing.T) {
+	agent := newTestAgent(t)
+	if err := agent.StartCurrent(); err != nil {
+		t.Fatal(err)
+	}
+	defer agent.Stop()
+	call, err := agent.SimulateCallNumber("+8613800000000")
+	if err != nil {
+		t.Fatal(err)
+	}
+	installDialogFailure(agent, "forced BYE write failure")
+	if err := agent.HangupCurrent(call.CallID()); err == nil || !strings.Contains(err.Error(), "forced BYE write failure") {
+		t.Fatalf("Hangup error = %v", err)
+	}
+	if agent.IsBusy() || agent.SnapshotCurrent().ActiveCall != nil {
+		t.Fatalf("failed BYE left active call: %+v", agent.SnapshotCurrent())
+	}
+	select {
+	case <-call.Done:
+	default:
+		t.Fatal("failed BYE left call done channel open")
+	}
+}
+
+func TestAgentHandlesRemoteBYE(t *testing.T) {
+	agent := newTestAgent(t)
+	if err := agent.StartCurrent(); err != nil {
+		t.Fatal(err)
+	}
+	defer agent.Stop()
+	call, err := agent.HandleClientInvite("+8613800000000", testClientSDP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := agent.HandleInboundVoiceRequest(imscore.InboundVoiceRequest{
+		Method: "BYE", CallID: call.CallID(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !result.Handled || result.StatusCode != 200 || agent.IsBusy() || call.CallState() != callstate.StateTerminated {
+		t.Fatalf("result=%+v state=%s busy=%t", result, call.CallState(), agent.IsBusy())
+	}
+}
+
+func TestAgentHandlesEstablishedReinvite(t *testing.T) {
+	agent := newTestAgent(t)
+	if err := agent.StartCurrent(); err != nil {
+		t.Fatal(err)
+	}
+	defer agent.Stop()
+	call, err := agent.HandleClientInvite("+8613800000000", testClientSDP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := agent.HandleInboundVoiceRequest(imscore.InboundVoiceRequest{
+		Method: "INVITE", CallID: call.CallID(), ContentType: "application/sdp",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !result.Handled || result.StatusCode != 200 || call.CallState() != callstate.StateConnected {
+		t.Fatalf("result=%+v state=%s", result, call.CallState())
+	}
+}
+
+func TestAgentRejectsReinviteOfferWithoutMediaAnswer(t *testing.T) {
+	agent := newTestAgent(t)
+	if err := agent.StartCurrent(); err != nil {
+		t.Fatal(err)
+	}
+	defer agent.Stop()
+	call, err := agent.HandleClientInvite("+8613800000000", testClientSDP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := agent.HandleInboundVoiceRequest(imscore.InboundVoiceRequest{
+		Method: "INVITE", CallID: call.CallID(), ContentType: "application/sdp", Body: []byte("v=0\r\n"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !result.Handled || result.StatusCode != 488 || call.CallState() != callstate.StateConnected {
+		t.Fatalf("result=%+v state=%s", result, call.CallState())
+	}
+}
+
+func TestAgentInboundBusEventDoesNotRepublish(t *testing.T) {
+	bus := imscore.NewEventBus()
+	agent := NewAgentCurrent("dev-1", nil, bus)
+	bus.Subscribe(agent)
+	notified := 0
+	agent.SetNotifier(func(events.Event) { notified++ })
+	bus.Publish(&events.EventCallEnded{DevID: "dev-1", CallID: "call-1", Time: time.Now()})
+	if notified != 1 {
+		t.Fatalf("notifier calls = %d, want 1", notified)
+	}
+}
+
+func TestCallTimersStopAndDoneCloseOnce(t *testing.T) {
+	agent := newTestAgent(t)
+	call := NewCall(agent, callstate.DirectionOutbound, "call-timers", "+8613800000000")
+	for _, state := range []callstate.State{callstate.StateCalling, callstate.StateEarlyMedia, callstate.StateConnected} {
+		if err := call.TransitionChecked(state); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := call.StartOutboundNoAnswerTimerCurrent(time.Hour); err != nil {
+		t.Fatal(err)
+	}
+	call.applyVoiceSessionExpires("3600")
+	call.StartSessionTimer(func() {})
+	if err := call.EnsureTimerStoppedCurrent(); err != nil {
+		t.Fatal(err)
+	}
+	if call.noAnswerTimer != nil || call.Timers.SessionTimer != nil {
+		t.Fatal("call timers remain installed after cleanup")
+	}
+	call.CloseDone()
+	call.CloseDone()
+	select {
+	case <-call.Done:
+	default:
+		t.Fatal("call done channel remains open")
+	}
+}
+
+func TestSessionRefreshUsesRecoveredExpirySchedule(t *testing.T) {
+	tests := []struct {
+		expires time.Duration
+		want    time.Duration
+	}{
+		{expires: 30 * time.Minute, want: 15 * time.Minute},
+		{expires: 120 * time.Second, want: 110 * time.Second},
+		{expires: 5 * time.Second, want: 5 * time.Second},
+	}
+	for _, test := range tests {
+		if got := sessionRefreshDelay(test.expires); got != test.want {
+			t.Fatalf("sessionRefreshDelay(%s) = %s, want %s", test.expires, got, test.want)
+		}
+	}
+}
+
+func TestBuildIMSSessionUpdateUsesNegotiatedExpiry(t *testing.T) {
+	agent := newTestAgent(t)
+	call := NewCall(agent, callstate.DirectionOutbound, "call-refresh", "+8613800000000")
+	call.setVoiceDialog(&voiceSIPDialog{
+		localURI: "sip:local@ims.example", remoteURI: "sip:peer@ims.example",
+		remoteTarget: "sip:peer@edge.example", localAddress: "192.0.2.10:5060",
+		transport: "tcp", localTag: "local", remoteTag: "remote", cseq: 7, inviteCSeq: 7,
+	})
+	call.applyVoiceSessionExpires("120;refresher=uac")
+
+	request := buildIMSSessionUpdate(agent, call)
+	if !strings.HasPrefix(request, "UPDATE sip:peer@edge.example SIP/2.0") {
+		t.Fatalf("session refresh request line = %q", strings.Split(request, "\r\n")[0])
+	}
+	if voiceTestHeader(request, "CSeq") != "8 UPDATE" || voiceTestHeader(request, "Session-Expires") != "120;refresher=uac" {
+		t.Fatalf("session refresh headers = CSeq %q Session-Expires %q", voiceTestHeader(request, "CSeq"), voiceTestHeader(request, "Session-Expires"))
+	}
+	if voiceTestHeader(request, "Content-Type") != "" || !strings.HasSuffix(request, "Content-Length: 0\r\n\r\n") {
+		t.Fatalf("session refresh unexpectedly carries SDP: %q", request)
+	}
+}
+
+func TestAgentInboundAnswerRequiresRequestContext(t *testing.T) {
+	agent := newTestAgent(t)
+	call := NewCall(agent, callstate.DirectionInbound, "call-in", "+8613800000000")
+	if err := call.TransitionChecked(callstate.StateRinging); err != nil {
+		t.Fatalf("Transition(Alerting): %v", err)
+	}
+	agent.mu.Lock()
+	agent.calls[call.CallID()] = call
+	agent.activeCall = call
+	agent.mu.Unlock()
+
+	if err := agent.Answer(call.CallID()); err == nil || !strings.Contains(err.Error(), "client SDP") {
+		t.Fatalf("Answer error = %v", err)
+	}
+	if call.CallState() != callstate.StateRinging {
+		t.Errorf("state = %s, want Alerting", call.CallState())
+	}
+}
+
+func TestHandleClientInviteUsesRealTransaction(t *testing.T) {
+	agent := newTestAgent(t)
+	if err := agent.StartCurrent(); err != nil {
+		t.Fatal(err)
+	}
+	defer agent.Stop()
+	call, err := agent.HandleClientInvite("+8613800000000", testClientSDP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if call.CallState() != callstate.StateConnected || call.HasInviteFinalSeen() || !call.IsACKSent() {
+		t.Fatalf("state=%s final=%t ack=%t", call.CallState(), call.HasInviteFinalSeen(), call.IsACKSent())
+	}
+	if strings.Contains(call.ClientSDP(), "m=audio 0 ") || call.RTPRelay() == nil {
+		t.Fatalf("client SDP or relay is invalid: %q", call.ClientSDP())
+	}
+}
+
+func TestGatewayStartAllowsLaterDeviceRegistration(t *testing.T) {
+	gateway := NewGateway(nil)
+	if err := gateway.StartCurrent(); err != nil {
+		t.Fatal(err)
+	}
+	defer gateway.Stop()
+}
+
+func TestParseSDP(t *testing.T) {
+	sdp := "v=0\r\n" +
+		"o=- 123 456 IN IP4 10.0.0.1\r\n" +
+		"s=VoWiFi call\r\n" +
+		"c=IN IP4 10.0.0.1\r\n" +
+		"t=0 0\r\n" +
+		"m=audio 49170 RTP/AVP 96 97\r\n" +
+		"a=rtpmap:96 AMR-WB/16000/1\r\n" +
+		"a=rtpmap:97 telephone-event/8000\r\n" +
+		"a=fmtp:96 mode-set=0,1,2\r\n"
+	info, err := ParseSDP([]byte(sdp))
+	if err != nil {
+		t.Fatalf("ParseSDP: %v", err)
+	}
+	if info.MediaType != "audio" || info.MediaPort != 49170 {
+		t.Fatalf("media = %s:%d", info.MediaType, info.MediaPort)
+	}
+	codec := info.GetCodecByPT(96)
+	if codec == nil {
+		t.Fatal("codec 96 not found")
+	}
+	if codec.Name != "AMR-WB" || codec.ClockRate != 16000 {
+		t.Errorf("codec = %+v", codec)
+	}
+	if codec.Fmtp != "mode-set=0,1,2" {
+		t.Errorf("fmtp = %q", codec.Fmtp)
+	}
+	if addr := info.GetMediaAddress(); addr != "10.0.0.1:49170" {
+		t.Errorf("media addr = %q", addr)
+	}
+}
+
+func TestRewriteSDP(t *testing.T) {
+	sdp := "v=0\r\nc=IN IP4 10.0.0.1\r\nm=audio 49170 RTP/AVP 96\r\n"
+	out := RewriteSDP([]byte(sdp), "192.168.1.5", 50000)
+	if !strings.Contains(string(out), "c=IN IP4 192.168.1.5") {
+		t.Errorf("rewritten SDP missing new IP: %q", out)
+	}
+	if !strings.Contains(string(out), "m=audio 50000 RTP/AVP 96") {
+		t.Errorf("rewritten SDP missing new port: %q", out)
+	}
+}
+
+func TestBuildIMSInvite(t *testing.T) {
+	agent := newTestAgent(t)
+	call := NewCall(agent, callstate.DirectionOutbound, "call-1", "+8613800000000")
+	invite := BuildIMSInvite(agent, call)
+	if !strings.HasPrefix(invite, "INVITE sip:+8613800000000@") {
+		t.Errorf("invite = %q", invite)
+	}
+	if !strings.Contains(invite, "Call-ID: call-1") {
+		t.Errorf("invite missing Call-ID: %q", invite)
+	}
+	if strings.Contains(invite, "m=audio 0 ") ||
+		!strings.Contains(invite, "m=audio 12000 RTP/AVP 104 110 102 108 96 101") ||
+		strings.Contains(invite, "EVS") ||
+		strings.Contains(invite, "a=rtpmap:0 PCMU") ||
+		!strings.Contains(invite, "a=rtpmap:96 telephone-event/16000") ||
+		!strings.Contains(invite, "a=maxptime:240") {
+		t.Errorf("builder did not emit the recovered basic offer: %q", invite)
+	}
+	if !strings.Contains(invite, "P-Early-Media: supported") {
+		t.Errorf("INVITE missing P-Early-Media: %q", invite)
+	}
+	if !strings.Contains(invite, "Accept: "+voiceInviteAccept) {
+		t.Errorf("INVITE missing Accept: %q", invite)
+	}
+	if !strings.Contains(invite, "a=curr:qos local sendrecv") ||
+		strings.Contains(invite, "a=curr:qos local none") ||
+		!strings.Contains(invite, "Supported: "+voiceInviteSupported) ||
+		strings.Contains(invite, "Require: precondition") ||
+		voiceTestHeader(invite, "Session-Expires") != "" {
+		t.Errorf("INVITE qos/precondition/session-timer offer is not IR.92 reserved-local: %q", invite)
+	}
+	if !strings.Contains(invite, "Privacy: none") ||
+		!strings.Contains(invite, "Feature-Caps: "+voiceFeatureCaps) {
+		t.Errorf("INVITE missing Privacy/Feature-Caps: %q", invite)
+	}
+	if strings.Contains(invite, "History-Info:") {
+		t.Errorf("non-forwarded INVITE should not attach History-Info: %q", invite)
+	}
+}
+
+func TestBuildIMSInvitePrivacyIDWhenOIREnabled(t *testing.T) {
+	agent := newTestAgent(t)
+	call := NewCall(agent, callstate.DirectionOutbound, "oir-call", "+8613800000000")
+	call.SetRestrictCallerID(true)
+	invite := BuildIMSInvite(agent, call)
+	if !strings.Contains(invite, "Privacy: id") || strings.Contains(invite, "Privacy: none") {
+		t.Fatalf("OIR INVITE Privacy = %q", voiceTestHeader(invite, "Privacy"))
+	}
+}
+
+func TestBuildIMSInviteMatchesRegisteredCarrierProfile(t *testing.T) {
+	agent := &Agent{}
+	call := NewCall(agent, callstate.DirectionOutbound, "vohive-test", "+447942985429")
+	call.setVoiceDialog(&voiceSIPDialog{
+		localURI:  "sip:+447840844894@o2.co.uk",
+		remoteURI: "sip:+447942985429@o2.co.uk;user=phone", remoteTarget: "sip:+447942985429@o2.co.uk;user=phone",
+		contactURI:    "sip:binding@[2001:db8::10]:48554;ob",
+		contactHeader: `<sip:binding@[2001:db8::10]:48554;ob>;+g.3gpp.accesstype="wlan1";audio`,
+		localAddress:  "[2001:db8::10]:50309", transport: "tcp",
+		serviceRoute:   []string{"<sip:pcscf.example;lr>"},
+		securityVerify: "ipsec-3gpp;alg=hmac-sha-1-96", pani: "IEEE-802.11;country=GB",
+		userAgent: "test-agent", localTag: "local-tag", inviteBranch: "z9hG4bK-branch",
+		sessionID: "session-id", cseq: 10, inviteCSeq: 10,
+	})
+
+	invite := buildIMSInviteWithSDP(agent, call, "v=0\r\n")
+	checks := []string{
+		"INVITE sip:+447942985429@o2.co.uk;user=phone SIP/2.0",
+		"CSeq: 10 INVITE",
+		`Contact: <sip:binding@[2001:db8::10]:48554;ob>;+g.3gpp.accesstype="wlan1";audio`,
+		"Require: sec-agree", "Proxy-Require: sec-agree",
+		"Supported: " + voiceInviteSupported, "Allow: " + voiceInviteAllow,
+		"P-Preferred-Identity: <sip:+447840844894@o2.co.uk>", "Session-ID: session-id",
+	}
+	for _, value := range checks {
+		if !strings.Contains(invite, value) {
+			t.Fatalf("INVITE missing %q: %s", value, invite)
+		}
+	}
+	via := voiceTestHeader(invite, "Via")
+	if !strings.Contains(via, "SIP/2.0/TCP") || !strings.Contains(via, "[2001:db8::10]:50309") {
+		t.Fatalf("TCP INVITE Via = %q, want actual source port-c", via)
+	}
+	if strings.Contains(via, ":48554") {
+		t.Fatalf("TCP INVITE Via used port-s: %q", via)
+	}
+	for _, unwanted := range []string{"+sip.instance", "reg-id=", ";expires="} {
+		if strings.Contains(invite, unwanted) {
+			t.Fatalf("dialog INVITE copied registration Contact param %q: %s", unwanted, invite)
+		}
+	}
+}
+
+func TestBuildIMSCancelUsesStoredInitialInviteTransaction(t *testing.T) {
+	agent := &Agent{}
+	call := NewCall(agent, callstate.DirectionOutbound, "cancel-call", "+447942985429")
+	call.setVoiceDialog(&voiceSIPDialog{
+		localURI: "sip:local@ims.example", remoteURI: "sip:peer@ims.example",
+		remoteTarget: "sip:peer@ims.example", contactHeader: "<sip:local@192.0.2.10>",
+		localAddress: "192.0.2.10:5060", transport: "udp",
+		serviceRoute: []string{"<sip:initial-route.example;lr>"},
+		pani:         "3GPP-NR", userAgent: "VoHive-Test", localTag: "local-tag",
+		inviteBranch: "z9hG4bK-initial", cseq: 15, inviteCSeq: 15,
+	})
+	invite := buildIMSInviteWithSDP(agent, call, "v=0\r\n")
+	call.setOutboundInvite(invite)
+
+	dialog := call.voiceDialogSnapshot()
+	dialog.inviteBranch = "z9hG4bK-mutated"
+	dialog.inviteCSeq = 99
+	dialog.serviceRoute = []string{"<sip:mutated-route.example;lr>"}
+	call.setVoiceDialog(&dialog)
+
+	cancel, err := buildIMSCancel(agent, call)
+	if err != nil {
+		t.Fatalf("buildIMSCancel: %v", err)
+	}
+	for _, want := range []string{
+		"CANCEL sip:peer@ims.example SIP/2.0",
+		"branch=z9hG4bK-initial",
+		"Route: <sip:initial-route.example;lr>",
+		"CSeq: 15 CANCEL",
+		"Max-Forwards: 70",
+		"Content-Length: 0",
+		`Reason: RELEASE_CAUSE;cause=31;text="Normal unspecified"`,
+	} {
+		if !strings.Contains(cancel, want) {
+			t.Errorf("CANCEL missing %q: %s", want, cancel)
+		}
+	}
+	for _, unwanted := range []string{"z9hG4bK-mutated", "mutated-route", "Contact:", "P-Access-Network-Info:", "User-Agent:"} {
+		if strings.Contains(cancel, unwanted) {
+			t.Errorf("CANCEL contains %q: %s", unwanted, cancel)
+		}
+	}
+}
+
+func TestBuildIMSCalledPartyURIUsesAssociatedPublicDomain(t *testing.T) {
+	got := buildIMSCalledPartyURI(
+		"+44 7942 985429", "sip:+447840844894@o2.co.uk", "ims.mnc010.mcc234.3gppnetwork.org",
+	)
+	if got != "sip:+447942985429@o2.co.uk;user=phone" {
+		t.Fatalf("called party URI = %q", got)
+	}
+}
+
+func TestBuildIMSCalledPartyURIAddsPhoneContextForLocalNumber(t *testing.T) {
+	got := buildIMSCalledPartyURI(
+		"191", "sip:+447840844894@ims.mnc015.mcc234.3gppnetwork.org", "ims.mnc015.mcc234.3gppnetwork.org",
+	)
+	want := "sip:191@ims.mnc015.mcc234.3gppnetwork.org;user=phone;phone-context=ims.mnc015.mcc234.3gppnetwork.org"
+	if got != want {
+		t.Fatalf("local called party URI = %q, want %q", got, want)
+	}
+}
+
+func TestBuildIMSByeUsesLearnedContactAndRecordRoute(t *testing.T) {
+	agent := &Agent{}
+	call := NewCall(agent, callstate.DirectionOutbound, "bye-dialog", "+447700900001")
+	call.setVoiceDialog(&voiceSIPDialog{
+		localURI: "sip:local@ims.example", remoteURI: "sip:+447700900001@ims.example;user=phone",
+		remoteTarget: "sip:+447700900001@ims.example;user=phone",
+		contactHeader: "<sip:local@192.0.2.10:48554;ob>",
+		localAddress: "192.0.2.10:50309", transport: "tcp",
+		serviceRoute: []string{"<sip:orig@scscf.ims.example;lr>"},
+		localTag: "local-tag", cseq: 1, inviteCSeq: 1,
+	})
+	call.learnVoiceDialog(imscore.SIPResponse{
+		Headers: map[string]string{
+			"To":           "<sip:+447700900001@ims.example>;tag=remote",
+			"Contact":      "<sip:term@10.128.120.163:50600>",
+			"Record-Route": "<sip:10.128.120.163:50600;transport=tcp;lr>,<sip:scscf.example;lr>",
+		},
+	})
+	bye := BuildIMSBye(agent, call)
+	if !strings.HasPrefix(bye, "BYE sip:term@10.128.120.163:50600 SIP/2.0") {
+		t.Fatalf("BYE Request-URI = %q", strings.SplitN(bye, "\r\n", 2)[0])
+	}
+	if !strings.Contains(bye, "Route: <sip:scscf.example;lr>") ||
+		!strings.Contains(bye, "Route: <sip:10.128.120.163:50600;transport=tcp;lr>") {
+		t.Fatalf("BYE Route missing reversed Record-Route: %s", bye)
+	}
+	if strings.Contains(bye, "orig@scscf.ims.example") {
+		t.Fatalf("BYE stacked REGISTER Service-Route: %s", bye)
+	}
+}
+
+func TestBuildIMSBye(t *testing.T) {
+	agent := newTestAgent(t)
+	call := NewCall(agent, callstate.DirectionOutbound, "call-1", "+8613800000000")
+	bye := BuildIMSBye(agent, call)
+	if !strings.HasPrefix(bye, "BYE sip:+8613800000000@") {
+		t.Errorf("bye = %q", bye)
+	}
+	if !strings.Contains(bye, "CSeq: 2 BYE") {
+		t.Errorf("bye missing CSeq: %q", bye)
+	}
+	if !strings.Contains(bye, `Reason: RELEASE_CAUSE;cause=31;text="Normal unspecified"`) {
+		t.Errorf("bye missing RELEASE_CAUSE: %q", bye)
+	}
+}
+
+func TestGatewayLifecycle(t *testing.T) {
+	agent := newTestAgent(t)
+	gw := NewGateway(agent)
+	if err := gw.StartCurrent(); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+	defer gw.Stop()
+	if gw.GetAgent(agent.DeviceID()) != agent {
+		t.Error("gateway agent mismatch")
+	}
+	status := gw.DeviceStatusCurrent(agent.DeviceID())
+	if status["registered"] != true {
+		t.Errorf("status = %+v", status)
+	}
+	call, err := gw.SimulateCallNumber(agent.DeviceID(), "+8613800000000")
+	if err != nil {
+		t.Fatalf("SimulateCall: %v", err)
+	}
+	if call.RTPRelay() == nil || call.RTPRelay().IMSPort() <= 0 {
+		t.Fatalf("SimulateCall relay = %+v", call.RTPRelay())
+	}
+	if err := call.HangupCurrent(); err != nil {
+		t.Fatalf("Hangup: %v", err)
+	}
+}
+
+func TestExtractAndApplyPTMapping(t *testing.T) {
+	remote, _ := ParseSDP([]byte("v=0\r\nm=audio 100 RTP/AVP 96\r\na=rtpmap:96 AMR-WB/16000/1\r\n"))
+	client, _ := ParseSDP([]byte("v=0\r\nm=audio 200 RTP/AVP 8\r\na=rtpmap:8 AMR-WB/16000/1\r\n"))
+	mapping := codecPTMapping(remote, client)
+	if mapping[96] != 8 {
+		t.Errorf("mapping = %+v, want {96:8}", mapping)
+	}
+}

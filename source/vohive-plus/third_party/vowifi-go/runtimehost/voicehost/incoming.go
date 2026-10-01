@@ -1,0 +1,263 @@
+package voicehost
+
+import (
+	"context"
+	"errors"
+	"strings"
+	"time"
+
+	"github.com/iniwex5/vowifi-go/internal/vowifi/voice"
+)
+
+// IncomingCall describes a pending or renegotiated IMS call. OfferSDP points
+// to the local RTP relay and is safe to pass to the client media engine.
+type IncomingCall struct {
+	DeviceID          string
+	CallID            string
+	Caller            string
+	Callee            string
+	OfferSDP          string
+	ReceivedAt        time.Time
+	State             string
+	OriginalCalledURI string
+	HistoryInfo       []voice.HistoryInfoEntry
+}
+
+// AnswerRequest supplies the client media answer for an inbound call.
+type AnswerRequest struct {
+	DeviceID string
+	CallID   string
+	SDP      string
+}
+
+// AnswerResult describes a successfully established inbound call.
+type AnswerResult struct {
+	CallID   string
+	OfferSDP string
+	State    string
+}
+
+// RejectRequest selects a pending call and its SIP failure status.
+type RejectRequest struct {
+	DeviceID   string
+	CallID     string
+	StatusCode int
+}
+
+type incomingVoiceAgent interface {
+	SetIncomingCallHandler(func(IncomingCall))
+	IncomingCalls() []IncomingCall
+	AnswerIncomingCall(context.Context, string, string) (AnswerResult, error)
+	RejectIncomingCall(string, int) error
+}
+
+// SetIncomingCallHandler installs a callback for new calls and re-INVITE
+// offers. Polling consumers can use IncomingCalls instead.
+func (g *Gateway) SetIncomingCallHandler(handler func(IncomingCall)) {
+	if g == nil {
+		return
+	}
+	g.mu.Lock()
+	previous := g.incomingLegacy
+	g.incomingLegacy = nil
+	if handler != nil {
+		g.incomingLegacy = newIncomingSubscription(handler)
+	}
+	agents := make([]voiceAgent, 0, len(g.agents))
+	for _, agent := range g.agents {
+		agents = append(agents, agent)
+	}
+	deviceIDs := make([]string, 0, len(g.innerDevices))
+	for deviceID := range g.innerDevices {
+		deviceIDs = append(deviceIDs, deviceID)
+	}
+	g.mu.Unlock()
+	previous.close()
+	for _, agent := range agents {
+		g.bindIncomingHandlerCurrent(agent)
+	}
+	for _, deviceID := range deviceIDs {
+		bindIncomingVoiceAgent(g.internalAgent(deviceID), g.publishIncoming)
+	}
+}
+
+// SubscribeIncomingCalls adds an independent, cancelable incoming-call slot.
+// Delivery is buffered so a slow UI or notifier never blocks the SIP actor.
+func (g *Gateway) SubscribeIncomingCalls(handler func(IncomingCall)) func() {
+	if g == nil || handler == nil {
+		return func() {}
+	}
+	subscription := newIncomingSubscription(handler)
+	g.mu.Lock()
+	g.nextSubscriptionID++
+	id := g.nextSubscriptionID
+	if g.incomingSubscribers == nil {
+		g.incomingSubscribers = make(map[uint64]*incomingSubscription)
+	}
+	g.incomingSubscribers[id] = subscription
+	agents := make([]voiceAgent, 0, len(g.agents))
+	for _, agent := range g.agents {
+		agents = append(agents, agent)
+	}
+	deviceIDs := make([]string, 0, len(g.innerDevices))
+	for deviceID := range g.innerDevices {
+		deviceIDs = append(deviceIDs, deviceID)
+	}
+	g.mu.Unlock()
+	for _, agent := range agents {
+		g.bindIncomingHandlerCurrent(agent)
+	}
+	for _, deviceID := range deviceIDs {
+		bindIncomingVoiceAgent(g.internalAgent(deviceID), g.publishIncoming)
+	}
+	return func() {
+		g.mu.Lock()
+		if current := g.incomingSubscribers[id]; current == subscription {
+			delete(g.incomingSubscribers, id)
+		}
+		g.mu.Unlock()
+		subscription.close()
+	}
+}
+
+func (g *Gateway) publishIncoming(call IncomingCall) {
+	if g == nil || !g.markIncomingSeen(call.CallID) {
+		return
+	}
+	g.mu.RLock()
+	legacy := g.incomingLegacy
+	subscribers := make([]*incomingSubscription, 0, len(g.incomingSubscribers))
+	for _, subscription := range g.incomingSubscribers {
+		subscribers = append(subscribers, subscription)
+	}
+	g.mu.RUnlock()
+	legacy.enqueue(call)
+	for _, subscription := range subscribers {
+		subscription.enqueue(call)
+	}
+}
+
+func (g *Gateway) markIncomingSeen(callID string) bool {
+	callID = strings.TrimSpace(callID)
+	if callID == "" {
+		return true
+	}
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if g.incomingSeen == nil {
+		g.incomingSeen = make(map[string]struct{})
+	}
+	if _, exists := g.incomingSeen[callID]; exists {
+		return false
+	}
+	g.incomingSeen[callID] = struct{}{}
+	return true
+}
+
+// IncomingCalls returns the active inbound calls for a device.
+func (g *Gateway) IncomingCalls(deviceID string) ([]IncomingCall, error) {
+	if agent := g.internalAgent(deviceID); agent != nil {
+		return incomingCallsFromVoice(agent), nil
+	}
+	agent, err := g.incomingAgent(deviceID)
+	if err != nil {
+		return nil, err
+	}
+	return agent.IncomingCalls(), nil
+}
+
+// AnswerIncomingCall sends the client's SDP answer over the retained IMS
+// INVITE transaction and starts the RTP relay.
+func (g *Gateway) AnswerIncomingCall(ctx context.Context, request AnswerRequest) (AnswerResult, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	select {
+	case <-ctx.Done():
+		return AnswerResult{}, ctx.Err()
+	default:
+	}
+	if strings.TrimSpace(request.SDP) == "" {
+		return AnswerResult{}, errors.New("voicehost: client SDP is required")
+	}
+	if agent := g.internalAgent(request.DeviceID); agent != nil {
+		answer, err := agent.AnswerWithSDP(request.CallID, request.SDP)
+		return answerResultFromVoice(answer), err
+	}
+	agent, err := g.incomingAgent(request.DeviceID)
+	if err != nil {
+		return AnswerResult{}, err
+	}
+	return agent.AnswerIncomingCall(ctx, request.CallID, request.SDP)
+}
+
+// RejectIncomingCall sends a final non-2xx response for a pending call.
+func (g *Gateway) RejectIncomingCall(request RejectRequest) error {
+	status := request.StatusCode
+	if status == 0 {
+		status = 486
+	}
+	if agent := g.internalAgent(request.DeviceID); agent != nil {
+		return agent.Reject(request.CallID, status)
+	}
+	agent, err := g.incomingAgent(request.DeviceID)
+	if err != nil {
+		return err
+	}
+	return agent.RejectIncomingCall(request.CallID, status)
+}
+
+func (g *Gateway) incomingAgent(deviceID string) (incomingVoiceAgent, error) {
+	if g == nil {
+		return nil, errors.New("voicehost: nil gateway")
+	}
+	g.mu.RLock()
+	agent := g.agents[strings.TrimSpace(deviceID)]
+	g.mu.RUnlock()
+	incoming, ok := agent.(incomingVoiceAgent)
+	if !ok {
+		return nil, errors.New("voicehost: inbound voice is unavailable for device " + deviceID)
+	}
+	return incoming, nil
+}
+
+func (g *Gateway) bindIncomingHandlerCurrent(agent voiceAgent) {
+	incoming, ok := agent.(incomingVoiceAgent)
+	if !ok {
+		return
+	}
+	incoming.SetIncomingCallHandler(g.publishIncoming)
+}
+
+func bindIncomingVoiceAgent(agent *voice.Agent, handler func(IncomingCall)) {
+	if agent == nil {
+		return
+	}
+	agent.SetIncomingCallHandler(func(call voice.IncomingCall) {
+		if handler != nil {
+			handler(incomingCallFromVoice(call))
+		}
+	})
+}
+
+func incomingCallsFromVoice(agent *voice.Agent) []IncomingCall {
+	calls := agent.IncomingCalls()
+	result := make([]IncomingCall, 0, len(calls))
+	for _, call := range calls {
+		result = append(result, incomingCallFromVoice(call))
+	}
+	return result
+}
+
+func incomingCallFromVoice(call voice.IncomingCall) IncomingCall {
+	return IncomingCall{
+		DeviceID: call.DeviceID, CallID: call.CallID, Caller: call.Caller,
+		Callee: call.Callee, OfferSDP: call.OfferSDP, ReceivedAt: call.ReceivedAt, State: call.State,
+		OriginalCalledURI: call.OriginalCalledURI,
+		HistoryInfo:       append([]voice.HistoryInfoEntry(nil), call.HistoryInfo...),
+	}
+}
+
+func answerResultFromVoice(answer voice.InboundAnswer) AnswerResult {
+	return AnswerResult{CallID: answer.CallID, OfferSDP: answer.OfferSDP, State: answer.State}
+}

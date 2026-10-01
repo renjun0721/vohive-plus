@@ -1,0 +1,52 @@
+#!/usr/bin/lua
+local json = require "luci.jsonc"
+local fs = require "nixio.fs"
+local util = require "luci.util"
+local logs = require "vohive.logs"
+
+-- Fixed commands only. No command text or paths are accepted from the browser.
+local state_text = util.exec("timeout 4 docker inspect --format '{{json .State}}' vohive-plus 2>/dev/null")
+local state = json.parse(state_text)
+local listeners = util.exec("netstat -lntp 2>/dev/null")
+local ports = {}
+for line in listeners:gmatch("[^\n]+") do
+    local address, pid, process = line:match("^tcp%s+%d+%s+%d+%s+(%S+)%s+%S+%s+LISTEN%s+(%d+)/(%S+)")
+    local port = address and tonumber(address:match(":(%d+)$"))
+    if port and (port == 7575 or port == 7576 or process:match("vohive")) then
+        ports[#ports + 1] = { port = port, address = address, pid = tonumber(pid), process = process }
+    end
+end
+table.sort(ports, function(a, b) return a.port < b.port end)
+
+local files = {}
+for _, entry in ipairs({
+    { "服务启动脚本", "/etc/init.d/vohive" },
+    { "容器启动脚本", "/usr/local/bin/vohive-plus-run" },
+    { "配置文件", "/mnt/sata2-4/vohive-plus/config/config.yaml" },
+    { "数据目录", "/mnt/sata2-4/vohive-plus/data" }
+}) do
+    local stat = fs.stat(entry[2])
+    files[#files + 1] = { label = entry[1], path = entry[2], exists = stat ~= nil, size = stat and stat.size or 0, directory = stat and stat.type == "dir" or false }
+end
+
+local entries = {}
+local raw = util.exec("logread -e vohive 2>/dev/null | tail -n 200")
+for line in raw:gmatch("[^\n]+") do
+    entries[#entries + 1] = logs.parse(line)
+end
+
+io.write(json.stringify({
+    checked_at = os.time(),
+    available = state ~= nil,
+    running = state and state.Running or false,
+    restarting = state and state.Restarting or false,
+    paused = state and state.Paused or false,
+    health = state and state.Health and state.Health.Status or "unknown",
+    started_at = state and state.StartedAt or "",
+    pid = state and state.Pid or 0,
+    container = "vohive-plus",
+    ports = ports,
+    files = files,
+    logs = entries
+}))
+io.write("\n")

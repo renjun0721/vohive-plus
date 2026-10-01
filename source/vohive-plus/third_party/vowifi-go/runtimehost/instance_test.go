@@ -1,0 +1,222 @@
+package runtimehost
+
+import (
+	"context"
+	"errors"
+	"net"
+	"testing"
+
+	"github.com/iniwex5/vowifi-go/internal/vowifi/common"
+	"github.com/iniwex5/vowifi-go/runtimehost/messaging"
+)
+
+type stubService struct {
+	sentSMS     bool
+	ussd        string
+	registerErr error
+}
+
+func (s *stubService) SendSMSWithOptions(ctx context.Context, to, text string, opts SendOptions) (SendOutcome, error) {
+	s.sentSMS = true
+	return SendOutcome{Ref: "ref-1"}, nil
+}
+func (s *stubService) SendSMSWithResult(ctx context.Context, to, text string) (SendOutcome, error) {
+	return s.SendSMSWithOptions(ctx, to, text, SendOptions{})
+}
+func (s *stubService) GetSMSDeliveryStatus(ref string) (*DeliveryStatus, error) {
+	return &DeliveryStatus{State: "delivered"}, nil
+}
+func (s *stubService) SendUSSD(ctx context.Context, code string) (*USSDResult, error) {
+	s.ussd = code
+	return &USSDResult{Code: "0", Message: "ok"}, nil
+}
+func (s *stubService) ContinueUSSD(ctx context.Context, sessionID, input string) (*USSDResult, error) {
+	return &USSDResult{}, nil
+}
+func (s *stubService) CancelUSSD(ctx context.Context, sessionID string) error { return nil }
+func (s *stubService) Status() map[string]interface{}                         { return nil }
+func (s *stubService) StatusSnapshot() messaging.ServiceStatus                { return messaging.ServiceStatus{} }
+func (s *stubService) Stop(context.Context) error                             { return nil }
+func (s *stubService) TriggerRegisterImmediate(string)                        {}
+
+func TestInstanceStateAndService(t *testing.T) {
+	i := &Instance{}
+	if i.State() != (State{}) {
+		t.Error("initial state should be zero")
+	}
+	if i.Service() != nil {
+		t.Error("initial service should be nil")
+	}
+	svc := &stubService{}
+	i.setService(svc)
+	if i.Service() != svc {
+		t.Error("setService did not install the service")
+	}
+	i.setState(State{SessionState: "established"})
+	if i.State().SessionState != "established" {
+		t.Errorf("state = %+v", i.State())
+	}
+}
+
+func TestInstanceObservers(t *testing.T) {
+	i := &Instance{}
+	var got []Event
+	i.AddObserver(ObserverFunc(func(_ context.Context, ev Event) { got = append(got, ev) }))
+	i.updateState(func(state *State) { state.SessionState = "connecting" })
+	if len(got) != 1 || got[0].Detail != "connecting" {
+		t.Errorf("observer events = %+v", got)
+	}
+}
+
+func TestInstanceSMSDelegation(t *testing.T) {
+	ctx := context.Background()
+	i := &Instance{}
+	if _, err := i.SendSMSWithResult(ctx, "+8613800000000", "hi"); !errors.Is(err, errNoService) || !errors.Is(err, messaging.ErrSMSNotReady) {
+		t.Errorf("no-service err = %v", err)
+	}
+	svc := &stubService{}
+	i.setService(svc)
+	out, err := i.SendSMSWithResult(ctx, "+8613800000000", "hi")
+	if err != nil || out.Ref != "ref-1" || !svc.sentSMS {
+		t.Errorf("SendSMSWithResult = %+v err %v", out, err)
+	}
+	ds, err := i.GetSMSDeliveryStatus("ref-1")
+	if err != nil || ds.State != "delivered" {
+		t.Errorf("delivery status = %+v err %v", ds, err)
+	}
+	res, err := i.SendUSSD(ctx, "*100#")
+	if err != nil || svc.ussd != "*100#" || res.Code != "0" {
+		t.Errorf("USSD = %+v err %v", res, err)
+	}
+}
+
+type memoryService struct {
+	stubService
+	full *bool
+}
+
+func (s *memoryService) SetSMSMemoryFull(full bool) {
+	if s.full != nil {
+		*s.full = full
+	}
+}
+
+func TestInstanceSetSMSMemoryFull(t *testing.T) {
+	var full bool
+	instance := &Instance{}
+	instance.SetSMSMemoryFull(true)
+	if full {
+		t.Fatal("nil service should ignore memory-full")
+	}
+	instance.setService(&memoryService{full: &full})
+	instance.SetSMSMemoryFull(true)
+	if !full {
+		t.Fatal("SetSMSMemoryFull did not reach the IMS service")
+	}
+}
+
+func TestInstanceStop(t *testing.T) {
+	i := &Instance{}
+	svc := &stubService{}
+	i.setService(svc)
+	if err := i.Stop(context.Background()); err != nil {
+		t.Errorf("Stop = %v", err)
+	}
+	if err := i.Stop(context.Background()); err != nil {
+		t.Errorf("Stop (idempotent) = %v", err)
+	}
+}
+
+func TestInstanceStopReleasesIMSBeforeTunnel(t *testing.T) {
+	var order []string
+	tunnel := newLifecycleTunnel(nil)
+	tunnel.onShutdown = func() { order = append(order, "tunnel") }
+	service := &lifecycleIMS{onStop: func() { order = append(order, "ims") }}
+	instance := &Instance{tunnel: tunnel, service: lifecycleServiceAdapter{lifecycle: service}}
+	if err := instance.Stop(context.Background()); err != nil {
+		t.Fatalf("Stop: %v", err)
+	}
+	if len(order) != 2 || order[0] != "ims" || order[1] != "tunnel" {
+		t.Fatalf("cleanup order = %v", order)
+	}
+}
+
+func TestInstanceStopDeregistersBeforeCancelingRuntime(t *testing.T) {
+	var order []string
+	tunnel := newLifecycleTunnel(nil)
+	tunnel.onShutdown = func() { order = append(order, "tunnel") }
+	service := &recordingStopService{onStop: func() { order = append(order, "ims") }}
+	instance := &Instance{
+		cancel:  func() { order = append(order, "cancel") },
+		service: service,
+		tunnel:  tunnel,
+	}
+	if err := instance.Stop(context.Background()); err != nil {
+		t.Fatalf("Stop: %v", err)
+	}
+	want := []string{"ims", "cancel", "tunnel"}
+	if !reflectDeepEqualStrings(order, want) {
+		t.Fatalf("cleanup order = %v, want %v", order, want)
+	}
+}
+
+type recordingStopService struct {
+	stubService
+	onStop func()
+}
+
+func (s *recordingStopService) Stop(context.Context) error {
+	if s.onStop != nil {
+		s.onStop()
+	}
+	return nil
+}
+
+func reflectDeepEqualStrings(got, want []string) bool {
+	if len(got) != len(want) {
+		return false
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func TestTriggerMOBIKEUsesTunnelAndReportsFailure(t *testing.T) {
+	tunnel := newLifecycleTunnel(nil)
+	instance := &Instance{tunnel: tunnel}
+	if err := instance.TriggerMOBIKE("192.0.2.10", "198.51.100.20"); err != nil {
+		t.Fatalf("TriggerMOBIKE: %v", err)
+	}
+	if !tunnel.oldIP.Equal(net.ParseIP("192.0.2.10")) || !tunnel.newIP.Equal(net.ParseIP("198.51.100.20")) {
+		t.Fatalf("MOBIKE addresses old=%v new=%v", tunnel.oldIP, tunnel.newIP)
+	}
+	tunnel.updateErr = errors.New("update rejected")
+	if err := instance.TriggerMOBIKE("192.0.2.10", "198.51.100.21"); err == nil {
+		t.Fatal("TriggerMOBIKE hid tunnel failure")
+	}
+	state := instance.State()
+	if state.SessionState != "error" || state.IMSReady || state.DataPlaneUp {
+		t.Fatalf("state after MOBIKE failure = %+v", state)
+	}
+}
+
+func TestNewTraceID(t *testing.T) {
+	a, b := NewTraceID(), NewTraceID()
+	if len(a) != 16 || a == b {
+		t.Errorf("trace ids = %q %q", a, b)
+	}
+}
+
+func TestWithTraceIDBridgesRuntimeContext(t *testing.T) {
+	generated := WithTraceID(nil, "")
+	if traceID := common.TraceID(generated); len(traceID) != 16 {
+		t.Fatalf("generated runtime trace ID = %q", traceID)
+	}
+	explicit := WithTraceID(context.Background(), "runtime-trace")
+	if traceID := common.TraceID(explicit); traceID != "runtime-trace" {
+		t.Fatalf("explicit runtime trace ID = %q", traceID)
+	}
+}

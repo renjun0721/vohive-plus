@@ -1,0 +1,142 @@
+package modem
+
+import (
+	"errors"
+	"reflect"
+	"testing"
+	"time"
+)
+
+func TestHandleCMTIUsesIndicatedStorageForReadAndDelete(t *testing.T) {
+	m := newRunningTestManager(t)
+	validPDU := "079144872000302320048102020000625061028204401AD9775D0E72D7DBE2B21C949E8360B75A4E7683D16AB71B"
+
+	done := make(chan []string, 1)
+	go func() {
+		done <- respondToCommands(t, m, 5, func(req commandRequest) {
+			switch req.cmd {
+			case "AT+CPMS?":
+				req.respChan <- "\r\n+CPMS: \"SM\",0,10,\"SM\",0,10,\"SM\",0,10\r\n\r\nOK\r\n"
+			case `AT+CPMS="ME","ME","ME"`:
+				req.respChan <- "OK"
+			case "AT+CMGR=7":
+				req.respChan <- "\r\n+CMGR: 0,,38\r\n" + validPDU + "\r\n\r\nOK\r\n"
+			case "AT+CMGD=7":
+				req.respChan <- "OK"
+			case `AT+CPMS="SM","SM","SM"`:
+				req.respChan <- "OK"
+			default:
+				req.errChan <- nil
+			}
+		})
+	}()
+
+	m.handleURC(`+CMTI: "ME",7`)
+
+	var got []string
+	select {
+	case got = <-done:
+	case <-time.After(time.Second):
+		t.Fatal("timed out waiting for storage-aware CMTI handling")
+	}
+	want := []string{
+		"AT+CPMS?",
+		`AT+CPMS="ME","ME","ME"`,
+		"AT+CMGR=7",
+		"AT+CMGD=7",
+		`AT+CPMS="SM","SM","SM"`,
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("commands=%#v want %#v", got, want)
+	}
+}
+
+func TestHandleCommandDispatchesCMTIWithoutPollutingResponse(t *testing.T) {
+	m := newRunningTestManager(t)
+	m.port = &timeoutSerialPort{}
+	received := make(chan string, 1)
+	m.SetNewSMSHandler(func(index string) { received <- index })
+	m.rxChan <- rxMsg{Data: `+CMTI: "SM",9`}
+	m.rxChan <- rxMsg{Data: "+CSQ: 20,99"}
+	m.rxChan <- rxMsg{Data: "OK"}
+
+	req := commandRequest{
+		cmd:      "AT+CSQ",
+		respChan: make(chan string, 1),
+		errChan:  make(chan error, 1),
+		timeout:  time.Second,
+	}
+	m.handleCommand(req)
+
+	select {
+	case index := <-received:
+		if index != "9" {
+			t.Fatalf("CMTI index = %q, want 9", index)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("CMTI handler was not called")
+	}
+	if response := <-req.respChan; response != "+CSQ: 20,99" {
+		t.Fatalf("response = %q, want CSQ only", response)
+	}
+}
+
+func TestReadSMSRetainsMessageWhenIdentityNotReady(t *testing.T) {
+	m := newRunningTestManager(t)
+	checks := 0
+	m.SetSMSReadinessCheck(func() error {
+		checks++
+		return errors.New("identity unknown")
+	})
+
+	m.ReadAndProcessSMS("7")
+
+	if checks != 1 {
+		t.Fatalf("readiness checks=%d, want 1", checks)
+	}
+	if len(m.cmdChan) != 0 {
+		t.Fatalf("queued AT commands=%d, want no read or delete", len(m.cmdChan))
+	}
+}
+
+func TestSetSMSCUsesSharedATQueueAndRejectsInvalidNumber(t *testing.T) {
+	m := newRunningTestManager(t)
+	done := make(chan []string, 1)
+	go func() {
+		done <- respondToCommands(t, m, 1, func(req commandRequest) {
+			req.respChan <- "OK"
+		})
+	}()
+
+	if err := m.SetSMSC("+447802002606"); err != nil {
+		t.Fatalf("SetSMSC() error = %v", err)
+	}
+	commands := <-done
+	if !reflect.DeepEqual(commands, []string{`AT+CSCA="+447802002606"`}) {
+		t.Fatalf("commands = %v", commands)
+	}
+	if err := m.SetSMSC(`+44";AT+CFUN=1`); err == nil {
+		t.Fatal("SetSMSC() accepted command injection characters")
+	}
+}
+
+func TestReadSMSRetainsMessageWhenProcessorFails(t *testing.T) {
+	m := newRunningTestManager(t)
+	validPDU := "079144872000302320048102020000625061028204401AD9775D0E72D7DBE2B21C949E8360B75A4E7683D16AB71B"
+	m.SetSMSProcessor(func(sender, content string, timestamp time.Time) error {
+		return errors.New("database unavailable")
+	})
+
+	done := make(chan []string, 1)
+	go func() {
+		done <- respondToCommands(t, m, 1, func(req commandRequest) {
+			req.respChan <- "\r\n+CMGR: 0,,38\r\n" + validPDU + "\r\n\r\nOK\r\n"
+		})
+	}()
+	m.ReadAndProcessSMS("7")
+	commands := <-done
+
+	if !reflect.DeepEqual(commands, []string{"AT+CMGR=7"}) {
+		t.Fatalf("commands=%v, want read without delete", commands)
+	}
+}

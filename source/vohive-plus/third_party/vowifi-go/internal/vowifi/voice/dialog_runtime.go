@@ -1,0 +1,293 @@
+package voice
+
+import (
+	"errors"
+	"strings"
+
+	"github.com/iniwex5/vowifi-go/internal/vowifi/emergency"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/imscore"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/imsdialog"
+)
+
+type voiceSIPDialog struct {
+	localURI       string
+	remoteURI      string
+	remoteTarget   string
+	contactURI     string
+	contactHeader  string
+	localAddress   string
+	transport      string
+	serviceRoute   []string
+	securityVerify string
+	pani           string
+	userAgent      string
+	localTag       string
+	remoteTag      string
+	inviteBranch   string
+	sessionID      string
+	cseq           int
+	inviteCSeq     int
+}
+
+func (a *Agent) prepareVoiceDialog(call *Call, number string) error {
+	if a == nil || a.imsEndpoint() == nil || call == nil {
+		return errors.New("voice: IMS service is unavailable")
+	}
+	profile, err := a.registeredDialogProfile()
+	if err != nil {
+		return err
+	}
+	if a.dialog != nil {
+		ctx := a.dialog.Context()
+		profile = applyControllerDialogContext(profile, ctx)
+	}
+	remoteURI, err := a.outboundRemoteURI(number, profile)
+	if err != nil {
+		return err
+	}
+	initialCSeq := profile.InitialCSeq
+	if initialCSeq <= 0 {
+		initialCSeq = 1
+	}
+	call.setVoiceDialog(&voiceSIPDialog{
+		localURI: profile.LocalURI, remoteURI: remoteURI, remoteTarget: remoteURI,
+		contactURI: profile.ContactURI, contactHeader: profile.ContactHeader,
+		localAddress: profile.LocalAddress,
+		transport:    profile.Transport, serviceRoute: splitVoiceHeaderValues(profile.ServiceRoute),
+		securityVerify: profile.SecurityVerify, pani: profile.PANI, userAgent: profile.UserAgent,
+		localTag: voiceTag(), inviteBranch: voiceBranch(), sessionID: voiceSessionID(),
+		cseq: initialCSeq, inviteCSeq: initialCSeq,
+	})
+	return nil
+}
+
+func applyControllerDialogContext(profile imscore.SIPDialogProfile, ctx imsdialog.Context) imscore.SIPDialogProfile {
+	if value := strings.TrimSpace(ctx.IMPU); value != "" {
+		profile.LocalURI = value
+	}
+	if value := strings.TrimSpace(ctx.ServiceRoute); value != "" {
+		profile.ServiceRoute = value
+	}
+	if value := strings.TrimSpace(ctx.SecVerify); value != "" {
+		profile.SecurityVerify = value
+	}
+	if value := strings.TrimSpace(ctx.PAccessNetworkInfo); value != "" {
+		profile.PANI = value
+	}
+	if value := strings.TrimSpace(ctx.UserAgent); value != "" {
+		profile.UserAgent = value
+	}
+	return profile
+}
+
+func (a *Agent) outboundRemoteURI(number string, profile imscore.SIPDialogProfile) (string, error) {
+	if emergency.IsEmergencyDestination(number) {
+		if a == nil || !a.emergencyOriginatingEnabled() {
+			return "", emergency.ErrOriginatingDisabled
+		}
+		if urn := emergency.ServiceURNFor(number); urn != "" {
+			return urn, nil
+		}
+	}
+	if uri := absoluteVoiceURI(number); uri != "" {
+		return uri, nil
+	}
+	remoteURI := buildIMSCalledPartyURI(number, profile.LocalURI, profile.Domain)
+	if remoteURI == "" {
+		return "", errors.New("voice: callee is empty")
+	}
+	return remoteURI, nil
+}
+
+func absoluteVoiceURI(value string) string {
+	value = strings.Trim(strings.TrimSpace(value), "<>")
+	lower := strings.ToLower(value)
+	if strings.HasPrefix(lower, "sip:") || strings.HasPrefix(lower, "sips:") || strings.HasPrefix(lower, "tel:") {
+		return value
+	}
+	return ""
+}
+
+func (a *Agent) emergencyOriginatingEnabled() bool {
+	if a == nil {
+		return false
+	}
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+	return a.allowEmergencyCalls
+}
+
+// SetAllowEmergencyCalls enables packing and originating IMS emergency sessions.
+// Production VoWiFi leaves this off so 112/999/911 are never sent to a PSAP.
+func (a *Agent) SetAllowEmergencyCalls(allow bool) {
+	if a == nil {
+		return
+	}
+	a.mu.Lock()
+	a.allowEmergencyCalls = allow
+	a.mu.Unlock()
+}
+
+func (c *Call) setVoiceDialog(dialog *voiceSIPDialog) {
+	c.mu.Lock()
+	c.sipDialog = dialog
+	c.mu.Unlock()
+}
+
+func (c *Call) voiceDialogSnapshot() voiceSIPDialog {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	if c.sipDialog == nil {
+		return voiceSIPDialog{}
+	}
+	copy := *c.sipDialog
+	copy.serviceRoute = append([]string(nil), c.sipDialog.serviceRoute...)
+	return copy
+}
+
+func (c *Call) setOutboundInvite(request string) {
+	c.mu.Lock()
+	c.outboundInvite = request
+	c.mu.Unlock()
+}
+
+func (c *Call) outboundInviteSnapshot() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.outboundInvite
+}
+
+func (c *Call) advanceVoiceCSeq() voiceSIPDialog {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.sipDialog == nil {
+		return voiceSIPDialog{}
+	}
+	c.sipDialog.cseq++
+	copy := *c.sipDialog
+	copy.serviceRoute = append([]string(nil), c.sipDialog.serviceRoute...)
+	return copy
+}
+
+func (c *Call) advanceVoiceInviteCSeq() voiceSIPDialog {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.sipDialog == nil {
+		return voiceSIPDialog{}
+	}
+	c.sipDialog.cseq++
+	c.sipDialog.inviteCSeq = c.sipDialog.cseq
+	// RFC 3262: RSeq numbering is per INVITE transaction (per CSeq).
+	c.Timers.RSeq = 0
+	copy := *c.sipDialog
+	copy.serviceRoute = append([]string(nil), c.sipDialog.serviceRoute...)
+	return copy
+}
+
+func (c *Call) RestrictCallerID() bool {
+	if c == nil {
+		return false
+	}
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.restrictCallerID
+}
+
+func (c *Call) SetRestrictCallerID(enabled bool) {
+	if c == nil {
+		return
+	}
+	c.mu.Lock()
+	c.restrictCallerID = enabled
+	c.mu.Unlock()
+}
+
+func (c *Call) terminateEarlyDialog(toTag string) {
+	if c == nil {
+		return
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	toTag = strings.TrimSpace(toTag)
+	if toTag == "" {
+		return
+	}
+	delete(c.dialogPrecondition, toTag)
+}
+
+func (c *Call) noteDialogPrecondition(toTag string, required bool) {
+	if c == nil || strings.TrimSpace(toTag) == "" {
+		return
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.dialogPrecondition == nil {
+		c.dialogPrecondition = make(map[string]bool)
+	}
+	c.dialogPrecondition[toTag] = required
+}
+
+func (c *Call) dialogRequiresPrecondition(toTag string) bool {
+	if c == nil {
+		return false
+	}
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.dialogPrecondition[strings.TrimSpace(toTag)]
+}
+
+func (c *Call) learnVoiceDialog(response imscore.SIPResponse) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.sipDialog == nil {
+		return
+	}
+	c.sipDialog.remoteTag = voiceHeaderTag(voiceResponseHeader(response.Headers, "To"))
+	if contact := voiceHeaderURI(voiceResponseHeader(response.Headers, "Contact")); contact != "" {
+		c.sipDialog.remoteTarget = contact
+	}
+	routes := splitVoiceHeaderValues(voiceResponseHeader(response.Headers, "Record-Route"))
+	for left, right := 0, len(routes)-1; left < right; left, right = left+1, right-1 {
+		routes[left], routes[right] = routes[right], routes[left]
+	}
+	if len(routes) > 0 {
+		c.sipDialog.serviceRoute = routes
+	}
+}
+
+func voiceResponseHeader(headers map[string]string, name string) string {
+	for key, value := range headers {
+		if strings.EqualFold(key, name) {
+			return strings.TrimSpace(value)
+		}
+	}
+	return ""
+}
+
+func voiceHeaderTag(value string) string {
+	for _, parameter := range strings.Split(value, ";")[1:] {
+		name, tag, ok := strings.Cut(strings.TrimSpace(parameter), "=")
+		if ok && strings.EqualFold(name, "tag") {
+			return strings.Trim(strings.TrimSpace(tag), "\"")
+		}
+	}
+	return ""
+}
+
+func voiceHeaderURI(value string) string {
+	start, end := strings.IndexByte(value, '<'), strings.IndexByte(value, '>')
+	if start >= 0 && end > start {
+		return strings.TrimSpace(value[start+1 : end])
+	}
+	return strings.TrimSpace(strings.Split(value, ";")[0])
+}
+
+func splitVoiceHeaderValues(value string) []string {
+	var values []string
+	for _, item := range strings.Split(value, ",") {
+		if item = strings.TrimSpace(item); item != "" {
+			values = append(values, item)
+		}
+	}
+	return values
+}

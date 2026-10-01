@@ -1,0 +1,158 @@
+package voice
+
+import (
+	"errors"
+	"fmt"
+	"strings"
+
+	"github.com/emiago/sipgo/sip"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/emergency"
+	"github.com/iniwex5/vowifi-go/internal/vowifi/sipkit"
+)
+
+const (
+	voiceInviteSupported = "100rel, 199, timer, replaces, norefersub, early-session, sec-agree, precondition"
+	// TS 24.229 5.1.3.1: initial INVITE Accept must include SDP and the 3GPP
+	// IM CN subsystem XML body MIME type.
+	voiceInviteAccept = "application/sdp, application/3gpp-ims+xml"
+	voiceInviteAllow  = "OPTIONS, NOTIFY, INVITE, ACK, BYE, CANCEL, UPDATE, PRACK, REFER, INFO, MESSAGE"
+	voiceFeatureCaps  = `*;+g.3gpp.icsi-ref="urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel"`
+)
+
+// BuildIMSInvite builds the initial IMS INVITE with the registered route.
+func BuildIMSInvite(agent *Agent, call *Call) string {
+	return buildIMSInviteWithSDP(agent, call, "")
+}
+
+func buildIMSInviteWithSDP(agent *Agent, call *Call, sdp string) string {
+	request, _ := buildIMSInviteWithSDPChecked(agent, call, sdp)
+	return request
+}
+
+func buildIMSInviteWithSDPChecked(agent *Agent, call *Call, sdp string) (string, error) {
+	if agent == nil || call == nil {
+		return "", errors.New("voice: missing agent or call")
+	}
+	dialog := call.voiceDialogSnapshot()
+	if dialog.remoteURI == "" {
+		dialog = fallbackVoiceDialog(agent, call)
+		call.setVoiceDialog(&dialog)
+	}
+	if strings.TrimSpace(sdp) == "" {
+		sdp = generateBasicSDPCurrent(agent, call)
+	}
+	recipient, err := parseVoiceURI(dialog.remoteURI)
+	if err != nil {
+		return "", fmt.Errorf("voice: parse INVITE target: %w", err)
+	}
+	from, err := parseVoiceURI(dialog.localURI)
+	if err != nil {
+		return "", fmt.Errorf("voice: parse INVITE identity: %w", err)
+	}
+	options := voiceIMSRequestOptions(dialog, voiceInitialRequest{
+		callID: call.CallID(), from: from, to: recipient, sdp: sdp,
+		restrictCallerID: call.RestrictCallerID(),
+	})
+	request, err := sipkit.BuildIMSRequest(sip.INVITE, recipient, options)
+	if err != nil {
+		return "", fmt.Errorf("voice: build IMS INVITE: %w", err)
+	}
+	return request.String(), nil
+}
+
+type voiceInitialRequest struct {
+	callID           string
+	from             sip.Uri
+	to               sip.Uri
+	sdp              string
+	restrictCallerID bool
+}
+
+func voiceIMSRequestOptions(dialog voiceSIPDialog, input voiceInitialRequest) sipkit.IMSRequestOptions {
+	securityMode := "disabled"
+	if strings.TrimSpace(dialog.securityVerify) != "" {
+		securityMode = "enabled"
+	}
+	headers := make([]sip.Header, 0, 2)
+	if strings.TrimSpace(dialog.contactHeader) != "" {
+		headers = append(headers, sip.NewHeader("Contact", strings.TrimSpace(dialog.contactHeader)))
+	}
+	if strings.TrimSpace(dialog.sessionID) != "" {
+		headers = append(headers, sip.NewHeader("Session-ID", strings.TrimSpace(dialog.sessionID)))
+	}
+	headers = append(headers, sip.NewHeader("Accept", voiceInviteAccept))
+	headers = append(headers, sip.NewHeader("P-Early-Media", "supported"))
+	privacy := "none"
+	if input.restrictCallerID {
+		privacy = "id"
+	}
+	headers = append(headers, sip.NewHeader("Privacy", privacy))
+	headers = append(headers, sip.NewHeader("Feature-Caps", voiceFeatureCaps))
+	if emergency.IsEmergencyDestination(dialog.remoteURI) {
+		headers = append(headers, sip.NewHeader("Priority", "emergency"))
+	}
+	contentType := ""
+	if input.sdp != "" {
+		contentType = "application/sdp"
+	}
+	return sipkit.IMSRequestOptions{
+		Transport: dialog.transport, Branch: dialog.inviteBranch, FromURI: input.from, FromTag: dialog.localTag,
+		ToURI: input.to, CallID: input.callID, CSeq: uint32(dialog.inviteCSeq), Routes: dialog.serviceRoute,
+		Body: []byte(input.sdp), Kind: sipkit.RequestKindOutOfDialog, SecurityMode: securityMode,
+		AddRPort: true, OmitURITransport: true, AddPreferredService: true,
+		PreferredService: "urn:urn-7:3gpp-service.ims.icsi.mmtel", AddAcceptContact: true,
+		AcceptContact: `*;+g.3gpp.icsi-ref="urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel"`,
+		AddUserAgent:  strings.TrimSpace(dialog.userAgent) != "", UserAgent: dialog.userAgent,
+		// IR.92 2.2.8 / RFC 4028: Supported: timer is required. Session-Expires
+		// on the initial INVITE may be 1800 or omitted. Omitting it is allowed
+		// by the spec, not a partial alignment. This UAC omits it.
+		AddSupported: true, Supported: voiceInviteSupported, AddAllow: true, Allow: voiceInviteAllow,
+		PreferredIdentity: "<" + dialog.localURI + ">", SecurityVerify: dialog.securityVerify,
+		Runtime:     sipkit.IMSRuntimeSnapshot{PAccessNetworkInfo: dialog.pani, LocalAddr: dialog.localAddress, Transport: dialog.transport},
+		ContentType: contentType, Headers: headers,
+	}
+}
+
+func parseVoiceURI(value string) (sip.Uri, error) {
+	value = strings.TrimSpace(value)
+	if strings.HasPrefix(strings.ToLower(value), "urn:") {
+		return sip.Uri{Scheme: "urn", Host: strings.TrimSpace(value[4:])}, nil
+	}
+	var uri sip.Uri
+	if err := sip.ParseUri(value, &uri); err != nil {
+		return sip.Uri{}, err
+	}
+	return uri, nil
+}
+
+// BuildIMSCancel builds a CANCEL matching the initial INVITE transaction.
+func BuildIMSCancel(agent *Agent, call *Call) string {
+	request, _ := buildIMSCancel(agent, call)
+	return request
+}
+
+func buildIMSCancel(agent *Agent, call *Call) (string, error) {
+	if agent == nil || call == nil {
+		return "", errors.New("voice: missing agent or call")
+	}
+	invite := call.outboundInviteSnapshot()
+	if strings.TrimSpace(invite) == "" {
+		dialog := ensureBuilderVoiceDialog(agent, call)
+		dialog.cseq = dialog.inviteCSeq
+		invite = buildVoiceRequest(dialog, call.CallID(), "INVITE", dialog.inviteBranch, "")
+	}
+	message, err := sip.ParseMessage([]byte(invite))
+	if err != nil {
+		return "", fmt.Errorf("voice: parse initial INVITE: %w", err)
+	}
+	inviteRequest, ok := message.(*sip.Request)
+	if !ok {
+		return "", errors.New("voice: initial INVITE is not a request")
+	}
+	cancel, err := sipkit.BuildCancelFromInvite(inviteRequest)
+	if err != nil {
+		return "", fmt.Errorf("voice: build CANCEL from INVITE: %w", err)
+	}
+	cancel.AppendHeader(sip.NewHeader("Reason", `RELEASE_CAUSE;cause=31;text="Normal unspecified"`))
+	return cancel.String(), nil
+}

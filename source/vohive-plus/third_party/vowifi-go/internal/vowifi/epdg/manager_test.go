@@ -1,0 +1,106 @@
+package epdg
+
+import (
+	"context"
+	"errors"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/iniwex5/vowifi-go/engine/ikev2"
+	"github.com/iniwex5/vowifi-go/engine/swu"
+	"go.uber.org/zap"
+)
+
+func TestManagerStartsSessionWithConfiguredEPDG(t *testing.T) {
+	manager := newTestManager(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	session, err := manager.Start(ctx, "device-1", &swu.Config{EPDGAddr: "epdg.example.test"})
+	if err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+	if got := session.SnapshotMap()["epdg"]; got != "epdg.example.test" {
+		t.Fatalf("session ePDG = %v", got)
+	}
+	if _, exists := manager.Snapshot("device-1"); !exists {
+		t.Fatal("started session missing from snapshot")
+	}
+	if err := manager.Stop("device-1"); err != nil {
+		t.Fatalf("Stop: %v", err)
+	}
+	if _, exists := manager.Snapshot("device-1"); exists {
+		t.Fatal("stopped session remained in snapshot")
+	}
+}
+
+func TestManagerWaitReturnsSessionFailure(t *testing.T) {
+	manager := newTestManager(t)
+	if _, err := manager.Start(context.Background(), "broken", &swu.Config{}); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+	defer manager.Stop("broken")
+	_, err := manager.Wait(context.Background(), "broken", 2*time.Second)
+	if err == nil || !strings.HasPrefix(err.Error(), "ePDG 会话失败: ") {
+		t.Fatalf("Wait error = %v", err)
+	}
+}
+
+func TestManagerWaitPreservesIKEAuthNotify(t *testing.T) {
+	manager := newTestManager(t)
+	cause := &swu.IKEAuthError{NotifyType: ikev2.INTERNAL_ADDRESS_FAILURE}
+	_, err := manager.Start(context.Background(), "address-failure", &swu.Config{
+		EPDGAddr:         "192.0.2.1:500",
+		TransportFactory: func(_, _ string) (swu.Transport, error) { return nil, cause },
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { manager.Stop("address-failure") })
+	_, err = manager.Wait(context.Background(), "address-failure", 2*time.Second)
+	var rejection *swu.IKEAuthError
+	if !errors.Is(err, cause) || !errors.As(err, &rejection) || rejection.NotifyType != ikev2.INTERNAL_ADDRESS_FAILURE {
+		t.Fatalf("Wait lost IKE_AUTH cause: %v", err)
+	}
+	if ShouldRetryFreshTunnel(context.Background(), err) {
+		t.Fatal("address failure must not immediately retry as an establishment timeout")
+	}
+}
+
+func TestManagerWaitHonorsContextAndTimeout(t *testing.T) {
+	manager := newTestManager(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, err := manager.Wait(ctx, "missing", time.Second); !errors.Is(err, context.Canceled) {
+		t.Fatalf("context error = %v", err)
+	}
+	if _, err := manager.Wait(context.Background(), "missing", time.Millisecond); err == nil || !errors.Is(err, ErrEstablishmentTimeout) {
+		t.Fatalf("timeout error = %v", err)
+	}
+}
+
+func TestShouldRetryFreshTunnel(t *testing.T) {
+	ctx := context.Background()
+	if !ShouldRetryFreshTunnel(ctx, ErrEstablishmentTimeout) {
+		t.Fatal("timeout should retry")
+	}
+	canceled, cancel := context.WithCancel(ctx)
+	cancel()
+	if ShouldRetryFreshTunnel(canceled, ErrEstablishmentTimeout) {
+		t.Fatal("canceled context must not retry")
+	}
+	if ShouldRetryFreshTunnel(ctx, errors.New("ePDG 会话失败: auth failed")) {
+		t.Fatal("auth failure must not retry as a fresh tunnel")
+	}
+}
+
+func newTestManager(t *testing.T) *Manager {
+	t.Helper()
+	previous := zap.L()
+	t.Cleanup(func() { zap.ReplaceGlobals(previous) })
+	manager := New()
+	if manager == nil || manager.mgr == nil {
+		t.Fatal("New returned an uninitialized manager")
+	}
+	return manager
+}

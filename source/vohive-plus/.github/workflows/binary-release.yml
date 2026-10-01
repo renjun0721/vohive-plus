@@ -1,0 +1,311 @@
+name: Build Release Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version string used when manually triggered'
+        required: false
+        default: 'dev'
+      enable_upx:
+        description: 'Enable UPX compression (true/false)'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: binary-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  frontend:
+    name: Build frontend assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Build frontend assets
+        shell: bash
+        run: |
+          npm ci --prefix web
+          npm run build --prefix web
+
+      - name: Upload frontend dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: web/dist
+          if-no-files-found: error
+          retention-days: 1
+
+  build:
+    name: Build ${{ matrix.artifact_arch }}
+    runs-on: ubuntu-latest
+    needs: frontend
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goarch: amd64
+            goarm: ''
+            artifact_arch: amd64
+          - goarch: arm64
+            goarm: ''
+            artifact_arch: arm64
+          - goarch: arm
+            goarm: '7'
+            artifact_arch: armv7
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Prepare build vars
+        id: vars
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            VERSION="${GITHUB_REF_NAME}"
+          else
+            VERSION="${{ github.event.inputs.version || 'dev' }}"
+          fi
+          BUILDTIME="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          ENABLE_UPX_RAW="${{ github.event.inputs.enable_upx || 'true' }}"
+          case "${ENABLE_UPX_RAW}" in
+            true|1|yes|on) ENABLE_UPX=1 ;;
+            *) ENABLE_UPX=0 ;;
+          esac
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "buildtime=${BUILDTIME}" >> "${GITHUB_OUTPUT}"
+          echo "enable_upx=${ENABLE_UPX}" >> "${GITHUB_OUTPUT}"
+
+      - name: Download frontend dist
+        uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: web/dist
+
+      - name: Sync frontend dist for embed
+        shell: bash
+        run: |
+          rm -rf internal/web/dist
+          mkdir -p internal/web
+          cp -R web/dist internal/web/dist
+
+      - name: Build binary
+        shell: bash
+        run: |
+          mkdir -p dist
+          GOWORK=off CGO_ENABLED=0 GOOS=linux GOARCH=${{ matrix.goarch }} GOARM=${{ matrix.goarm }} \
+            go build -trimpath -buildvcs=false -tags "with_utls nomsgpack" \
+            -ldflags "-s -w -X 'github.com/yibaiba/hideck/internal/global.Version=${{ steps.vars.outputs.version }}' -X 'github.com/yibaiba/hideck/internal/global.BuildTime=${{ steps.vars.outputs.buildtime }}'" \
+            -o dist/hideck ./cmd/hideck
+
+      - name: Install UPX
+        if: ${{ steps.vars.outputs.enable_upx == '1' }}
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y upx-ucl || sudo apt-get install -y upx
+
+      - name: Compress with UPX
+        if: ${{ steps.vars.outputs.enable_upx == '1' }}
+        shell: bash
+        run: |
+          upx --best --lzma dist/hideck || upx -9 dist/hideck
+
+      - name: Package artifact
+        shell: bash
+        run: |
+          OUT="hideck_${{ steps.vars.outputs.version }}_linux_${{ matrix.artifact_arch }}"
+          mkdir -p out
+          cp dist/hideck "out/${OUT}"
+          (cd out && sha256sum "${OUT}" > "${OUT}.sha256")
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ matrix.artifact_arch }}
+          path: out/*
+          retention-days: 3
+
+  build-openwrt:
+    name: Build OpenWrt ${{ matrix.artifact_arch }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: frontend
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goarch: amd64
+            goarm: ''
+            musl_triple: ''
+            artifact_arch: amd64
+          - goarch: arm64
+            goarm: ''
+            musl_triple: aarch64-linux-musl
+            artifact_arch: arm64
+          - goarch: arm
+            goarm: '7'
+            musl_triple: arm-linux-musleabihf
+            artifact_arch: armv7
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Prepare build vars
+        id: vars
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            VERSION="${GITHUB_REF_NAME}"
+          else
+            VERSION="${{ github.event.inputs.version || 'dev' }}"
+          fi
+          BUILDTIME="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "buildtime=${BUILDTIME}" >> "${GITHUB_OUTPUT}"
+
+      - name: Install musl toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${{ matrix.musl_triple }}" ]; then
+            sudo apt-get update
+            sudo apt-get install -y musl-tools
+            echo "CC=musl-gcc" >> "${GITHUB_ENV}"
+            exit 0
+          fi
+          case "${{ matrix.goarch }}" in
+            arm64) zig_target=aarch64-linux-musl ;;
+            arm) zig_target=arm-linux-musleabihf ;;
+            *) echo "unsupported goarch ${{ matrix.goarch }}" >&2; exit 1 ;;
+          esac
+          curl -fsSL --connect-timeout 20 --max-time 120 --retry 3 --retry-delay 2 \
+            "https://ziglang.org/download/0.13.0/zig-linux-x86_64-0.13.0.tar.xz" \
+            | tar -C "$RUNNER_TEMP" -xJ
+          echo "$RUNNER_TEMP/zig-linux-x86_64-0.13.0" >> "${GITHUB_PATH}"
+          wrapper="$RUNNER_TEMP/musl-cc"
+          printf '#!/bin/sh\nexec "%s/zig-linux-x86_64-0.13.0/zig" cc -target %s "$@"\n' \
+            "$RUNNER_TEMP" "$zig_target" > "$wrapper"
+          chmod +x "$wrapper"
+          echo "CC=${wrapper}" >> "${GITHUB_ENV}"
+
+      - name: Download frontend dist
+        uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: web/dist
+
+      - name: Sync frontend dist for embed
+        shell: bash
+        run: |
+          rm -rf internal/web/dist
+          mkdir -p internal/web
+          cp -R web/dist internal/web/dist
+
+      - name: Build OpenWrt static binary
+        shell: bash
+        run: |
+          VERSION="${{ steps.vars.outputs.version }}" \
+          BUILD_TIME="${{ steps.vars.outputs.buildtime }}" \
+          GOARCH="${{ matrix.goarch }}" \
+          GOARM="${{ matrix.goarm }}" \
+          OUT="dist/hideck" \
+          sh packaging/openwrt/build.sh
+
+      - name: Package artifact
+        shell: bash
+        run: |
+          OUT="hideck_${{ steps.vars.outputs.version }}_openwrt_${{ matrix.artifact_arch }}"
+          mkdir -p out
+          cp dist/hideck "out/${OUT}"
+          (cd out && sha256sum "${OUT}" > "${OUT}.sha256")
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-openwrt-${{ matrix.artifact_arch }}
+          path: out/*
+          retention-days: 3
+
+  release:
+    name: Publish release assets
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - build-openwrt
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Prepare release vars
+        id: release_vars
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            RELEASE_VERSION="${GITHUB_REF_NAME}"
+          else
+            RELEASE_VERSION="${{ github.event.inputs.version || 'dev' }}"
+          fi
+          echo "release_version=${RELEASE_VERSION}" >> "${GITHUB_OUTPUT}"
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: binaries-*
+          merge-multiple: true
+          path: dist
+
+      - name: Write SHA256SUMS from uploaded binaries
+        shell: bash
+        run: |
+          cd dist
+          : > SHA256SUMS
+          for f in hideck_*; do
+            [ -f "$f" ] || continue
+            case "$f" in
+              *.sha256) continue ;;
+            esac
+            sha256sum "$f" >> SHA256SUMS
+          done
+          if [ ! -s SHA256SUMS ]; then
+            echo "SHA256SUMS is empty; no binaries found in dist/" >&2
+            ls -la
+            exit 1
+          fi
+          echo "SHA256SUMS:"
+          cat SHA256SUMS
+
+      - name: Publish to this GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_vars.outputs.release_version }}
+          files: dist/*
+          fail_on_unmatched_files: true
+          overwrite_files: true

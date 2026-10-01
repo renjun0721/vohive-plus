@@ -1,0 +1,22 @@
+server:
+  debug: false
+  port: 7575
+  https_enabled: false
+  https_port: 7576
+  webrtc_udp_address: ":7580"
+
+system:
+  openwrt_dynamic_interfaces: true
+
+web:
+  username: admin
+  password: admin
+
+devices: []
+
+vowifi:
+  enabled: false
+
+webhook:
+  enabled: false
+

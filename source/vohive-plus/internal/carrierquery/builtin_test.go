@@ -1,0 +1,97 @@
+package carrierquery
+
+import "testing"
+
+func TestBuiltInRulesCoverProductionPresets(t *testing.T) {
+	expected := []struct{ mcc, mnc, id string }{
+		{"530", "24", "2degrees_nz_53024"},
+		{"520", "01", "ais_th_52001"}, {"520", "03", "ais_th_52003"},
+		{"310", "280", "att_310280"},
+		{"310", "410", "att_310410"},
+		{"454", "12", "cmhk_45412"}, {"454", "13", "cmhk_45413"},
+		{"454", "000", "csl_454000"},
+		{"234", "33", "cteuk_23433"}, {"515", "66", "dito_51566"},
+		{"440", "10", "docomo_44010"},
+		{"234", "30", "ee_uk_23430"}, {"234", "31", "ee_uk_23431"}, {"234", "32", "ee_uk_23432"},
+		{"248", "02", "elisa_ee_24802"},
+		{"234", "10", "giffgaff_23410"}, {"515", "02", "globe_ph_51502"},
+		{"502", "12", "hotlink_my_50212"}, {"440", "51", "kddi_44051"},
+		{"204", "08", "kpn_nl_20408"},
+		{"234", "87", "lebara_uk_23487"}, {"234", "26", "lycamobile_uk_23426"},
+		{"621", "30", "mtn_ng_62130"},
+		{"262", "03", "o2_de_26203"}, {"262", "07", "o2_de_26207"},
+		{"530", "01", "one_nz_53001"}, {"234", "25", "oneglobal_23425"},
+		{"208", "01", "orange_fr_20801"},
+		{"515", "03", "smart_ph_51503"},
+		{"440", "20", "softbank_44020"},
+		{"530", "05", "spark_nz_53005"},
+		{"228", "002", "sunrise_22802"}, {"262", "01", "telekom_de_26201"},
+		{"454", "003", "three_hk_454003"},
+		{"234", "020", "three_uk_234020"}, {"310", "240", "tmobile_310240"},
+		{"310", "260", "tmobile_310260"},
+		{"262", "02", "vodafone_de_26202"},
+		{"204", "04", "vodafone_nl_20404"},
+		{"234", "15", "vodafone_uk_23415"},
+		{"440", "00", "ymobile_44000"},
+	}
+
+	rules := BuiltInRules()
+	if len(rules) != len(expected) {
+		t.Fatalf("BuiltInRules() count = %d, want %d", len(rules), len(expected))
+	}
+	for _, item := range expected {
+		rule, ok := FindBuiltIn(item.mcc, item.mnc)
+		if !ok || rule.ID != item.id {
+			t.Errorf("FindBuiltIn(%s, %s) = %q/%v, want %q/true", item.mcc, item.mnc, rule.ID, ok, item.id)
+			continue
+		}
+		if err := rule.Validate(); err != nil {
+			t.Errorf("rule %s invalid: %v", rule.ID, err)
+		}
+	}
+}
+
+func TestBuiltInRulesReturnDefensiveCopies(t *testing.T) {
+	rules := BuiltInRules()
+	rules[0].ExpectedSenders[0] = "changed"
+	rule, _ := FindBuiltIn("530", "24")
+	if rule.ExpectedSenders[0] == "changed" {
+		t.Fatal("BuiltInRules() exposed mutable registry state")
+	}
+}
+
+func TestCTExcelRuleDoesNotOverstateHistoricalEvidence(t *testing.T) {
+	rule, ok := FindBuiltIn("234", "33")
+	if !ok {
+		t.Fatal("CTExcel rule not found")
+	}
+	if rule.EvidenceType != projectObservation {
+		t.Fatalf("EvidenceType = %q, want %q", rule.EvidenceType, projectObservation)
+	}
+	if rule.CostStatus != costUnknown {
+		t.Fatalf("CostStatus = %q, want %q", rule.CostStatus, costUnknown)
+	}
+	if len(rule.Limitations) == 0 {
+		t.Fatal("CTExcel observation must retain an explicit limitation")
+	}
+}
+
+func TestRuleValidationRejectsInvalidParser(t *testing.T) {
+	rule := BuiltInRules()[0]
+	rule.ID = "custom-rule"
+	rule.BuiltIn = false
+	rule.ParserPattern = "("
+	if err := rule.Validate(); err == nil {
+		t.Fatal("Validate() accepted invalid RE2 pattern")
+	}
+}
+
+func TestRuleValidationRejectsSMSReplyWithoutExpectedSender(t *testing.T) {
+	rule := BuiltInRules()[0]
+	rule.ID = "custom-rule"
+	rule.BuiltIn = false
+	rule.ExpectedSenders = []string{"", "  "}
+	if err := rule.Validate(); err == nil {
+		t.Fatal("Validate() accepted a reply rule that cannot correlate inbound SMS")
+	}
+}

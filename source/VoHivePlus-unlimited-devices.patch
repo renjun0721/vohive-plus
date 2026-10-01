@@ -1,0 +1,200 @@
+diff --git a/PERSONAL-NOTICE.md b/PERSONAL-NOTICE.md
+index 0b8b851..50de9db 100644
+--- a/PERSONAL-NOTICE.md
++++ b/PERSONAL-NOTICE.md
+@@ -1,6 +1,6 @@
+ # VoHive Plus 个人版
+ 
+-本版本由用户授权，为其个人 iStoreOS 环境定制。版本：0.1.1-personal-classic，2026-10-01。
++本版本由用户授权，为其个人 iStoreOS 环境定制。版本：0.1.2-personal-classic，2026-10-01。
+ 
+ 基础源码来自 [HiDeck](https://github.com/yibaiba/hideck)，固定提交 `3fd3d6aaf55924c338c2cf3f092e1af1f588d152`（v2.1.23 之后的源码快照）。HiDeck 继承 VoHive，项目原有作者声明、LICENSE 与 THIRD_PARTY_NOTICES.md 均保留；third_party 中的组件仍适用各自的许可，包括 vowifi-go 的 AGPL-3.0。
+ 
+@@ -9,3 +9,5 @@
+ 个人版以原版 VoHive UI 与布局为基础增加功能。前端基线为 VoHive 提交 `f240894e763cf7f0cf74c88562bb9b55f0d573b1`；保留原侧栏、首页统计与设备卡片、设备列表和详情页、短信三栏、代理页、登录和系统设置布局，并保留升级后的后台与数据。新增通话、自动任务、指令与余额入口，以及 Telegram/QQ 编辑器、只读环境诊断。个人版新增：无周期确认弹窗的控制台启动、关闭网页自卸载、独立 SQLite 副本迁移、登录保护的环境诊断、AMR/AMR-WB/MP3 库检测，以及避免官方镜像覆盖个人定制版的更新提示。短信、eSIM、电话、代理、通知、任务等主功能来自完整 HiDeck 源码。按用户选择，设置页只展示 Telegram 和 QQ Bot 提醒；其余提醒关闭，相关源码仍保留以便后续维护。
+ 
+ 本说明不替代或变更任何原有许可。分发源码时应一并保留上游许可与作者声明；本次交付只用于用户的个人环境。
++
++0.1.2：个人版设备配额设为无限制（API device_limit=0），统一解除添加、启动、重扫、重连中的设备数量检查；前端按原有逻辑隐藏配额标签。重复设备和硬件有效性检查继续保留。
+diff --git a/build-personal.sh b/build-personal.sh
+index f05af55..7a1897a 100644
+--- a/build-personal.sh
++++ b/build-personal.sh
+@@ -11,5 +11,5 @@ cd ..
+ mkdir -p internal/web/dist
+ cp -R web/dist/. internal/web/dist/
+ mkdir -p personal-dist
+-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod=readonly -trimpath -buildvcs=false -tags 'with_utls nomsgpack' -ldflags "-s -w -X github.com/yibaiba/hideck/internal/global.Version=0.1.1-personal-classic -X github.com/yibaiba/hideck/internal/global.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -o personal-dist/vohive-plus_linux_amd64 ./cmd/hideck
++CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod=readonly -trimpath -buildvcs=false -tags 'with_utls nomsgpack' -ldflags "-s -w -X github.com/yibaiba/hideck/internal/global.Version=0.1.2-personal-classic -X github.com/yibaiba/hideck/internal/global.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -o personal-dist/vohive-plus_linux_amd64 ./cmd/hideck
+ echo 'Run the binary inside the codec-enabled container runtime, not directly on musl iStoreOS.'
+diff --git a/internal/api/personal_device_limit_test.go b/internal/api/personal_device_limit_test.go
+new file mode 100644
+index 0000000..e1931c5
+--- /dev/null
++++ b/internal/api/personal_device_limit_test.go
+@@ -0,0 +1,47 @@
++package api
++
++import (
++	"encoding/json"
++	"fmt"
++	"github.com/gin-gonic/gin"
++	"github.com/yibaiba/hideck/internal/config"
++	"github.com/yibaiba/hideck/internal/device"
++	"net/http"
++	"net/http/httptest"
++	"testing"
++	"time"
++)
++
++func TestPersonalDeviceConfigAdditionBeyondFiveAllowed(t *testing.T) {
++	for _, count := range []int{5, 6, 12, 1000} {
++		configs := make([]config.DeviceConfig, count)
++		for i := range configs {
++			configs[i].ID = fmt.Sprintf("device-%d", i)
++		}
++		if err := validateFreeDeviceConfigLimit(configs); err != nil {
++			t.Fatalf("count %d: %v", count, err)
++		}
++	}
++}
++
++func TestPersonalDeviceListReportsUnlimitedQuota(t *testing.T) {
++	gin.SetMode(gin.TestMode)
++	server := &Server{pool: device.NewPool(&config.Config{}), auth: config.WebConfig{Username: "admin", Password: "fixture-secret"}}
++	router := gin.New()
++	router.GET("/api/devices", server.authMiddleware(), server.handleDeviceMgmtList)
++	request := httptest.NewRequest(http.MethodGet, "/api/devices", nil)
++	request.Header.Set("Authorization", "Bearer "+testSessionToken(t, "fixture-secret", time.Now().Add(time.Hour)))
++	response := httptest.NewRecorder()
++	router.ServeHTTP(response, request)
++	if response.Code != http.StatusOK {
++		t.Fatalf("status %d", response.Code)
++	}
++	var body map[string]json.RawMessage
++	if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
++		t.Fatal(err)
++	}
++	quota, exists := body["device_limit"]
++	if !exists || string(quota) != "0" {
++		t.Fatalf("unlimited quota = %s", quota)
++	}
++}
+diff --git a/internal/device/device_limit.go b/internal/device/device_limit.go
+index eda679b..f66c3d1 100644
+--- a/internal/device/device_limit.go
++++ b/internal/device/device_limit.go
+@@ -7,10 +7,12 @@ import (
+ 	"github.com/yibaiba/hideck/internal/config"
+ )
+ 
+-const DefaultFreeDeviceLimit = 5
++// Zero means unlimited in the personal edition. The API keeps the existing
++// device_limit field; the frontend hides the quota badge for this value.
++const DefaultFreeDeviceLimit = 0
+ 
+ func FreeDeviceLimitReached(count int) bool {
+-	return count >= DefaultFreeDeviceLimit
++	return DefaultFreeDeviceLimit > 0 && count >= DefaultFreeDeviceLimit
+ }
+ 
+ func FreeDeviceAddLimitMessage() string {
+@@ -22,6 +24,9 @@ func FreeDeviceWorkerLimitMessage() string {
+ }
+ 
+ func FreeDeviceLimitAllowsConfiguredDevice(devices []config.DeviceConfig, deviceID string) bool {
++	if DefaultFreeDeviceLimit <= 0 {
++		return true
++	}
+ 	deviceID = strings.TrimSpace(deviceID)
+ 	if deviceID == "" {
+ 		return true
+diff --git a/internal/device/pool_device_limit_test.go b/internal/device/pool_device_limit_test.go
+index 60ad4bc..856bbf7 100644
+--- a/internal/device/pool_device_limit_test.go
++++ b/internal/device/pool_device_limit_test.go
+@@ -9,57 +9,51 @@ import (
+ 	"github.com/yibaiba/hideck/internal/config"
+ )
+ 
+-// TestPoolAddWorkerFromConfigRejectsFourthWorkerBeforeHardwareInit 测试当设备数量达到限制时，添加新设备应该被限额策略拒绝
+-func TestPoolAddWorkerFromConfigRejectsFourthWorkerBeforeHardwareInit(t *testing.T) {
++// A sixth worker must reach real hardware validation rather than the old quota.
++func TestPersonalPoolSixthWorkerReachesHardwareValidation(t *testing.T) {
+ 	p := NewPool(&config.Config{})
+-	for i := 1; i <= DefaultFreeDeviceLimit; i++ {
++	defer p.cancel()
++	for i := 1; i <= 5; i++ {
+ 		id := fmt.Sprintf("dev%d", i)
+ 		p.workers[id] = &Worker{ID: id, Config: config.DeviceConfig{ID: id}}
+ 	}
+-
+-	// 使用超过限制的额外设备 ID（如 dev5），触发限额策略
+-	extraID := fmt.Sprintf("dev%d", DefaultFreeDeviceLimit+1)
+-	_, err := p.AddWorkerFromConfig(config.DeviceConfig{ID: extraID})
+-	if err == nil {
+-		t.Fatal("AddWorkerFromConfig() error = nil, want device limit error")
+-	}
+-	if !strings.Contains(err.Error(), FreeDeviceWorkerLimitMessage()) {
+-		t.Fatalf("AddWorkerFromConfig() error = %q, want %q", err.Error(), FreeDeviceWorkerLimitMessage())
++	missing := t.TempDir() + "/missing-qmi-control"
++	_, err := p.AddWorkerFromConfig(config.DeviceConfig{ID: "dev6", DeviceBackend: "qmi", ControlDevice: missing})
++	if err == nil || !strings.Contains(err.Error(), missing) {
++		t.Fatalf("sixth worker must reach missing hardware validation, got %v", err)
+ 	}
+-	if len(p.workers) != DefaultFreeDeviceLimit {
+-		t.Fatalf("worker count = %d, want %d", len(p.workers), DefaultFreeDeviceLimit)
++	if len(p.workers) != 5 || p.rebuilding["dev6"] {
++		t.Fatal("failed hardware initialization left a worker or rebuilding reservation")
+ 	}
+ }
+ 
+-// TestPoolAddWorkerFromConfigKeepsExistingDeviceErrorBeforeLimitError 测试即使达到设备限制，当尝试添加一个已存在的同名设备时，应该优先返回“设备已存在”错误而非限制错误
+-func TestPoolAddWorkerFromConfigKeepsExistingDeviceErrorBeforeLimitError(t *testing.T) {
++func TestPersonalPoolStillRejectsDuplicateDevice(t *testing.T) {
+ 	p := NewPool(&config.Config{})
+-	for i := 1; i <= DefaultFreeDeviceLimit; i++ {
++	defer p.cancel()
++	for i := 1; i <= 6; i++ {
+ 		id := fmt.Sprintf("dev%d", i)
+ 		p.workers[id] = &Worker{ID: id, Config: config.DeviceConfig{ID: id}}
+ 	}
+-
+ 	_, err := p.AddWorkerFromConfig(config.DeviceConfig{ID: "dev1"})
+-	if err == nil {
+-		t.Fatal("AddWorkerFromConfig() error = nil, want existing device error")
+-	}
+-	if !strings.Contains(err.Error(), "设备已存在") {
+-		t.Fatalf("AddWorkerFromConfig() error = %q, want existing device error", err.Error())
++	if err == nil || !strings.Contains(err.Error(), "设备已存在") {
++		t.Fatalf("duplicate must remain rejected, got %v", err)
+ 	}
+ }
+ 
+-// TestFreeDeviceLimitAllowsRebuildAfterRemovingWorker 测试移除某个设备后，已使用的配额应被释放，从而允许重新添加/启动设备
+-func TestFreeDeviceLimitAllowsRebuildAfterRemovingWorker(t *testing.T) {
+-	p := NewPool(&config.Config{})
+-	for i := 1; i <= DefaultFreeDeviceLimit; i++ {
+-		id := fmt.Sprintf("dev%d", i)
+-		p.workers[id] = &Worker{ID: id, Config: config.DeviceConfig{ID: id}}
++func TestPersonalConfiguredDevicesHaveNoCountLimit(t *testing.T) {
++	devices := make([]config.DeviceConfig, 12)
++	for i := range devices {
++		devices[i].ID = fmt.Sprintf("dev%d", i+1)
+ 	}
+-	if err := p.RemoveWorker("dev1"); err != nil {
+-		t.Fatalf("RemoveWorker() error = %v", err)
++	for _, d := range devices {
++		if !FreeDeviceLimitAllowsConfiguredDevice(devices, d.ID) {
++			t.Fatalf("configured device %s excluded by quota", d.ID)
++		}
+ 	}
+-	if FreeDeviceLimitReached(len(p.workers)) {
+-		t.Fatalf("FreeDeviceLimitReached(%d) = true, want false after removal", len(p.workers))
++	for _, count := range []int{0, 4, 5, 6, 12, 1000} {
++		if FreeDeviceLimitReached(count) {
++			t.Fatalf("quota reached at %d", count)
++		}
+ 	}
+ }
+ 
