@@ -14,3 +14,8 @@ snapshot/
 restore-work/
 recovery-keys/
 .auth/
+
+# 所有者指定：仅允许本次备份对应的解密密钥
+!recovery-keys/
+recovery-keys/*
+!recovery-keys/vohive-plus-20261001.agekey

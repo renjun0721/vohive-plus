@@ -16,11 +16,11 @@
 
 ## 下载和解密
 
-在 Release 下载 `vohive-plus-full-20261001.tar.gz.age` 和 `SHA256SUMS`。解密密钥文件 `vohive-plus-20261001.agekey` 单独保存在本地，不在 GitHub 上。
+在 Release 下载 `vohive-plus-full-20261001.tar.gz.age` 和 `SHA256SUMS`。按仓库所有者要求，解密密钥也备份在本私有仓库的 `recovery-keys/vohive-plus-20261001.agekey`。下载 Release 附件与该密钥即可恢复。有仓库访问权限的人可以解密完整备份，仓库须保持私有。
 
 ```sh
 sha256sum -c SHA256SUMS
-age --decrypt --identity /安全位置/vohive-plus-20261001.agekey \
+age --decrypt --identity recovery-keys/vohive-plus-20261001.agekey \
   --output vohive-plus-full-20261001.tar.gz vohive-plus-full-20261001.tar.gz.age
 mkdir restore-work
 tar -xzf vohive-plus-full-20261001.tar.gz -C restore-work
@@ -28,7 +28,7 @@ cd restore-work/snapshot
 sha256sum -c SHA256SUMS
 ```
 
-请把密钥另存到电脑或其他安全介质。只保存 GitHub 附件而丢失密钥，将无法恢复敏感配置和数据。解密后的目录包含 Bot 密钥、短信和证书私钥，不要提交到仓库。
+仍可把密钥另存到电脑或其他安全介质，方便离线恢复。解密后的目录包含 Bot 密钥、短信和证书私钥，继续保留在加密附件中。
 
 ## 恢复到 iStoreOS
 
