@@ -12,8 +12,8 @@
   "running_binary_sha256": "9a4df904a903a68fe0e54816c52712e29dc7abd2dc63d920cd023ce9fc530631",
   "source_correspondence": "Built from source/vohive-plus with embedded rebuilt web UI; deployed binary SHA-256 matches build artifact",
   "secret_scan": "Passed: live Bot credentials and private key material absent from source; existing historical recovery assets unchanged",
-  "file_count": 2606,
-  "total_bytes": 20805092,
+  "file_count": 2607,
+  "total_bytes": 20806755,
   "files": [
     {
       "path": "source/VoHivePlus-unlimited-devices.patch",
@@ -121,6 +121,11 @@
       "sha256": "15914e2215ea9e8004e3f7e674061dafb68e3e20a4147b6004c1b52afc90722f"
     },
     {
+      "path": "source/router-network/README.md",
+      "size": 930,
+      "sha256": "0ff574580211c4bf8a85605048fe7d3843b628f62ca423f077cab636756367be"
+    },
+    {
       "path": "source/router-network/etc/init.d/passwall-mark-compat",
       "size": 226,
       "sha256": "4e4cd2716f740a3deb871063fea81469045109ce4cc667242cb3cd94744d93a7"
@@ -137,8 +142,8 @@
     },
     {
       "path": "source/router-network/etc/passwall-mark-compat.sh",
-      "size": 2086,
-      "sha256": "171b922c596c964f59add6b7540d3136a30f37b282dcbb872b2e2ec7bb72fc96"
+      "size": 2819,
+      "sha256": "bebdc824968084be0f9a541fd3a4c3206e9e1532e43b7cd687f5927fa97eb03f"
     },
     {
       "path": "source/router-network/etc/qiyou-passwall-compat-monitor.sh",
@@ -13045,5 +13050,6 @@
       "size": 3249,
       "sha256": "55568d9ccf0ac4e54dfd7336ff993cb16d23bdd17c915333ff7a1e30394d22b1"
     }
-  ]
+  ],
+  "router_network_updated_at": "2026-10-04"
 }

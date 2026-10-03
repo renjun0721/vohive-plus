@@ -34,5 +34,16 @@ for subnet in $(ip -4 route show table main dev br-lan scope link | awk '$1 ~ /\
     ip -4 rule add pref 998 to "$subnet" fwmark "$mark_signature/$mark_mask" lookup main
 done
 
+# TPROXY also marks packets arriving from Tailscale exit-node clients.
+# Source validation and replies must find those peers in Tailscale table 52;
+# otherwise PassWall table 999 treats the remote source as a local address
+# and drops its SYN before INPUT. The existing LAN guard does not cover it.
+for family in 4 6; do
+    ip -"$family" route show table 52 2>/dev/null | grep -q 'dev tailscale0' || continue
+    if [ "$family" = 4 ]; then subnet=100.64.0.0/10; else subnet=fd7a:115c:a1e0::/48; fi
+    ip -"$family" rule show | grep -F "to $subnet " | grep -F "fwmark $mark_signature/$mark_mask " | grep -q 'lookup 52' && continue
+    ip -"$family" rule add pref 998 to "$subnet" fwmark "$mark_signature/$mark_mask" lookup 52
+done
+
 # Reapply active Qiyou exclusions immediately after PassWall startup/reload.
 [ ! -x /etc/qiyou-passwall-compat.sh ] || /etc/qiyou-passwall-compat.sh

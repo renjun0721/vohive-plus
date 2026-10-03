@@ -8,7 +8,7 @@
 | `source/router-ui/` | 当前 LuCI 美化、中文日志和智能 HTTPS 入口 |
 | `source/https/` | 公网反代、局域网/Tailscale DNS、HAProxy、隧道及证书同步脚本；不包含实际证书、私钥或隧道口令 |
 | `source/deployment/` | 0.1.3 Dockerfile、iStoreOS 启动器和 procd 服务 |
-| `source/router-network/` | 奇游/PassWall 兼容及 Tailscale 标记保护脚本，沿用原文件 |
+| `source/router-network/` | 奇游/PassWall 兼容及 Tailscale 对端路由保护；2026-10-04 补齐出口客户端规则 |
 | `source-manifest.json` | 源码文件大小、SHA-256 及本次程序信息 |
 | `releases/0.1.3/` | 更新说明、构建与验证记录 |
 
