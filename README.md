@@ -1,8 +1,8 @@
-# VoHive Plus 私有备份
+# VoHive Plus 个人版源码与恢复备份
 
-本仓库保存 iStoreOS 上已验证的 VoHive Plus 部署文件、LuCI 页面及恢复说明。完整运行镜像、应用配置、短信数据库、TLS 证书和日志放在 Release 的加密附件中。
+本仓库公开保存 iStoreOS 上的 VoHive Plus 完整个人版源码、部署文件、LuCI 页面及恢复说明。当前版本为 **0.1.3-personal-classic（2026-10-03）**，包含 eSIM Profile AID 兼容重试、USSD 会话渠道修复，以及本地未插入设备显示和智能 HTTPS 改动。完整运行镜像、应用配置、短信数据库、TLS 证书和日志放在 Release 的加密附件中。
 
-## 本次备份
+## 历史恢复备份（2026-10-01）
 
 - 备份日期：2026-10-01，Asia/Shanghai。
 - 平台：iStoreOS / Linux amd64。
@@ -12,11 +12,11 @@
 - 数据库：`vohive-plus-final.db`，通过 SQLite 在线备份接口生成快照，已通过完整性检查。
 - 短信接收、QQ 和 Telegram 实际送达均已验证；本次备份未停止正在运行的服务。
 
-已补齐与实际运行的 0.1.2-personal-classic 对应的完整后端、原版布局前端、第三方源码，以及后续 LuCI UI 和中文日志修改。详见 [完整源码与构建恢复说明](SOURCE-README.md)。原 Release 加密备份保持原样。
+完整后端、原版布局前端和第三方源码已同步到当前 0.1.3-personal-classic，LuCI UI、中文日志和 HTTPS 部署脚本一并保存。详见 [完整源码与构建恢复说明](SOURCE-README.md)。原 Release 加密备份保持原样。
 
 ## 下载和解密
 
-在 Release 下载 `vohive-plus-full-20261001.tar.gz.age` 和 `SHA256SUMS`。按仓库所有者要求，解密密钥也备份在本私有仓库的 `recovery-keys/vohive-plus-20261001.agekey`。下载 Release 附件与该密钥即可恢复。有仓库访问权限的人可以解密完整备份，仓库须保持私有。
+在 Release 下载 `vohive-plus-full-20261001.tar.gz.age` 和 `SHA256SUMS`。按仓库所有者要求，解密密钥也备份在本仓库的 `recovery-keys/vohive-plus-20261001.agekey`。下载 Release 附件与该密钥即可恢复。该历史附件及对应密钥沿用原备份，未更新内容。
 
 ```sh
 sha256sum -c SHA256SUMS

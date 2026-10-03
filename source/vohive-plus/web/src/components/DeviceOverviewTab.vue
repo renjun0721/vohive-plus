@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isDeviceAbsent } from '../utils/devicePresence'
 import { ref, computed } from 'vue'
 import { Eye24Regular, EyeOff24Regular } from '@vicons/fluent'
 import type { DeviceOverviewItem } from '../types/api'
@@ -138,15 +139,17 @@ const activeEsimProfileName = computed(() => activeEsimProfileDisplayName(props.
 
 const controlOnline = computed(() => isControlOnline(props.device))
 
-const isRegistered = computed(() => isRadioRegistered(props.device))
+const isRegistered = computed(() => !isDeviceAbsent(props.device) && isRadioRegistered(props.device))
 
 const cellularStatusTone = computed<StatusLightTone>(() => {
+  if (isDeviceAbsent(props.device)) return 'neutral'
   if (isRecoveryPhase(props.device?.lifecycle_phase)) return 'warning'
   if (!controlOnline.value) return 'danger'
   return isRegistered.value ? 'success' : 'warning'
 })
 
 const cellularStatusText = computed(() => {
+  if (isDeviceAbsent(props.device)) return '未插入设备'
   const phaseText = lifecycleStatusLabel(props.device?.lifecycle_phase)
   if (phaseText && props.device?.lifecycle_phase !== 'online' && props.device?.lifecycle_phase !== 'offline') return phaseText
   if (!controlOnline.value) return props.device?.running ? '控制面恢复中' : '离线'
@@ -157,6 +160,7 @@ const cellularStatusText = computed(() => {
 })
 
 const networkPanelMessage = computed(() => {
+  if (isDeviceAbsent(props.device)) return '未插入设备'
   if (!props.device?.network_enabled) return '数据未开启'
   if (!props.device?.network_connected) return '数据网络未连接'
   return ''
@@ -172,7 +176,7 @@ const networkPanelMessage = computed(() => {
       <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">运行状态</div>
 
       <!-- ── VoWiFi 模式 ── -->
-      <template v-if="device?.vowifi_enabled">
+      <template v-if="device?.vowifi_enabled && !isDeviceAbsent(device)">
 
         <!-- Hero pill -->
         <div

@@ -1,20 +1,29 @@
 {
-  "date": "2026-10-01",
-  "version": "0.1.2-personal-classic",
-  "source_commit": "f1c24573bdc0326cbf8800ba5feab544838e60d7",
+  "date": "2026-10-03",
+  "version": "0.1.3-personal-classic",
+  "base_source_commit": "f1c24573bdc0326cbf8800ba5feab544838e60d7",
+  "github_base_commit": "581a5e38fa72b85900f8a6a1ad0a4b39720b6f70",
   "upstream_hideck_commit": "3fd3d6aaf55924c338c2cf3f092e1af1f588d152",
   "classic_ui_upstream_vohive_commit": "f240894e763cf7f0cf74c88562bb9b55f0d573b1",
-  "source_archive_sha256": "55aa240f5abe0a98802f1c79a0b03c753c2bf24fa29aeef7a4c534107785ebb7",
-  "running_binary_sha256": "1947be2cb394cdedb5c2c91ca963f397ed0d60238a5ece02b26328730d1bd137",
-  "source_correspondence": "Running binary matches the 0.1.2 build record",
-  "secret_scan": "passed; original Telegram token and QQ app secret absent from source; no recovery key or OpenSSH private key in source",
-  "file_count": 2583,
-  "total_bytes": 20750708,
+  "reference_vocat_commits": [
+    "3cbb6c1aa0e9bd77a1da98f6c4d60cd866b4e4c1",
+    "a1273f0281cf74b288bab329d734c83c5afc3f48"
+  ],
+  "running_binary_sha256": "9a4df904a903a68fe0e54816c52712e29dc7abd2dc63d920cd023ce9fc530631",
+  "source_correspondence": "Built from source/vohive-plus with embedded rebuilt web UI; deployed binary SHA-256 matches build artifact",
+  "secret_scan": "Passed: live Bot credentials and private key material absent from source; existing historical recovery assets unchanged",
+  "file_count": 2606,
+  "total_bytes": 20805093,
   "files": [
     {
+      "path": "source/VoHivePlus-unlimited-devices.patch",
+      "size": 10023,
+      "sha256": "cb659031632bf8c3d1c514cbfffdf0288b59c58c3011440e00ef527d2eaff7ef"
+    },
+    {
       "path": "source/deployment/Personal.Dockerfile",
-      "size": 1204,
-      "sha256": "b51c15f6ae6d21f72390ac9e7e12f0004928aa93d15dc2aec129cac53b1fbc0a"
+      "size": 1219,
+      "sha256": "0f7a395e206ef0d1439b759da12f6c1c639cf50369d9cc3e4949b692eb7e372b"
     },
     {
       "path": "source/deployment/vohive-plus-run",
@@ -25,6 +34,91 @@
       "path": "source/deployment/vohive-plus.init",
       "size": 515,
       "sha256": "ec05d78fa4ec8ef265dd3e54e5ce3af61c27611a493432bd84a48a3420ca311a"
+    },
+    {
+      "path": "source/https/README.md",
+      "size": 8392,
+      "sha256": "9ce5feb62720c0d6ee1fb5e601555d121d3cef23ee46c5164f5b4feb5322bd4f"
+    },
+    {
+      "path": "source/https/check-secure-browser.py",
+      "size": 2774,
+      "sha256": "52f4d20df8d7967fa4f23b51b8281b1b9bdd07cff54b06eb8cb3ecf951e8e1e7"
+    },
+    {
+      "path": "source/https/deploy-nginx.py",
+      "size": 1551,
+      "sha256": "662eb46df8b75a6a75ca0467626ed824d1068f62bc9be697a267b751c5986836"
+    },
+    {
+      "path": "source/https/direct-dns.conf",
+      "size": 204,
+      "sha256": "8b35bae2b11fa359b5accecdc3fb148734743dc8e8c2243ef9d60c8acc53a802"
+    },
+    {
+      "path": "source/https/direct-haproxy.cfg",
+      "size": 1212,
+      "sha256": "cbc32cf2c4d0c6d5438923b1ea15a02e66a4fa782cca0a62c8178ad5ef4341af"
+    },
+    {
+      "path": "source/https/direct-routing.nft",
+      "size": 738,
+      "sha256": "5971eba375e4b61942a1a502c5bfa14e2b17fd18ae7834a188d6ec79a2ff9131"
+    },
+    {
+      "path": "source/https/enable-public-compression.py",
+      "size": 1152,
+      "sha256": "63eb7795b6e70af4c19eaabba9e15a87248f38047f35dfb4f237a13deeafeb19"
+    },
+    {
+      "path": "source/https/export-vps-tls.sh",
+      "size": 126,
+      "sha256": "b20728c19fe3c09a437c948b390f3a90f4d0de6243d689ab764725601aca6aec"
+    },
+    {
+      "path": "source/https/frp-LICENSE",
+      "size": 11358,
+      "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
+    },
+    {
+      "path": "source/https/install-tunnel-key.py",
+      "size": 795,
+      "sha256": "a0db0ea0f0dbe677c607721e7b50787d58b598a48972c823e579719fbef97f44"
+    },
+    {
+      "path": "source/https/nginx-site.conf",
+      "size": 1860,
+      "sha256": "cfc3284b4a934fc2e1688e0764d098f5e9656b24811e8752a6f05970319af51e"
+    },
+    {
+      "path": "source/https/sync-vps-tls.sh",
+      "size": 1453,
+      "sha256": "461a5b25ee3355ffd79380d433e91b725b7c5ab87e10d06b15438c080f797d05"
+    },
+    {
+      "path": "source/https/vohive-direct-https.init",
+      "size": 454,
+      "sha256": "48c178247f8bc87e8370bc8c555877d9a8859b0ec3ec341678982ae6d04ad942"
+    },
+    {
+      "path": "source/https/vohive-media-relay.init",
+      "size": 355,
+      "sha256": "a4fc4b6cc2d3a6d41cad3233f7fcd512dbf4be88c9d9ed4b1514111c168f89e1"
+    },
+    {
+      "path": "source/https/vohive-media-relay.service",
+      "size": 363,
+      "sha256": "d285cd438c9b8e0ead4f916ae1b0d6d3094a9453ec845508956a77e52643fa20"
+    },
+    {
+      "path": "source/https/vohive-private-dns.init",
+      "size": 447,
+      "sha256": "5fe04ef2ff537b51109b969f9101e3c735f32d62946703548a3299133d209de8"
+    },
+    {
+      "path": "source/https/vohive-vps-tunnel.init",
+      "size": 562,
+      "sha256": "15914e2215ea9e8004e3f7e674061dafb68e3e20a4147b6004c1b52afc90722f"
     },
     {
       "path": "source/router-network/etc/init.d/passwall-mark-compat",
@@ -60,6 +154,11 @@
       "path": "source/router-network/root/uu-switch.sh",
       "size": 120,
       "sha256": "8cd2504acb886f7f471051adf429d58897b326c0bb1ed1c72c46013eda3badd4"
+    },
+    {
+      "path": "source/router-ui/README.md",
+      "size": 2003,
+      "sha256": "7b3d0bd40d78fe6248ab7da57a06d22cd22597de3d711635e9742dd665598230"
     },
     {
       "path": "source/router-ui/backups/20261001-before-redesign/luci-app-vohive.json",
@@ -112,11 +211,6 @@
       "sha256": "2f715e5bd349b6eb477025a8ec15666f2bdae6e20fe849f8ec08646f3ef9f802"
     },
     {
-      "path": "source/router-ui/README.md",
-      "size": 2003,
-      "sha256": "7b3d0bd40d78fe6248ab7da57a06d22cd22597de3d711635e9742dd665598230"
-    },
-    {
       "path": "source/router-ui/vohive-luci-info",
       "size": 2081,
       "sha256": "c34a20218819b5f9ba6e685bd1d282aad4761498661d374b9993db3cfc96a62f"
@@ -128,8 +222,8 @@
     },
     {
       "path": "source/router-ui/vohive.js",
-      "size": 19083,
-      "sha256": "175c41b244b43189d1f2a94843c3414eb2b587b02a880126706334363a1ef855"
+      "size": 19122,
+      "sha256": "9018f4401aa68c6abe5f3f1fe8bc249a4e3b48e76d640575e6902182ad487841"
     },
     {
       "path": "source/vohive-plus/.dockerignore",
@@ -163,13 +257,78 @@
     },
     {
       "path": "source/vohive-plus/.gitignore",
-      "size": 1176,
-      "sha256": "96bdf29b2d18d6213f09b30fb172a2d883563c7ba5071630d3b11fef1fc4a015"
+      "size": 1244,
+      "sha256": "b714bf8203f85b25f7f17a908291886f0d0176be32cd56a26467d5b854ade399"
+    },
+    {
+      "path": "source/vohive-plus/CHANGELOG.md",
+      "size": 11148,
+      "sha256": "946c8db46d329ceb27d262396058e87f050197bcedcbb0176f34f110d4cd4ad8"
+    },
+    {
+      "path": "source/vohive-plus/Caddyfile",
+      "size": 117,
+      "sha256": "4e7a5a4f87522209c63eab5071ab67cbf31596d3034ddbd6dc68e691d18f7bc9"
+    },
+    {
+      "path": "source/vohive-plus/Caddyfile.dns",
+      "size": 169,
+      "sha256": "9157c148234c527bfb1e648b2db43c6b0e8aaface6945b8770fd8c9c59e51ce1"
+    },
+    {
+      "path": "source/vohive-plus/DOCKERHUB.md",
+      "size": 6562,
+      "sha256": "b5893d573461b444e858d6063fe766171d48baddf01e40219c419ee119fb7d9b"
+    },
+    {
+      "path": "source/vohive-plus/Dockerfile",
+      "size": 4843,
+      "sha256": "e3c755af0c8ffa0a0e57dce79affea4612b5d3136304fbd7467188c80d22dbbe"
+    },
+    {
+      "path": "source/vohive-plus/Dockerfile.github",
+      "size": 4732,
+      "sha256": "3420fe9515e98fee71068f66c4b313467acd8faaf0fce5edd05160250b6c5ad5"
+    },
+    {
+      "path": "source/vohive-plus/Dockerfile.release",
+      "size": 1891,
+      "sha256": "49dcf31ec75a857c0657286aadc6f4e4d484576cb72a86a674bb86a20ba6459f"
+    },
+    {
+      "path": "source/vohive-plus/Dockerfile.runtime",
+      "size": 1025,
+      "sha256": "f2788f5d813f67e598c9a215a69b3b6c79dcd6241b0f136e37446e466e722bfa"
+    },
+    {
+      "path": "source/vohive-plus/LICENSE",
+      "size": 4709,
+      "sha256": "272193c86b16315d688e1afdd7b09b8dfac6e92b5002c7f24999c45519d4219a"
+    },
+    {
+      "path": "source/vohive-plus/Makefile",
+      "size": 2592,
+      "sha256": "ce086189d3f26710e8f909852b22b7e434f8ca6da554f2443abe5df749ce6270"
+    },
+    {
+      "path": "source/vohive-plus/PERSONAL-NOTICE.md",
+      "size": 2735,
+      "sha256": "d43554d618a6b19ef625510de38e287c428258f6687b8b3a68040f97219717cc"
+    },
+    {
+      "path": "source/vohive-plus/README.md",
+      "size": 6432,
+      "sha256": "705f399eafe81377dde5343eb17af5fbc3de616ff8cc9d7c269c1fa17aa19a3d"
+    },
+    {
+      "path": "source/vohive-plus/THIRD_PARTY_NOTICES.md",
+      "size": 2329,
+      "sha256": "a440733b583907c94d6261c49112eeba6b3c7c58946ebe2d5c06261d1ca21bf0"
     },
     {
       "path": "source/vohive-plus/build-personal.sh",
       "size": 743,
-      "sha256": "e9b3d2f33d9a1fc728ede224dae990af163583b808df668cd6661dcb272ef3cf"
+      "sha256": "2d68fdc0382c3e24622522409bb4b7af58be8fa4909d5fc286ed815e8c7c319e"
     },
     {
       "path": "source/vohive-plus/caddy-dns/alidns.caddy",
@@ -192,29 +351,14 @@
       "sha256": "417c21d1f0e31ffd436d5f1dc35e9b2cacc5c29d3d7e433ab560cea7eda50f6c"
     },
     {
-      "path": "source/vohive-plus/caddy-dns-image/docker-compose.yml",
-      "size": 422,
-      "sha256": "d8c483e980767c02caba9a8005a3fef8cc023e862d329345818e244444160633"
-    },
-    {
       "path": "source/vohive-plus/caddy-dns-image/Dockerfile",
       "size": 952,
       "sha256": "6850068b929acd3308178e7de4714f80631d4fb3b92febf02c51c9df9c4dbbc9"
     },
     {
-      "path": "source/vohive-plus/Caddyfile",
-      "size": 117,
-      "sha256": "4e7a5a4f87522209c63eab5071ab67cbf31596d3034ddbd6dc68e691d18f7bc9"
-    },
-    {
-      "path": "source/vohive-plus/Caddyfile.dns",
-      "size": 169,
-      "sha256": "9157c148234c527bfb1e648b2db43c6b0e8aaface6945b8770fd8c9c59e51ce1"
-    },
-    {
-      "path": "source/vohive-plus/CHANGELOG.md",
-      "size": 11148,
-      "sha256": "946c8db46d329ceb27d262396058e87f050197bcedcbb0176f34f110d4cd4ad8"
+      "path": "source/vohive-plus/caddy-dns-image/docker-compose.yml",
+      "size": 422,
+      "sha256": "d8c483e980767c02caba9a8005a3fef8cc023e862d329345818e244444160633"
     },
     {
       "path": "source/vohive-plus/cmd/hideck/main.go",
@@ -275,31 +419,6 @@
       "path": "source/vohive-plus/docker-compose.yml",
       "size": 579,
       "sha256": "903fddba5b98be83258f1d602eea6afe989cf351126f1402f994d21578dc5dab"
-    },
-    {
-      "path": "source/vohive-plus/Dockerfile",
-      "size": 4843,
-      "sha256": "e3c755af0c8ffa0a0e57dce79affea4612b5d3136304fbd7467188c80d22dbbe"
-    },
-    {
-      "path": "source/vohive-plus/Dockerfile.github",
-      "size": 4732,
-      "sha256": "3420fe9515e98fee71068f66c4b313467acd8faaf0fce5edd05160250b6c5ad5"
-    },
-    {
-      "path": "source/vohive-plus/Dockerfile.release",
-      "size": 1891,
-      "sha256": "49dcf31ec75a857c0657286aadc6f4e4d484576cb72a86a674bb86a20ba6459f"
-    },
-    {
-      "path": "source/vohive-plus/Dockerfile.runtime",
-      "size": 1025,
-      "sha256": "f2788f5d813f67e598c9a215a69b3b6c79dcd6241b0f136e37446e466e722bfa"
-    },
-    {
-      "path": "source/vohive-plus/DOCKERHUB.md",
-      "size": 6562,
-      "sha256": "b5893d573461b444e858d6063fe766171d48baddf01e40219c419ee119fb7d9b"
     },
     {
       "path": "source/vohive-plus/docs/browser-storage-audit.md",
@@ -523,8 +642,8 @@
     },
     {
       "path": "source/vohive-plus/internal/api/device_mgmt.go",
-      "size": 108974,
-      "sha256": "a5a9dca6b8bacee2d6e44e72b05310faeb0a4634216efc19177f1b846ea728ed"
+      "size": 109050,
+      "sha256": "67c816e73218b4177a3d9b638ef55ebbc3a08abc67565a3466f1a3a5da088c76"
     },
     {
       "path": "source/vohive-plus/internal/api/device_mgmt_add_imei_test.go",
@@ -1075,6 +1194,16 @@
       "path": "source/vohive-plus/internal/api/upstream_proxy_probe_test.go",
       "size": 1785,
       "sha256": "55c6dc619f918a19338f04748896da5b0da2395bb3e87c838fa4fe6d7e6d3996"
+    },
+    {
+      "path": "source/vohive-plus/internal/api/ussd_session_route.go",
+      "size": 480,
+      "sha256": "f05f82bce43430c48cc858500105bfbc93211abdf7bef1690115454abee1a59f"
+    },
+    {
+      "path": "source/vohive-plus/internal/api/ussd_session_route_test.go",
+      "size": 2016,
+      "sha256": "5c30e5cfb6c8222f8e43391cff1d8347111c9585eb4565613126c1adecf2cfda"
     },
     {
       "path": "source/vohive-plus/internal/api/ut.go",
@@ -2838,8 +2967,8 @@
     },
     {
       "path": "source/vohive-plus/internal/esim/manager.go",
-      "size": 128084,
-      "sha256": "72ad6dbd580fce0eb38b3a4e6f538ca8a9de57e60de700d7d12b80904fe2d872"
+      "size": 128331,
+      "sha256": "fdd240c5b25af3964392df269d6c76e2cc8f8e63b46c1fa6aee64c6230a21c8b"
     },
     {
       "path": "source/vohive-plus/internal/esim/manager_test.go",
@@ -2870,6 +2999,16 @@
       "path": "source/vohive-plus/internal/esim/pki/pki.go",
       "size": 3236,
       "sha256": "0fb8f8f57ae8c6429deaf16cab3923ee66cd95a13716d1a9029cffef44bab4fd"
+    },
+    {
+      "path": "source/vohive-plus/internal/esim/profile_aid_fallback.go",
+      "size": 3155,
+      "sha256": "2f94190e467cad7208ddbeaea74d558227dc1c0ce4ea8542f04fe4e7b24037e6"
+    },
+    {
+      "path": "source/vohive-plus/internal/esim/profile_aid_fallback_test.go",
+      "size": 5597,
+      "sha256": "6d493ea03d51d6e9cded1cb21db2d3663eb928a7252726ea376c890821a3bbd7"
     },
     {
       "path": "source/vohive-plus/internal/esim/qmi_channel.go",
@@ -4502,19 +4641,19 @@
       "sha256": "62a1766a94adf547f9c6b9cedf2f650e6f68efc2536c89f5cf7d2540e9e92d3d"
     },
     {
-      "path": "source/vohive-plus/LICENSE",
-      "size": 4709,
-      "sha256": "272193c86b16315d688e1afdd7b09b8dfac6e92b5002c7f24999c45519d4219a"
-    },
-    {
-      "path": "source/vohive-plus/Makefile",
-      "size": 2592,
-      "sha256": "ce086189d3f26710e8f909852b22b7e434f8ca6da554f2443abe5df749ce6270"
+      "path": "source/vohive-plus/packaging/openwrt/README.md",
+      "size": 1426,
+      "sha256": "54a921c312ccbaf926640d7e8a48da3a5c98215d407a6993cf74c122334c35af"
     },
     {
       "path": "source/vohive-plus/packaging/openwrt/build.sh",
       "size": 1326,
       "sha256": "6504905681ed0bc3a73fabc09e96fecfd6b380596d1e4be66552325efa63c6b8"
+    },
+    {
+      "path": "source/vohive-plus/packaging/openwrt/hideck/Makefile",
+      "size": 1513,
+      "sha256": "a756c8c0a44ebae45fc5e8e7b12ae1d7ef6148cdf732b0c7481aa70735aa56e7"
     },
     {
       "path": "source/vohive-plus/packaging/openwrt/hideck/files/config.yaml",
@@ -4525,21 +4664,6 @@
       "path": "source/vohive-plus/packaging/openwrt/hideck/files/hideck.init",
       "size": 562,
       "sha256": "b63c7f244f59d596e2bc4b18c21aa92a1d29f0f1256125872e40af0a77585bbd"
-    },
-    {
-      "path": "source/vohive-plus/packaging/openwrt/hideck/Makefile",
-      "size": 1513,
-      "sha256": "a756c8c0a44ebae45fc5e8e7b12ae1d7ef6148cdf732b0c7481aa70735aa56e7"
-    },
-    {
-      "path": "source/vohive-plus/packaging/openwrt/README.md",
-      "size": 1426,
-      "sha256": "54a921c312ccbaf926640d7e8a48da3a5c98215d407a6993cf74c122334c35af"
-    },
-    {
-      "path": "source/vohive-plus/PERSONAL-NOTICE.md",
-      "size": 1947,
-      "sha256": "d11242324d4b5d8306bd58db84bbf0f2ae4870d82cbd3600d39c31ee7eae5c4e"
     },
     {
       "path": "source/vohive-plus/pkg/logger/log_broadcaster.go",
@@ -4982,11 +5106,6 @@
       "sha256": "747b75f3765b04daeb46c1c33e0967a75158447b00afcf9a7535d3e6500ad700"
     },
     {
-      "path": "source/vohive-plus/README.md",
-      "size": 6432,
-      "sha256": "705f399eafe81377dde5343eb17af5fbc3de616ff8cc9d7c269c1fa17aa19a3d"
-    },
-    {
       "path": "source/vohive-plus/third_party/netlink/.github/workflows/main.yml",
       "size": 822,
       "sha256": "ee1cd1589853e2174e0104ae018e5bbf1eeb6c1735c73e146aa52762f0f55dd6"
@@ -4995,6 +5114,26 @@
       "path": "source/vohive-plus/third_party/netlink/.gitignore",
       "size": 16,
       "sha256": "dae42fa54ecb19c7657aeecf76ee1ab2c182c4748d0867d39e1f03f0096b8aad"
+    },
+    {
+      "path": "source/vohive-plus/third_party/netlink/CHANGELOG.md",
+      "size": 59,
+      "sha256": "c071ddfa04c375579faa3112e6793414476e77d69369078dd0f0a37fad1cfea9"
+    },
+    {
+      "path": "source/vohive-plus/third_party/netlink/LICENSE",
+      "size": 10796,
+      "sha256": "04cf148229e562c643203d1ee8c43aae2022e5130e95ceb8ba8357a27c1a9abe"
+    },
+    {
+      "path": "source/vohive-plus/third_party/netlink/Makefile",
+      "size": 758,
+      "sha256": "dad1fe3b4cc85ff2be9c26714f2ff6fb70140e38fedc80271c80e064090eb143"
+    },
+    {
+      "path": "source/vohive-plus/third_party/netlink/README.md",
+      "size": 3019,
+      "sha256": "2c60061d8deeaa217d916eb3a1261992bc4319453308830799dad653403778e6"
     },
     {
       "path": "source/vohive-plus/third_party/netlink/addr.go",
@@ -5040,11 +5179,6 @@
       "path": "source/vohive-plus/third_party/netlink/chain_test.go",
       "size": 1513,
       "sha256": "5ac2e840e53be67b9a68b5b4fbc9e1b54d7247d489f59efc93908226c69c6311"
-    },
-    {
-      "path": "source/vohive-plus/third_party/netlink/CHANGELOG.md",
-      "size": 59,
-      "sha256": "c071ddfa04c375579faa3112e6793414476e77d69369078dd0f0a37fad1cfea9"
     },
     {
       "path": "source/vohive-plus/third_party/netlink/class.go",
@@ -5207,11 +5341,6 @@
       "sha256": "5f67c88be632e1bd3883dc2ce136c91562e0efe50e7279857f73ad6d4e1b97ce"
     },
     {
-      "path": "source/vohive-plus/third_party/netlink/LICENSE",
-      "size": 10796,
-      "sha256": "04cf148229e562c643203d1ee8c43aae2022e5130e95ceb8ba8357a27c1a9abe"
-    },
-    {
       "path": "source/vohive-plus/third_party/netlink/link.go",
       "size": 31532,
       "sha256": "9f252d5f30d9986a78a8d6bd405d85bc6153bd1af6e17ffb189afba1829b2ca7"
@@ -5230,11 +5359,6 @@
       "path": "source/vohive-plus/third_party/netlink/link_tuntap_linux.go",
       "size": 4795,
       "sha256": "e928445104741beb6a733e12c49c27e5b5443a05c0993be713c0676dbfd12dcf"
-    },
-    {
-      "path": "source/vohive-plus/third_party/netlink/Makefile",
-      "size": 758,
-      "sha256": "dad1fe3b4cc85ff2be9c26714f2ff6fb70140e38fedc80271c80e064090eb143"
     },
     {
       "path": "source/vohive-plus/third_party/netlink/neigh.go",
@@ -5532,11 +5656,6 @@
       "sha256": "2afb4266e99f252b3a3c466bd18b0cec3e2d0d92c89dd68b11b4f3b8c955c19a"
     },
     {
-      "path": "source/vohive-plus/third_party/netlink/README.md",
-      "size": 3019,
-      "sha256": "2c60061d8deeaa217d916eb3a1261992bc4319453308830799dad653403778e6"
-    },
-    {
       "path": "source/vohive-plus/third_party/netlink/route.go",
       "size": 6258,
       "sha256": "9c78ebd486bd7d03dab12e3e2d8eee34e5dc8a63aa471ba311d734e02f3a4477"
@@ -5712,6 +5831,16 @@
       "sha256": "141b8fd592c79cb80b12e3844ae7cbcaf16096c6d87e3dca65db3a8bcaba218e"
     },
     {
+      "path": "source/vohive-plus/third_party/qqbot/LICENSE",
+      "size": 9156,
+      "sha256": "6cf63d87586c7c25c3ab8e62eef5c75bbaa982b0a6f9c00c59e2720255aac9ec"
+    },
+    {
+      "path": "source/vohive-plus/third_party/qqbot/README.md",
+      "size": 1224,
+      "sha256": "786216894d0f750c5fd17318f7a5eedcb336fbe6ffea8d23a41d6e97bef20501"
+    },
+    {
       "path": "source/vohive-plus/third_party/qqbot/app.go",
       "size": 6513,
       "sha256": "2376e9ded8d9a29b4d7de6021a89b601721e4f7aea012a43c38f877eeeb0a406"
@@ -5807,24 +5936,24 @@
       "sha256": "df672e745f739118fb5e0458e0d9086a6199e888723f98cb39ee2cec8279eb02"
     },
     {
-      "path": "source/vohive-plus/third_party/qqbot/LICENSE",
-      "size": 9156,
-      "sha256": "6cf63d87586c7c25c3ab8e62eef5c75bbaa982b0a6f9c00c59e2720255aac9ec"
-    },
-    {
       "path": "source/vohive-plus/third_party/qqbot/model.go",
       "size": 1242,
       "sha256": "bd72789237a9b97b5ce1bc0da70f5fc2174eba49b9a9d27bc41d19e98416ff85"
     },
     {
-      "path": "source/vohive-plus/third_party/qqbot/README.md",
-      "size": 1224,
-      "sha256": "786216894d0f750c5fd17318f7a5eedcb336fbe6ffea8d23a41d6e97bef20501"
-    },
-    {
       "path": "source/vohive-plus/third_party/qqbot/settings.go",
       "size": 2728,
       "sha256": "59fa6661e369ffa9a536a9371c5bdb05f0540c7c5ebbb3cba923ae4174b759ac"
+    },
+    {
+      "path": "source/vohive-plus/third_party/quectel-qmi-go/LICENSE",
+      "size": 1064,
+      "sha256": "b053beb685ef0d03c518220cfe95a2d33899ed9e48173e07a4086b2d56bbecc5"
+    },
+    {
+      "path": "source/vohive-plus/third_party/quectel-qmi-go/README.md",
+      "size": 8598,
+      "sha256": "8133861c6d4fad96603da7b893778903b6d2062f694cbc850b5a40fb3d68ae54"
     },
     {
       "path": "source/vohive-plus/third_party/quectel-qmi-go/cmd/cm/main.go",
@@ -5870,11 +5999,6 @@
       "path": "source/vohive-plus/third_party/quectel-qmi-go/go.sum",
       "size": 2727,
       "sha256": "b3d51a80e9e0419890d31ccc084b43bded2b05ca27a746a3e87bd3ce77d819d4"
-    },
-    {
-      "path": "source/vohive-plus/third_party/quectel-qmi-go/LICENSE",
-      "size": 1064,
-      "sha256": "b053beb685ef0d03c518220cfe95a2d33899ed9e48173e07a4086b2d56bbecc5"
     },
     {
       "path": "source/vohive-plus/third_party/quectel-qmi-go/pkg/device/at_port_rules.go",
@@ -6335,11 +6459,6 @@
       "path": "source/vohive-plus/third_party/quectel-qmi-go/pkg/qmi/wms_test.go",
       "size": 15180,
       "sha256": "5f68e796858abddb7a84123be1bf6da13fee6261ba3cfc60e76c2cfd8ceb017f"
-    },
-    {
-      "path": "source/vohive-plus/third_party/quectel-qmi-go/README.md",
-      "size": 8598,
-      "sha256": "8133861c6d4fad96603da7b893778903b6d2062f694cbc850b5a40fb3d68ae54"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/CAPABILITIES.md",
@@ -10902,6 +11021,26 @@
       "sha256": "0ce074fc5ea105399261ae7b20bae1489d1805083ab394b7e3915e7a266f1d1d"
     },
     {
+      "path": "source/vohive-plus/third_party/vowifi-go.v112/LICENSE",
+      "size": 34522,
+      "sha256": "4df3c306dddaaf4baffdff5ca820cc679ac8cd6dc263c6a74517783e42fa7a3b"
+    },
+    {
+      "path": "source/vohive-plus/third_party/vowifi-go.v112/Makefile",
+      "size": 972,
+      "sha256": "6ddff045b86a2c7e0925666e31c5bb7b93ff8613ff9d3f496c37bf7580b89365"
+    },
+    {
+      "path": "source/vohive-plus/third_party/vowifi-go.v112/README.md",
+      "size": 2134,
+      "sha256": "6ec5e604ad2e9c9c8670e329a8d3a21c7017df3e8bfa66c9b0806b0a3e74640c"
+    },
+    {
+      "path": "source/vohive-plus/third_party/vowifi-go.v112/README.zh-CN.md",
+      "size": 1972,
+      "sha256": "f53596e19055587ad9362cb3a7c07e8cb4c443407b7889828a17755252dcbbe9"
+    },
+    {
       "path": "source/vohive-plus/third_party/vowifi-go.v112/docs/ARCHITECTURE.md",
       "size": 2770,
       "sha256": "e725696d1e0bd4f79b189bd2c5e12a98299c77496fc7efc11de4145b0fe9add4"
@@ -11197,26 +11336,6 @@
       "sha256": "6240466717eb801f2a0220b0efb544487f1c62ad4ac731bc1b3387b4e29a277f"
     },
     {
-      "path": "source/vohive-plus/third_party/vowifi-go.v112/LICENSE",
-      "size": 34522,
-      "sha256": "4df3c306dddaaf4baffdff5ca820cc679ac8cd6dc263c6a74517783e42fa7a3b"
-    },
-    {
-      "path": "source/vohive-plus/third_party/vowifi-go.v112/Makefile",
-      "size": 972,
-      "sha256": "6ddff045b86a2c7e0925666e31c5bb7b93ff8613ff9d3f496c37bf7580b89365"
-    },
-    {
-      "path": "source/vohive-plus/third_party/vowifi-go.v112/README.md",
-      "size": 2134,
-      "sha256": "6ec5e604ad2e9c9c8670e329a8d3a21c7017df3e8bfa66c9b0806b0a3e74640c"
-    },
-    {
-      "path": "source/vohive-plus/third_party/vowifi-go.v112/README.zh-CN.md",
-      "size": 1972,
-      "sha256": "f53596e19055587ad9362cb3a7c07e8cb4c443407b7889828a17755252dcbbe9"
-    },
-    {
       "path": "source/vohive-plus/third_party/vowifi-go.v112/runtimehost/carrier/carrier.go",
       "size": 4820,
       "sha256": "12364211190aa16c9b9c7889cfb5c9935b420e0a13b0510e9d6b2de87af341b2"
@@ -11487,11 +11606,6 @@
       "sha256": "f1d7fe7f8f5b75f8ab78a87578b5fc2adf5c6bef7f2e5051b17e12bf562c72dc"
     },
     {
-      "path": "source/vohive-plus/THIRD_PARTY_NOTICES.md",
-      "size": 2329,
-      "sha256": "a440733b583907c94d6261c49112eeba6b3c7c58946ebe2d5c06261d1ca21bf0"
-    },
-    {
       "path": "source/vohive-plus/web/.gitignore",
       "size": 290,
       "sha256": "079169b8f60db1789c6cd3273585b0f5c1a996c93094472840e621d09d96fb94"
@@ -11500,6 +11614,16 @@
       "path": "source/vohive-plus/web/.npmrc",
       "size": 41,
       "sha256": "dddd0205b3be6457c59b922c291cfc599477f6544262b10f53a1e058faa72259"
+    },
+    {
+      "path": "source/vohive-plus/web/PERSONAL-UI.md",
+      "size": 1263,
+      "sha256": "14af2f0c2372af681507ec9e39575a3aae650d034be10699390c32afe4518f03"
+    },
+    {
+      "path": "source/vohive-plus/web/README.md",
+      "size": 923,
+      "sha256": "e43b740f07af1514c89572f8f89de89c574fc60e6c1bab064c7941a5fc576982"
     },
     {
       "path": "source/vohive-plus/web/eslint.config.js",
@@ -11527,11 +11651,6 @@
       "sha256": "ac5285e069a3e052112f8d8be204af9836bb6f669186151624895ae88f934055"
     },
     {
-      "path": "source/vohive-plus/web/PERSONAL-UI.md",
-      "size": 1263,
-      "sha256": "14af2f0c2372af681507ec9e39575a3aae650d034be10699390c32afe4518f03"
-    },
-    {
       "path": "source/vohive-plus/web/pnpm-lock.yaml",
       "size": 128219,
       "sha256": "c776091ebc332a4adbc6a709855ef8dc99fb8a4f7889bea0dea1190724f6e63a"
@@ -11550,11 +11669,6 @@
       "path": "source/vohive-plus/web/public/vite.svg",
       "size": 1497,
       "sha256": "4a748afd443918bb16591c834c401dae33e87861ab5dbad0811c3a3b4a9214fb"
-    },
-    {
-      "path": "source/vohive-plus/web/README.md",
-      "size": 923,
-      "sha256": "e43b740f07af1514c89572f8f89de89c574fc60e6c1bab064c7941a5fc576982"
     },
     {
       "path": "source/vohive-plus/web/src/App.vue",
@@ -11582,16 +11696,6 @@
       "sha256": "adaf8e738fc44d4565c1a2944853f25c41a6e1e358383ca06c524372c9b96914"
     },
     {
-      "path": "source/vohive-plus/web/src/components/automation/AutomaticTaskDetail.vue",
-      "size": 5201,
-      "sha256": "0a96e2304d9da3812bcc50a016804141949da730a1d38f861ab4f48fb2198278"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/automation/AutomaticTaskList.vue",
-      "size": 12584,
-      "sha256": "0147ca282ad6f4d2146d50e8ca3f10de890fa5ec9924a9e4aee3367b67b7697f"
-    },
-    {
       "path": "source/vohive-plus/web/src/components/CardPolicyPanel.vue",
       "size": 18848,
       "sha256": "29384128327d7b1cafc106364d2360071c6273d7ac5dad0d00a70d6a2670f451"
@@ -11600,51 +11704,6 @@
       "path": "source/vohive-plus/web/src/components/CarrierWebsheetDialog.vue",
       "size": 4629,
       "sha256": "6e1ab3c4ad317a7d490f3cb30d46a3c68eddd2ceee0ac59184a9b54e32247864"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/commands/BalanceDrawer.vue",
-      "size": 2571,
-      "sha256": "424f8267dc72bf41533b7f14d7193bfe9195cafcf0835432e84b01c294770db2"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/commands/BalanceMessage.vue",
-      "size": 1825,
-      "sha256": "3ddd03005aa8829beb6b73607fdf9656d447f736953f223173a1f36f589029d0"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/commands/BalancePanel.vue",
-      "size": 16294,
-      "sha256": "1a04d1ae78a82e73a7ff3ccb4f137dbb150d3ad7c55b2fe4f8642b7c1262ea5c"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/commands/CommandAudioPlayer.vue",
-      "size": 11109,
-      "sha256": "af6e49ca772fc2f04b17b567266393511a115e858950911202b16d564291f602"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/commands/CommandChat.vue",
-      "size": 8570,
-      "sha256": "8eba98873343d540e8013f23be2652e181387dd4afcd63d1dbad7758f0bd6c6f"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/commands/CommandComposer.vue",
-      "size": 6852,
-      "sha256": "480785a9810c5d65b4c39d4bfc47441ed1e376efd6e9c1d53fe40701bac2a4e0"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/commands/CommandTimeline.vue",
-      "size": 12045,
-      "sha256": "35ee53b3c54ca42ae26f816b740ec0aa32c598e0fb1116ac4fc5cba41a1be1ee"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/commands/ManualBalanceDialog.vue",
-      "size": 3910,
-      "sha256": "532f652b3cd5462fbca301e73f4b8d10ca93ea3b9e39a07222f63bc11b58e20c"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/commands/RuleEditorDrawer.vue",
-      "size": 28263,
-      "sha256": "a0cf84ec4ac92d3aa45ba6dfcd8b50e0603991133dc00342897d3bb6533b11d7"
     },
     {
       "path": "source/vohive-plus/web/src/components/ConnectionFocusStage.vue",
@@ -11687,44 +11746,14 @@
       "sha256": "032764743b6db10f1aaeb11df63ae3f23db84bca51f9c2b35dfecb7a34b5ac34"
     },
     {
-      "path": "source/vohive-plus/web/src/components/deviceEsimNotifications.ts",
-      "size": 1866,
-      "sha256": "9ebfdd5f0585bd594baa6f3200f4346de22d8d91bbc308810171e293a47b4d29"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/deviceEsimOperationNotice.ts",
-      "size": 1809,
-      "sha256": "df9ad9b2714275955c8b916f31498470434c6e598a869c937e690d3c5ad3fabc"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/deviceEsimOptimistic.ts",
-      "size": 1125,
-      "sha256": "06ce1b5e39e68cb9d8f5b9dfc018172dcde830a7084b45a786a2dcd2ece45d58"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/deviceEsimOverviewRefresh.ts",
-      "size": 354,
-      "sha256": "0b4e9c85755bbb2cc932beec21737c5ac03d8fd938a140306dff103a494c5a09"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/deviceEsimProfileAction.ts",
-      "size": 178,
-      "sha256": "6b0e01abd6283bd79afbdd67ce75bcb5837d853fc30e2c5d4c79226be29637d6"
-    },
-    {
       "path": "source/vohive-plus/web/src/components/DeviceEsimTab.vue",
       "size": 42634,
       "sha256": "d63c3d272bb7cdcf53c61a21aa728aa37921c5bcff8969ca31ecd7fa3165ca55"
     },
     {
       "path": "source/vohive-plus/web/src/components/DeviceListPanel.vue",
-      "size": 5776,
-      "sha256": "396c0430675f56d7d40c0390a400319d313fd3889a20c5eff904495cb18c416b"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/deviceOverviewActiveEsim.ts",
-      "size": 242,
-      "sha256": "9953e8b0d817fe3ba2da3aee31fb4d3f032a07e30fe796abd10a83b2341d9f16"
+      "size": 5968,
+      "sha256": "5942505e278af8d715465acd631f5bddcaa15c884277638b4f6a50929884d057"
     },
     {
       "path": "source/vohive-plus/web/src/components/DeviceOverviewConnectionStage.vue",
@@ -11738,8 +11767,8 @@
     },
     {
       "path": "source/vohive-plus/web/src/components/DeviceOverviewTab.vue",
-      "size": 17287,
-      "sha256": "26b629407ea4b58936edb6693cf10e02bdaae81d886b7f34d2767d04fbc83dd8"
+      "size": 17579,
+      "sha256": "8ec574add1a25446f1551c9c3a5aead130b071d4e37d272b0c7b91708630598a"
     },
     {
       "path": "source/vohive-plus/web/src/components/DeviceUssdTab.vue",
@@ -11822,6 +11851,126 @@
       "sha256": "b550d0090ce195420e793c55e3579ee95024cb726c138d8495d4d99e26260060"
     },
     {
+      "path": "source/vohive-plus/web/src/components/RefreshButton.vue",
+      "size": 472,
+      "sha256": "f5532f4a10e2c752b031024f423911c83885f4f5487b25d36ca9e0873044252b"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/StatusLight.vue",
+      "size": 643,
+      "sha256": "bdde0bdccbd094c2959ed0d17bb7caef2cbb1aa771e343d5cba1681295c3b155"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/SwitchDark.vue",
+      "size": 527,
+      "sha256": "cd49e4e0f910585c68152a7a86a68bb8e98de670a7aab7db28a1668d3625bfe1"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/SwitchLocale.vue",
+      "size": 1143,
+      "sha256": "625e5756f40d571706264324655a6114d8662106773c02045858418774fc208b"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/TrafficAnalysisPanel.vue",
+      "size": 18315,
+      "sha256": "a6a71788aaff6f742de15c0cda46b3cc0d6f94b6332e09897c5dd47999538423"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/WiFiCallingHealth.vue",
+      "size": 9791,
+      "sha256": "87b3b393d2a87f1e11b203033c58e82d771a8d085a16ca2205b5e299f2be73a0"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/WorkspaceStage.vue",
+      "size": 8380,
+      "sha256": "a952a4926dcf5572630e76d48864bc1d61e765d5a41ea04a7abbb140673e41ff"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/automation/AutomaticTaskDetail.vue",
+      "size": 5201,
+      "sha256": "0a96e2304d9da3812bcc50a016804141949da730a1d38f861ab4f48fb2198278"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/automation/AutomaticTaskList.vue",
+      "size": 12584,
+      "sha256": "0147ca282ad6f4d2146d50e8ca3f10de890fa5ec9924a9e4aee3367b67b7697f"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/commands/BalanceDrawer.vue",
+      "size": 2571,
+      "sha256": "424f8267dc72bf41533b7f14d7193bfe9195cafcf0835432e84b01c294770db2"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/commands/BalanceMessage.vue",
+      "size": 1825,
+      "sha256": "3ddd03005aa8829beb6b73607fdf9656d447f736953f223173a1f36f589029d0"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/commands/BalancePanel.vue",
+      "size": 16294,
+      "sha256": "1a04d1ae78a82e73a7ff3ccb4f137dbb150d3ad7c55b2fe4f8642b7c1262ea5c"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/commands/CommandAudioPlayer.vue",
+      "size": 11109,
+      "sha256": "af6e49ca772fc2f04b17b567266393511a115e858950911202b16d564291f602"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/commands/CommandChat.vue",
+      "size": 8570,
+      "sha256": "8eba98873343d540e8013f23be2652e181387dd4afcd63d1dbad7758f0bd6c6f"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/commands/CommandComposer.vue",
+      "size": 6852,
+      "sha256": "480785a9810c5d65b4c39d4bfc47441ed1e376efd6e9c1d53fe40701bac2a4e0"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/commands/CommandTimeline.vue",
+      "size": 12045,
+      "sha256": "35ee53b3c54ca42ae26f816b740ec0aa32c598e0fb1116ac4fc5cba41a1be1ee"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/commands/ManualBalanceDialog.vue",
+      "size": 3910,
+      "sha256": "532f652b3cd5462fbca301e73f4b8d10ca93ea3b9e39a07222f63bc11b58e20c"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/commands/RuleEditorDrawer.vue",
+      "size": 28263,
+      "sha256": "a0cf84ec4ac92d3aa45ba6dfcd8b50e0603991133dc00342897d3bb6533b11d7"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/deviceEsimNotifications.ts",
+      "size": 1866,
+      "sha256": "9ebfdd5f0585bd594baa6f3200f4346de22d8d91bbc308810171e293a47b4d29"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/deviceEsimOperationNotice.ts",
+      "size": 1809,
+      "sha256": "df9ad9b2714275955c8b916f31498470434c6e598a869c937e690d3c5ad3fabc"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/deviceEsimOptimistic.ts",
+      "size": 1125,
+      "sha256": "06ce1b5e39e68cb9d8f5b9dfc018172dcde830a7084b45a786a2dcd2ece45d58"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/deviceEsimOverviewRefresh.ts",
+      "size": 354,
+      "sha256": "0b4e9c85755bbb2cc932beec21737c5ac03d8fd938a140306dff103a494c5a09"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/deviceEsimProfileAction.ts",
+      "size": 178,
+      "sha256": "6b0e01abd6283bd79afbdd67ce75bcb5837d853fc30e2c5d4c79226be29637d6"
+    },
+    {
+      "path": "source/vohive-plus/web/src/components/deviceOverviewActiveEsim.ts",
+      "size": 242,
+      "sha256": "9953e8b0d817fe3ba2da3aee31fb4d3f032a07e30fe796abd10a83b2341d9f16"
+    },
+    {
       "path": "source/vohive-plus/web/src/components/proxy/ProxyCountryRuleDrawer.vue",
       "size": 10497,
       "sha256": "51a810b3968a0a2c4299f4619e924c4bc905fdb1b4610b9821499245170e74eb"
@@ -11860,11 +12009,6 @@
       "path": "source/vohive-plus/web/src/components/proxy/ProxyUpstreamInventory.vue",
       "size": 8223,
       "sha256": "481e264eb22145ab02bb31fe4b64a39918fdbbdfd42b5914e8ff8cf62b38b6db"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/RefreshButton.vue",
-      "size": 472,
-      "sha256": "f5532f4a10e2c752b031024f423911c83885f4f5487b25d36ca9e0873044252b"
     },
     {
       "path": "source/vohive-plus/web/src/components/settings/FeishuNotificationTab.vue",
@@ -11935,36 +12079,6 @@
       "path": "source/vohive-plus/web/src/components/statusLight.ts",
       "size": 657,
       "sha256": "f500c91ab11516026335d688b208cbdd88b61ba4fe0b75a5c11a37407972c269"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/StatusLight.vue",
-      "size": 643,
-      "sha256": "bdde0bdccbd094c2959ed0d17bb7caef2cbb1aa771e343d5cba1681295c3b155"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/SwitchDark.vue",
-      "size": 527,
-      "sha256": "cd49e4e0f910585c68152a7a86a68bb8e98de670a7aab7db28a1668d3625bfe1"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/SwitchLocale.vue",
-      "size": 1143,
-      "sha256": "625e5756f40d571706264324655a6114d8662106773c02045858418774fc208b"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/TrafficAnalysisPanel.vue",
-      "size": 18315,
-      "sha256": "a6a71788aaff6f742de15c0cda46b3cc0d6f94b6332e09897c5dd47999538423"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/WiFiCallingHealth.vue",
-      "size": 9791,
-      "sha256": "87b3b393d2a87f1e11b203033c58e82d771a8d085a16ca2205b5e299f2be73a0"
-    },
-    {
-      "path": "source/vohive-plus/web/src/components/WorkspaceStage.vue",
-      "size": 8380,
-      "sha256": "a952a4926dcf5572630e76d48864bc1d61e765d5a41ea04a7abbb140673e41ff"
     },
     {
       "path": "source/vohive-plus/web/src/components.d.ts",
@@ -12088,8 +12202,8 @@
     },
     {
       "path": "source/vohive-plus/web/src/main.ts",
-      "size": 5066,
-      "sha256": "25654d3d6693d000cfb1fd304c47e455e384c703f3904d8c03ab95a6468844a5"
+      "size": 5209,
+      "sha256": "ec500782981d47d78f0faf8185476f1b95bc137748b4d388fe95fd69e17d4221"
     },
     {
       "path": "source/vohive-plus/web/src/router/index.ts",
@@ -12363,8 +12477,13 @@
     },
     {
       "path": "source/vohive-plus/web/src/utils/deviceLifecycle.ts",
-      "size": 2437,
-      "sha256": "a0811038395903f71668a68240fe88a31d23c58b7d21879346c7eee0b46cba90"
+      "size": 2625,
+      "sha256": "08ca6b0ab9b21dd533adc8eee992665f63cd21b75d1f3f0fc8fab72ba7f30bef"
+    },
+    {
+      "path": "source/vohive-plus/web/src/utils/devicePresence.ts",
+      "size": 4665,
+      "sha256": "4177368be10b53049b0e30b20a0a04f392186c36afe8737af36d95767ee29221"
     },
     {
       "path": "source/vohive-plus/web/src/utils/deviceRequestScope.ts",
@@ -12518,8 +12637,8 @@
     },
     {
       "path": "source/vohive-plus/web/src/views/Devices.vue",
-      "size": 50746,
-      "sha256": "9506ec0b9031f4c916074016ad4c8d4159873e6b785ec8c4b44221b5e566f3f5"
+      "size": 50889,
+      "sha256": "21b83398ba61290eecb1972d9b63c8c68b8a592f613888600673103de5ad4f6d"
     },
     {
       "path": "source/vohive-plus/web/src/views/Login.vue",
@@ -12677,6 +12796,11 @@
       "sha256": "0fc8b24d4ca6733a64f96ef47305d45aa4674a31240c1c6d01a8d82be49a0159"
     },
     {
+      "path": "source/vohive-plus/web/tests/devicePresence.test.ts",
+      "size": 2485,
+      "sha256": "3386f572a7ca75250f9ac69a474f8bce8ee063bfbd20e418e125858f3d6c8d2e"
+    },
+    {
       "path": "source/vohive-plus/web/tests/deviceRequestScope.test.ts",
       "size": 770,
       "sha256": "eaa76fc6ef8580bf58be4bb4e6abaef1a0a2925cb81733a9a52271a01857de6f"
@@ -12807,14 +12931,14 @@
       "sha256": "4059eb5caabcc030b96c78c09e60c9bbf474c29ba5c933ead3211220f18049f3"
     },
     {
-      "path": "source/vohive-plus/web/tests/settingsNotifications.test.ts",
-      "size": 386,
-      "sha256": "6dbac96a85a458122bdc4860a16ac459fa42144ccebbe2256757c25b4e1ce699"
-    },
-    {
       "path": "source/vohive-plus/web/tests/settingsNotificationStore.test.ts",
       "size": 1831,
       "sha256": "f3f1ad3eb4b3148517d45e9e167a165aae21b87c998d92582cf5315dad64d53c"
+    },
+    {
+      "path": "source/vohive-plus/web/tests/settingsNotifications.test.ts",
+      "size": 386,
+      "sha256": "6dbac96a85a458122bdc4860a16ac459fa42144ccebbe2256757c25b4e1ce699"
     },
     {
       "path": "source/vohive-plus/web/tests/signalPresentation.test.ts",
@@ -12920,11 +13044,6 @@
       "path": "source/vohive-plus/web/vite.config.ts",
       "size": 3249,
       "sha256": "55568d9ccf0ac4e54dfd7336ff993cb16d23bdd17c915333ff7a1e30394d22b1"
-    },
-    {
-      "path": "source/VoHivePlus-unlimited-devices.patch",
-      "size": 10023,
-      "sha256": "cb659031632bf8c3d1c514cbfffdf0288b59c58c3011440e00ef527d2eaff7ef"
     }
   ]
 }

@@ -1,0 +1,12 @@
+chain vohive_https_lan {
+    type nat hook prerouting priority dstnat - 1; policy accept;
+    ip daddr 100.71.142.28 tcp dport 443 redirect to :8443 comment "VoHive HTTPS private access"
+    ip daddr 100.71.142.28 meta l4proto { tcp, udp } th dport 53 redirect to :5354 comment "VoHive private DNS"
+    iifname "br-lan" ip daddr 192.168.100.1 meta l4proto { tcp, udp } th dport 53 redirect to :5354 comment "VoHive LAN DNS"
+}
+
+chain vohive_https_router {
+    type nat hook output priority dstnat - 1; policy accept;
+    ip daddr 100.71.142.28 tcp dport 443 redirect to :8443 comment "VoHive HTTPS router access"
+    ip daddr 100.71.142.28 meta l4proto { tcp, udp } th dport 53 redirect to :5354 comment "VoHive private DNS test access"
+}

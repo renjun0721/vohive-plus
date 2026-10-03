@@ -234,6 +234,7 @@ func buildDiscoveredEUICCInfo(aid []byte, eidStr string) EUICCInfo {
 // ProfileItem 单个 profile 信息
 type ProfileItem struct {
 	ICCID               string `json:"iccid"`
+	ProfileAID          string `json:"profile_aid,omitempty"`
 	Name                string `json:"name"`
 	ServiceProviderName string `json:"service_provider_name"`
 	State               int    `json:"state"` // 0=disabled, 1=enabled
@@ -1710,6 +1711,7 @@ func buildProfileGroup(eidStr string, aid []byte, profiles []*sgp22.ProfileInfo)
 		}
 		group.Profiles = append(group.Profiles, ProfileItem{
 			ICCID:               p.ICCID.String(),
+			ProfileAID:          strings.ToUpper(hex.EncodeToString(p.ISDPAID)),
 			Name:                name,
 			ServiceProviderName: p.ServiceProviderName,
 			State:               int(p.ProfileState),
@@ -2763,7 +2765,7 @@ func (m *Manager) SwitchProfileWithResult(ctx context.Context, targetICCID strin
 	var enableErr error
 	const maxCatBusyRetries = 3
 	for attempt := 0; attempt <= maxCatBusyRetries; attempt++ {
-		enableErr = client.EnableProfile(iccid, m.switchUseRefreshTrue)
+		enableErr = m.profileOperationWithAIDFallback(ctx, client, iccid, targetAID, sgp22.EnableProfile, m.switchUseRefreshTrue)
 		if enableErr == nil || !errors.Is(enableErr, sgp22.ErrCatBusy) {
 			break
 		}
@@ -2904,7 +2906,7 @@ func (m *Manager) DisableProfile(ctx context.Context, targetICCID string, aidHex
 		return fmt.Errorf("等待禁用 profile APDU barrier 失败: %w", err)
 	}
 
-	disableErr := client.DisableProfile(iccid, true)
+	disableErr := m.profileOperationWithAIDFallback(ctx, client, iccid, targetAID, sgp22.DisableProfile, true)
 	if err := m.closeLPAClientForOperation("disable_profile_pre_refresh", client); err == nil {
 		clientClosed = true
 	}

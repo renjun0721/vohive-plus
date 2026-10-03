@@ -1,9 +1,10 @@
+import { isDeviceAbsent } from './devicePresence'
 import { t } from '../i18n'
 import type { DeviceLifecyclePhase, DeviceMgmtListItem, DeviceOverviewItem } from '../types/api'
 
 type DeviceLike = Pick<
   DeviceMgmtListItem | DeviceOverviewItem,
-  'running' | 'healthy' | 'control_online' | 'lifecycle_phase' | 'modem'
+  'id' | 'running' | 'healthy' | 'control_online' | 'lifecycle_phase' | 'modem'
 >
 
 export function isRecoveryPhase(phase?: DeviceLifecyclePhase) {
@@ -52,6 +53,7 @@ export function lifecycleStatusLabel(phase?: DeviceLifecyclePhase) {
 }
 
 export function primaryLifecycleStatus(device: DeviceLike | null | undefined) {
+  if (isDeviceAbsent(device)) return { label: '未插入设备', tag: 'info' as const, tone: 'neutral' as const, animated: false }
   const phase = device?.lifecycle_phase
   if (isRecoveryPhase(phase)) {
     return { label: lifecycleStatusLabel(phase) || t('lifecycle.recoveringShort'), tag: 'warning' as const, tone: 'warning' as const, animated: true }

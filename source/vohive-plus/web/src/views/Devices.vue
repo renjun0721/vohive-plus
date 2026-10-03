@@ -25,6 +25,7 @@ import { useDevicesStore } from '../stores/devices'
 import { debugCollector } from '../debug/collector'
 import { isManagedDeviceBackendSwitch, isWwanQmiControlPath } from '../utils/deviceBackend'
 import { firstRemainingDeviceId, isPCSCServiceUnavailable, routeDeviceStillManaged, suggestedAddDeviceId } from '../utils/deviceSelection'
+import { isDeviceAbsent, rememberDevicePresence } from '../utils/devicePresence'
 import { isControlOnline, isRecoveryPhase } from '../utils/deviceLifecycle'
 import { createDeviceRequestScope } from '../utils/deviceRequestScope'
 import { getMccMncIndex, lookupMccMncRow, mccMncCountryCode, type MccMncRow } from '../utils/mcc-mnc'
@@ -148,7 +149,7 @@ const filteredDevices = computed<DeviceMgmtListItem[]>(() => {
   if (statusFilter.value === 'online') {
     list = list.filter(d => isControlOnline(d))
   } else if (statusFilter.value === 'offline') {
-    list = list.filter(d => !d?.running && !isRecoveryPhase(d.lifecycle_phase))
+    list = list.filter(d => isDeviceAbsent(d) || (!d?.running && !isRecoveryPhase(d.lifecycle_phase)))
   }
 
   if (q) {
@@ -1287,6 +1288,7 @@ type OverviewSSEPayload = { devices?: DeviceOverviewItem[] }
 function handleOverviewEvent(data: OverviewSSEPayload) {
   if (!data?.devices || !data.devices.length) return
 
+  rememberDevicePresence(data.devices)
   const found = data.devices[0]
   const idx = devices.value.findIndex(d => d.id === found.id)
   if (idx !== -1) {

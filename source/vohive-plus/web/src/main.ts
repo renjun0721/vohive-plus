@@ -1,3 +1,5 @@
+import { api } from './stores/auth'
+import { installDevicePresenceTracking } from './utils/devicePresence'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import router from './router'
@@ -117,6 +119,8 @@ window.addEventListener('unhandledrejection', (e) => {
     showBootError(ev.reason, { force: isChunkLoadLikeError(ev.reason) })
   }
 })
+
+installDevicePresenceTracking(api)
 
 const app = createApp(App)
 

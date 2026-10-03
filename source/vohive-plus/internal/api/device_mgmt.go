@@ -2618,7 +2618,7 @@ func (s *Server) handleDeviceMgmtContinueUSSD(c *gin.Context) {
 		timeout = 120 * time.Second
 	}
 
-	if !s.pool.IsVoWiFiActive(id) {
+	if !ussdSessionUsesVoWiFi(req.SessionID, s.pool.IsVoWiFiActive(id)) {
 		worker := s.pool.GetWorker(id)
 		if worker == nil {
 			c.JSON(http.StatusNotFound, gin.H{"status": "error", "message": "设备未找到"})
@@ -2662,7 +2662,7 @@ func (s *Server) handleDeviceMgmtCancelUSSD(c *gin.Context) {
 		req.SessionID = ""
 	}
 
-	if !s.pool.IsVoWiFiActive(id) {
+	if !ussdSessionUsesVoWiFi(req.SessionID, s.pool.IsVoWiFiActive(id)) {
 		worker := s.pool.GetWorker(id)
 		if worker == nil {
 			c.JSON(http.StatusNotFound, gin.H{"status": "error", "message": "设备未找到"})

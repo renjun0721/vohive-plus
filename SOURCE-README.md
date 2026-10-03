@@ -1,64 +1,41 @@
 # 完整源码与个人版恢复
 
-本仓库已补齐与实际运行程序对应的 **VoHive Plus 0.1.2-personal-classic** 完整源码，以及后续 LuCI 美化和中文日志修改。
-
-## 文件位置
+当前源码为 **VoHive Plus 0.1.3-personal-classic（2026-10-03）**，与本次安装到路由器的程序对应。此次将原来只保存在本地的未插入设备显示和智能 HTTPS 改动纳入源码，同时修复 eSIM 兼容重试和 USSD 会话渠道判断。
 
 | 路径 | 内容 |
 | --- | --- |
-| `source/vohive-plus/` | 完整 Go 后端、原版布局的 Vue 前端、锁文件、第三方源码和许可、个人版构建脚本 |
-| `source/router-ui/` | 路由器上实际安装的 LuCI CSS、JavaScript、Lua、安装脚本和界面预览 |
-| `source/deployment/` | 0.1.2 Dockerfile、iStoreOS 启动器和 procd 服务 |
-| `source/router-network/` | 奇游与 PassWall 自动兼容、Tailscale 与 PassWall 标记保护脚本及启动服务 |
-| `source/VoHivePlus-unlimited-devices.patch` | 0.1.1 至 0.1.2 解除设备限额的补丁 |
-| `source-manifest.json` | 每个源码文件的大小和 SHA-256，及程序对应信息 |
+| `source/vohive-plus/` | 完整 Go 后端、Vue 前端、锁文件、第三方源码与许可、个人版构建脚本 |
+| `source/router-ui/` | 当前 LuCI 美化、中文日志和智能 HTTPS 入口 |
+| `source/https/` | 公网反代、局域网/Tailscale DNS、HAProxy、隧道及证书同步脚本；不包含实际证书、私钥或隧道口令 |
+| `source/deployment/` | 0.1.3 Dockerfile、iStoreOS 启动器和 procd 服务 |
+| `source/router-network/` | 奇游/PassWall 兼容及 Tailscale 标记保护脚本，沿用原文件 |
+| `source-manifest.json` | 源码文件大小、SHA-256 及本次程序信息 |
+| `releases/0.1.3/` | 更新说明、构建与验证记录 |
 
-源码提交为 `f1c24573bdc0326cbf8800ba5feab544838e60d7`。Go 后端基线为 HiDeck `3fd3d6aaf55924c338c2cf3f092e1af1f588d152`；Vue 前端原版布局基线为 VoHive `f240894e763cf7f0cf74c88562bb9b55f0d573b1`。原有 LICENSE、作者声明和第三方许可均保留。VoCat 的诊断思路用于设计，并未合并 VoCat 源码。
+后端基线保留 HiDeck `3fd3d6aaf55924c338c2cf3f092e1af1f588d152`，前端布局基线保留 VoHive `f240894e763cf7f0cf74c88562bb9b55f0d573b1`。原有许可和作者声明保留；本次没有整体同步 VoCat，也没有更换通信核心。
 
-实际运行程序 SHA-256 为 `1947be2cb394cdedb5c2c91ca963f397ed0d60238a5ece02b26328730d1bd137`，与源码构建交付记录一致。容器的基础镜像标签仍是 0.1.1，但其中运行的程序已更新为 0.1.2。LuCI 美化文件属于独立安装的覆盖层，不是另一次 Go 后端构建。
+运行程序 SHA-256：`9a4df904a903a68fe0e54816c52712e29dc7abd2dc63d920cd023ce9fc530631`。现存容器沿用原挂载目录和容器文件层，程序已替换为 0.1.3；本地另外构建 `vohive-plus-personal:0.1.3` 镜像供后续重建使用。原 2026-10-01 的恢复附件仍是历史快照。
 
-## 从源码构建
+## 构建
 
-Linux 构建环境需 Go 1.27.1、Node.js 24、pnpm 11.25.0。按锁文件安装依赖：
+Linux 环境使用 Go 1.27.1、Node.js 24、pnpm 11.25.0：
 
 ```sh
 cd source/vohive-plus
 sh build-personal.sh
-```
-
-产物位于 `personal-dist/vohive-plus_linux_amd64`。程序依赖容器中的语音编解码运行库，应按 Dockerfile 构建运行环境，不要直接替换为 iStoreOS 原生程序。
-
-```sh
 cd ../deployment
 cp ../vohive-plus/personal-dist/vohive-plus_linux_amd64 .
-docker build -f Personal.Dockerfile -t vohive-plus-personal:0.1.2 .
+docker build -f Personal.Dockerfile -t vohive-plus-personal:0.1.3 .
 ```
 
-没有容器和现存数据的新环境，可先按仓库首页的加密备份恢复步骤恢复。已有安装应先备份配置和数据库，确认原容器挂载目录后再计划升级；不要覆盖新产生的短信或同时启动两个管理同一模组的实例。当前数据库名称为 `vohive-plus-final.db`，创建容器时需要沿用对应参数。
+数据库名称沿用 `vohive-plus-final.db`，容器需要原配置、数据和日志挂载以及设备访问权限。不要同时启动两个管理同一模组的实例。升级前使用 SQLite 在线备份或停止服务后备份数据。若使用 Release 中的编译产物，先 `gzip -d vohive-plus_0.1.3_linux_amd64.gz` 并核对 SHA-256，再按 Dockerfile 构建。
 
-## LuCI 与网络兼容文件
+已有安装可停止 `/etc/init.d/vohive`，将新程序复制到 `vohive-plus:/usr/local/bin/vohive-plus` 后启动服务；原程序、配置及数据库快照应先保存。仅替换容器程序时，重建容器需选择新镜像。
 
-LuCI 页面可执行 `sh source/router-ui/install.sh` 安装，并用 `lua source/router-ui/check-logs.lua` 检查中文日志转换。它保留现有应用配置及数据。
+## 本地改动与测试
 
-网络脚本按 `source/router-network/` 下的绝对路径布局安装，赋予脚本和服务可执行权限，再启用对应服务。奇游兼容脚本自动读取正在加速的设备规则，只在加速期间让这些设备绕过 PassWall；其他设备继续使用 PassWall。不要把它当作通用固件安装脚本：迁移前核对接口名称 `br-lan`、奇游 `HOST_HOOK*` 规则和 PassWall nftables 表是否相同。
+未插入设备判定已迁入 `web/src/utils/devicePresence.ts`；每 15 秒只读查询硬件发现，保留初始化、近期在线和重启缓冲，检测失败/过期时回到原有状态。后端重连扫描保留。
 
-## 核验与备份范围
+LuCI 可用 `sh source/router-ui/install.sh` 安装；中文日志验证运行 `lua source/router-ui/check-logs.lua`。HTTPS 和网络脚本部署前核对实际接口、域名和证书路径；参见各目录说明。
 
-本次新增源码没有短信数据库、个人配置、Bot 凭据、路由器或 VPS SSH 私钥，也没有再次加入解密密钥。已检查实际 Telegram Token 和 QQ App Secret 未出现在新增源码中。
-
-原先 Release 的加密包保持原样，里面包含运行环境和私人数据。源码现在位于仓库文件树中；不要把原加密包误认为已包含这次新加入的源码。
-
-可用以下命令核对源码文件：
-
-```sh
-python3 - <<'PY'
-import json, hashlib
-from pathlib import Path
-manifest = json.loads(Path('source-manifest.json').read_text())
-for entry in manifest['files']:
-    data = Path(entry['path']).read_bytes()
-    assert len(data) == entry['size'], entry['path']
-    assert hashlib.sha256(data).hexdigest() == entry['sha256'], entry['path']
-print('全部源码文件校验通过')
-PY
-```
+本次验证记录见 [0.1.3 更新说明](releases/0.1.3/README.md)。实际 SIM 切换、运营商 USSD 及拨号未执行。

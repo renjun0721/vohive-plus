@@ -232,13 +232,11 @@ return view.extend({
         this.updated = E('span', {}, '等待更新');
         this.logNote = E('p', { 'class': 'vh-description' }, '最近 200 条记录 · 最新记录在前');
         this.diagnostics = E('div', { 'class': 'vh-diagnostic-content' });
-        var host = window.location.hostname;
-        if (host.indexOf(':') >= 0 && host.charAt(0) !== '[') host = '[' + host + ']';
         var page = E('div', { 'class': 'vh-page' }, [
             E('link', { 'rel': 'stylesheet', 'href': L.resource('view/services/vohive.css') + '?v=20261001-1' }),
             E('div', { 'class': 'vh-hero' }, [
                 E('div', { 'class': 'vh-brand' }, [ E('div', { 'class': 'vh-logo' }, icon('hive')), E('div', {}, [ E('div', { 'class': 'vh-title' }, [ E('h2', { 'class': 'vh-heading' }, 'VoHive'), E('span', { 'class': 'vh-plus' }, 'PLUS') ]), E('p', { 'class': 'vh-subtitle' }, '设备互联，轻松掌控 · iStoreOS 服务管理') ]) ]),
-                E('div', { 'class': 'vh-hero-tools' }, [ this.badge, E('a', { 'class': 'vh-button vh-primary', 'href': 'http://' + host + ':7575/', 'target': '_blank', 'rel': 'noopener noreferrer' }, [ E('span', {}, '打开管理页面'), icon('external') ]) ])
+                E('div', { 'class': 'vh-hero-tools' }, [ this.badge, E('a', { 'class': 'vh-button vh-primary', 'href': 'https://xjp.721609.xyz/', 'target': '_blank', 'rel': 'noopener noreferrer' }, [ E('span', {}, '智能 HTTPS'), icon('external') ]), E('a', { 'class': 'vh-button', 'href': 'https://xjp.721609.xyz/#/phone', 'target': '_blank', 'rel': 'noopener noreferrer' }, [ E('span', {}, '通话中心'), icon('external') ]) ])
             ]),
             this.notice,
             E('div', { 'class': 'vh-cards' }, [ card('status', '服务状态', 'power', 'green'), card('boot', '开机自启', 'check', ''), card('port', '访问端口', 'port', 'blue'), card('uptime', '运行时长', 'clock', 'amber') ]),

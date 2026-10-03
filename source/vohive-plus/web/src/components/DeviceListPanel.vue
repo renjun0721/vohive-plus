@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isDeviceAbsent } from '../utils/devicePresence'
 import { computed } from 'vue'
 import EmptyState from './EmptyState.vue'
 import ListSkeleton from './ListSkeleton.vue'
@@ -51,6 +52,7 @@ const modelSortDir = computed({
 const primaryStatus = primaryLifecycleStatus
 
 const registrationText = (d: DeviceMgmtListItem) => {
+  if (isDeviceAbsent(d)) return '未插入设备'
   const phaseText = lifecycleStatusLabel(d.lifecycle_phase)
   if (phaseText && d.lifecycle_phase !== 'online' && d.lifecycle_phase !== 'offline') return phaseText
   if (isRadioRegistered(d)) {
@@ -63,6 +65,7 @@ const registrationText = (d: DeviceMgmtListItem) => {
 }
 
 const dataNetworkText = (d: DeviceMgmtListItem) => {
+  if (isDeviceAbsent(d)) return ''
   if (d?.vowifi_enabled) return ''
   if (!d?.network_enabled) return '数据未开启'
   if (!d?.network_connected) return '数据网络未连接'
@@ -70,6 +73,7 @@ const dataNetworkText = (d: DeviceMgmtListItem) => {
 }
 
 const secondaryStatus = (d: DeviceMgmtListItem) => {
+  if (isDeviceAbsent(d)) return '未插入设备'
   if (d?.vowifi_enabled) return 'WiFi-Calling'
   return [registrationText(d), dataNetworkText(d)].filter(Boolean).join(' · ')
 }
