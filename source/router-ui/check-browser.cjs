@@ -80,8 +80,11 @@ const server = http.createServer((req, res) => {
     await page.locator('.vh-page').screenshot({ path: '/check/preview-desktop.png' });
     assert.equal(await page.locator('.vh-heading').textContent(), 'VoHive');
     assert.equal(await page.locator('.vh-badge').textContent(), '运行中');
-    assert.equal(await page.locator('button:has-text("启动")').isDisabled(), true);
-    assert.equal(await page.locator('button:has-text("停止")').isDisabled(), false);
+    assert.equal(await page.locator('.vh-status-actions button').count(), 2);
+    assert.equal(await page.locator('.vh-control').count(), 0);
+    assert.equal(await page.getByRole('button', { name: '停止服务', exact: true }).isDisabled(), false);
+    assert.equal(await page.getByRole('button', { name: '重启服务', exact: true }).isDisabled(), false);
+    assert.equal(await page.evaluate(() => getComputedStyle(__view.powerButton).color === getComputedStyle(__view.cards.status.value).color), true);
     assert.equal(await page.getByRole('link', { name: '本地管理' }).getAttribute('href'), 'http://127.0.0.1:7575/');
     assert.equal(await page.getByRole('link', { name: '通话中心' }).getAttribute('href'), 'https://xjp.721609.xyz/#/phone');
     // Exercise the same view using the addresses used to open LuCI, without navigation.
@@ -112,11 +115,22 @@ const server = http.createServer((req, res) => {
     await page.evaluate(() => { __fixture.running = false; __resolveAction(0); });
     await page.waitForFunction(() => !__view.busy);
     assert.equal(await page.locator('.vh-badge').textContent(), '已停止');
+    assert.equal(await page.locator('.vh-power-toggle').getAttribute('aria-pressed'), 'false');
+    assert.equal(await page.evaluate(() => getComputedStyle(__view.powerButton).color === getComputedStyle(__view.cards.status.note).color), true);
+    assert.equal(await page.getByRole('button', { name: '重启服务', exact: true }).isDisabled(), true);
+    await page.locator('.vh-status-card').screenshot({ path: '/check/preview-stopped-card.png' });
     await page.getByRole('button', { name: '启动服务', exact: true }).click();
     assert.equal(await page.evaluate(() => __actions.at(-1)), 'start');
     await page.evaluate(() => { __fixture.running = true; __resolveAction(0); });
     await page.waitForFunction(() => !__view.busy);
     assert.equal(await page.locator('.vh-badge').textContent(), '运行中');
+    await page.getByRole('button', { name: '重启服务', exact: true }).click();
+    assert.equal(await page.evaluate(() => __actions.at(-1)), 'restart');
+    assert.equal(await page.locator('.vh-restart').isDisabled(), true);
+    assert.equal(await page.locator('.vh-power-toggle').isDisabled(), true);
+    assert.equal(await page.locator('.vh-card-note').first().textContent(), '正在重启服务，请稍候…');
+    await page.evaluate(() => __resolveAction(0));
+    await page.waitForFunction(() => !__view.busy);
     await page.evaluate(() => { __deferAction = false; __rpcResult = 1; });
     await page.getByRole('button', { name: '停止服务', exact: true }).click();
     await page.waitForFunction(() => !__view.busy);
@@ -160,8 +174,8 @@ const server = http.createServer((req, res) => {
     assert.equal(await page.locator('.vh-badge').textContent(), '运行中');
     await page.evaluate(() => { __view.autoRefresh.checked = true; return __polls[0](); });
     assert.equal(await page.locator('.vh-badge').textContent(), '已停止');
-    assert.equal(await page.locator('button:has-text("启动")').isDisabled(), false);
-    assert.equal(await page.locator('button:has-text("停止")').isDisabled(), true);
+    assert.equal(await page.getByRole('button', { name: '启动服务', exact: true }).isDisabled(), false);
+    assert.equal(await page.locator('.vh-restart').isDisabled(), true);
     console.log('通过：断线保留数据、恢复刷新、暂停轮询和停止状态');
 
     await page.evaluate(() => __view.runAction('start'));
@@ -170,7 +184,7 @@ const server = http.createServer((req, res) => {
     await page.evaluate(() => { __rpcResult = 1; return __view.runAction('start'); });
     assert.equal(await page.evaluate(() => __notifications.at(-1).type), 'error');
     await page.evaluate(() => { __readonly = true; const data = {service:{enabled:true},info:__fixture}; document.getElementById('app').replaceChildren(__view.render(data)); });
-    assert.equal(await page.locator('button:has-text("启动")').isDisabled(), true);
+    assert.equal(await page.locator('.vh-restart').isDisabled(), true);
     const actionCount = await page.evaluate(() => __actions.length);
     assert.equal(await page.locator('.vh-power-toggle').isDisabled(), true);
     await page.evaluate(() => __view.toggleService());
@@ -189,8 +203,19 @@ const server = http.createServer((req, res) => {
     console.log('通过：日志内容按文字显示，避免 HTML 注入');
 
     await page.setViewportSize({ width: 390, height: 844 });
+    assert.equal(await page.locator('.vh-status-actions button').count(), 2);
+    assert.equal(await page.evaluate(() => {
+        const card = document.querySelector('.vh-status-card').getBoundingClientRect();
+        return Array.from(document.querySelectorAll('.vh-status-actions button')).every(button => {
+            const rect = button.getBoundingClientRect();
+            return rect.left >= card.left && rect.right <= card.right && rect.top >= card.top && rect.bottom <= card.bottom;
+        });
+    }), true);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false);
     await page.locator('.vh-page').screenshot({ path: '/check/preview-mobile.png' });
+    await page.setViewportSize({ width: 320, height: 844 });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false);
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.getByText('服务诊断', { exact: true }).click();
     assert.equal(await page.locator('.vh-diagnostic-content').isVisible(), true);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false);

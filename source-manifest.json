@@ -13,7 +13,7 @@
   "source_correspondence": "Built from source/vohive-plus with embedded rebuilt web UI; deployed binary SHA-256 matches build artifact",
   "secret_scan": "Passed: live Bot credentials and private key material absent from source; existing historical recovery assets unchanged",
   "file_count": 2607,
-  "total_bytes": 20814169,
+  "total_bytes": 20816400,
   "files": [
     {
       "path": "source/VoHivePlus-unlimited-devices.patch",
@@ -162,8 +162,8 @@
     },
     {
       "path": "source/router-ui/README.md",
-      "size": 2484,
-      "sha256": "90fdb5adc44ab06824de30ed7a066168b6ac901becf874a5ac809f5ccd385fc9"
+      "size": 2679,
+      "sha256": "a9e914f5d297f4526d67c4b78ba431cd5261604e4d08314fa5d305a58f08ef00"
     },
     {
       "path": "source/router-ui/backups/20261001-before-redesign/luci-app-vohive.json",
@@ -182,8 +182,8 @@
     },
     {
       "path": "source/router-ui/check-browser.cjs",
-      "size": 16797,
-      "sha256": "17dffca43f04fe7abc12df710411e528de5d7c5383cf1ad8dc1c4dd5a0b4d2d5"
+      "size": 18853,
+      "sha256": "782318bfc500ad09005cd7b0a33bb30f503197d5cdfb2bb18e27b2af9adebd9c"
     },
     {
       "path": "source/router-ui/check-logs.lua",
@@ -222,13 +222,13 @@
     },
     {
       "path": "source/router-ui/vohive.css",
-      "size": 13253,
-      "sha256": "342b747ef6fa22324f8471ee02a2857bd092b7aaab0883fd3249f2803739ce6a"
+      "size": 13209,
+      "sha256": "96bb62266ee156dcbb9094383d533f4fc72c6010e5822b1ba22c25ab1c01dff4"
     },
     {
       "path": "source/router-ui/vohive.js",
-      "size": 20657,
-      "sha256": "412d76b2f50ada7bcf4bdd9508c4f6283a164214c16a05339f9c536c492038dd"
+      "size": 20681,
+      "sha256": "bd36123fcc874e3eb8940d96900942602c794bcd0eb05c3e6fa55eb458d7e29b"
     },
     {
       "path": "source/vohive-plus/.dockerignore",

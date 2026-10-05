@@ -5,7 +5,7 @@
 | 路径 | 内容 |
 | --- | --- |
 | `source/vohive-plus/` | 完整 Go 后端、Vue 前端、锁文件、第三方源码与许可、个人版构建脚本 |
-| `source/router-ui/` | 当前 LuCI 美化、中文日志、本地管理 / HTTPS 通话入口和服务状态电源启停 |
+| `source/router-ui/` | 当前 LuCI 美化、中文日志、本地管理 / HTTPS 通话入口和服务状态开关与重启 |
 | `source/https/` | 公网反代、局域网/Tailscale DNS、HAProxy、隧道及证书同步脚本；不包含实际证书、私钥或隧道口令 |
 | `source/deployment/` | 0.1.3 Dockerfile、iStoreOS 启动器和 procd 服务 |
 | `source/router-network/` | 奇游/PassWall 兼容及 Tailscale 对端路由保护；2026-10-04 补齐出口客户端规则 |
@@ -42,4 +42,4 @@ LuCI 可用 `sh source/router-ui/install.sh` 安装；中文日志验证运行 `
 
 ## 2026-10-05 LuCI 管理入口与电源操作
 
-“本地管理”按当前 iStoreOS 访问地址打开 HTTP 7575，支持局域网、Tailscale 与 IPv6；“通话中心”继续使用受信任 HTTPS。服务状态卡片的电源按钮复用现有 rc.init 启停接口，显示执行进度并避免重复点击，遵循只读权限和未知/重启状态保护。浏览器模拟 RPC 验证通过，安装不需要重启 VoHive Plus。
+“本地管理”按当前 iStoreOS 访问地址打开 HTTP 7575，支持局域网、Tailscale 与 IPv6；“通话中心”继续使用受信任 HTTPS。服务状态卡片右侧仅保留开关和重启两个按钮，运行时开关呈绿色、停止时呈灰色；复用现有 rc.init 接口，显示执行进度并避免重复点击，遵循只读权限和未知/重启状态保护。独立服务管理栏已移除，手动刷新入口放到日志标题右侧。浏览器模拟 RPC 验证通过，安装不需要重启 VoHive Plus。

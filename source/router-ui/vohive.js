@@ -103,6 +103,7 @@ return view.extend({
         this.powerButton.title = label;
         this.powerButton.setAttribute('aria-label', label);
         this.powerButton.setAttribute('aria-busy', String(this.busy));
+        this.powerButton.setAttribute('aria-pressed', String(Boolean(running)));
         this.powerButton.classList.toggle('green', Boolean(running));
         if (this.busy) this.cards.status.note.textContent = label;
         else if (this.snapshot) {
@@ -122,7 +123,6 @@ return view.extend({
         this.busy = true;
         this.pendingAction = action;
         this.updateButtons();
-        this.controlNote.textContent = '正在' + actionNames[action] + '服务，请稍候…';
         return callRcInit('vohive', action).then(L.bind(function(result) {
             // rc.init returns an exit code, rather than a successful boolean.
             if (result !== 0) throw new Error('操作失败');
@@ -133,7 +133,6 @@ return view.extend({
         }).finally(L.bind(function() {
             this.busy = false;
             this.pendingAction = null;
-            this.controlNote.textContent = this.readonly ? '当前为只读模式' : '管理服务的启动、重启与停止';
             this.updateButtons();
         }, this));
     },
@@ -236,17 +235,21 @@ return view.extend({
         var card = function(key, title, symbol, color) {
             var value = E('div', { 'class': 'vh-value' }, '—'), note = E('div', { 'class': 'vh-card-note' }, '正在读取状态');
             self.cards[key] = { value: value, note: note };
-            var cardIcon = key === 'status' ? (self.powerButton = E('button', { 'type': 'button', 'class': 'vh-card-icon vh-power-toggle ' + color, 'disabled': true, 'aria-label': '等待服务状态', 'click': ui.createHandlerFn(self, 'toggleService') }, icon(symbol))) : E('span', { 'class': 'vh-card-icon ' + color }, icon(symbol));
+            if (key === 'status') {
+                self.powerButton = E('button', { 'type': 'button', 'class': 'vh-card-icon vh-card-button vh-power-toggle', 'disabled': true, 'aria-label': '等待服务状态', 'click': ui.createHandlerFn(self, 'toggleService') }, icon('power'));
+                self.actionButtons.restart = E('button', { 'type': 'button', 'class': 'vh-card-icon vh-card-button vh-restart', 'disabled': true, 'title': '重启服务', 'aria-label': '重启服务', 'click': ui.createHandlerFn(self, 'runAction', 'restart') }, icon('refresh'));
+                return E('div', { 'class': 'vh-card vh-status-card' }, [
+                    E('div', { 'class': 'vh-status-copy' }, [ E('div', { 'class': 'vh-card-top' }, title), value, note ]),
+                    E('div', { 'class': 'vh-status-actions', 'role': 'group', 'aria-label': '服务启停与重启' }, [ self.powerButton, self.actionButtons.restart ])
+                ]);
+            }
+            var cardIcon = E('span', { 'class': 'vh-card-icon ' + color }, icon(symbol));
             return E('div', { 'class': 'vh-card' }, [ E('div', { 'class': 'vh-card-top' }, [ E('span', {}, title), cardIcon ]), value, note ]);
         };
         this.notice = E('div', { 'class': 'vh-notice', 'role': 'status', 'hidden': true });
         this.badgeLabel = E('span', {}, '正在读取');
         this.badge = E('span', { 'class': 'vh-badge', 'role': 'status' }, [ E('span', { 'class': 'vh-dot' }), this.badgeLabel ]);
-        this.refreshButton = button('刷新状态', 'refresh', ui.createHandlerFn(this, 'refreshStatus'));
-        this.controlNote = E('p', { 'class': 'vh-description' }, this.readonly ? '当前为只读模式' : '管理服务的启动、重启与停止');
-        var actions = ['start', 'restart', 'stop'].map(function(action) {
-            return self.actionButtons[action] = button(actionNames[action], { start: 'power', restart: 'refresh', stop: 'stop' }[action], ui.createHandlerFn(self, 'runAction', action), action === 'stop' ? 'vh-danger' : '');
-        });
+        this.refreshButton = E('button', { 'type': 'button', 'class': 'vh-card-icon vh-card-button', 'title': '刷新状态', 'aria-label': '刷新状态', 'click': ui.createHandlerFn(this, 'refreshStatus') }, icon('refresh'));
         this.searchInput = E('input', { 'type': 'search', 'placeholder': '搜索日志内容、设备或接口…', 'aria-label': '搜索日志', 'input': L.bind(this.renderLogs, this) });
         this.levelSelect = E('select', { 'class': 'vh-select', 'aria-label': '日志等级', 'change': L.bind(this.renderLogs, this) }, [ E('option', { 'value': '' }, '全部等级'), E('option', { 'value': 'error' }, '错误'), E('option', { 'value': 'warn' }, '警告'), E('option', { 'value': 'info' }, '信息'), E('option', { 'value': 'debug' }, '调试') ]);
         this.hideHeartbeat = E('input', { 'type': 'checkbox', 'checked': true, 'change': L.bind(this.renderLogs, this) });
@@ -258,16 +261,15 @@ return view.extend({
         this.logNote = E('p', { 'class': 'vh-description' }, '最近 200 条记录 · 最新记录在前');
         this.diagnostics = E('div', { 'class': 'vh-diagnostic-content' });
         var page = E('div', { 'class': 'vh-page' }, [
-            E('link', { 'rel': 'stylesheet', 'href': L.resource('view/services/vohive.css') + '?v=20261005-1' }),
+            E('link', { 'rel': 'stylesheet', 'href': L.resource('view/services/vohive.css') + '?v=20261005-2' }),
             E('div', { 'class': 'vh-hero' }, [
                 E('div', { 'class': 'vh-brand' }, [ E('div', { 'class': 'vh-logo' }, icon('hive')), E('div', {}, [ E('div', { 'class': 'vh-title' }, [ E('h2', { 'class': 'vh-heading' }, 'VoHive'), E('span', { 'class': 'vh-plus' }, 'PLUS') ]), E('p', { 'class': 'vh-subtitle' }, '设备互联，轻松掌控 · iStoreOS 服务管理') ]) ]),
                 E('div', { 'class': 'vh-hero-tools' }, [ this.badge, E('a', { 'class': 'vh-button vh-primary', 'href': localManagementUrl(window.location.hostname), 'target': '_blank', 'rel': 'noopener noreferrer' }, [ E('span', {}, '本地管理'), icon('external') ]), E('a', { 'class': 'vh-button', 'href': 'https://xjp.721609.xyz/#/phone', 'target': '_blank', 'rel': 'noopener noreferrer' }, [ E('span', {}, '通话中心'), icon('external') ]) ])
             ]),
             this.notice,
             E('div', { 'class': 'vh-cards' }, [ card('status', '服务状态', 'power', 'green'), card('boot', '开机自启', 'check', ''), card('port', '访问端口', 'port', 'blue'), card('uptime', '运行时长', 'clock', 'amber') ]),
-            E('div', { 'class': 'vh-panel vh-control' }, [ E('div', {}, [ E('h3', { 'class': 'vh-section-title' }, '服务管理'), this.controlNote ]), E('div', { 'class': 'vh-actions' }, actions.concat([ E('span', { 'class': 'vh-divider' }), this.refreshButton ])) ]),
             E('div', { 'class': 'vh-panel' }, [
-                E('div', { 'class': 'vh-log-header' }, [ E('div', {}, [ E('div', { 'class': 'vh-log-title' }, [ icon('logs'), E('h3', { 'class': 'vh-section-title' }, '运行日志') ]), this.logNote ]), E('label', { 'class': 'vh-auto' }, [ this.autoRefresh, E('span', {}, '自动刷新 · 10 秒') ]) ]),
+                E('div', { 'class': 'vh-log-header' }, [ E('div', {}, [ E('div', { 'class': 'vh-log-title' }, [ icon('logs'), E('h3', { 'class': 'vh-section-title' }, '运行日志') ]), this.logNote ]), E('div', { 'class': 'vh-log-tools' }, [ E('label', { 'class': 'vh-auto' }, [ this.autoRefresh, E('span', {}, '自动刷新 · 10 秒') ]), this.refreshButton ]) ]),
                 E('div', { 'class': 'vh-toolbar' }, [ E('div', { 'class': 'vh-search' }, [ icon('search'), this.searchInput ]), this.levelSelect, E('label', { 'class': 'vh-auto' }, [ this.hideHeartbeat, E('span', {}, '隐藏心跳') ]), this.copyButton ]),
                 E('div', { 'class': 'vh-log-table', 'role': 'table', 'aria-label': '中文运行日志' }, [ E('div', { 'class': 'vh-log-columns', 'role': 'row' }, [ E('span', { 'role': 'columnheader' }, '时间'), E('span', { 'role': 'columnheader' }, '等级'), E('span', { 'role': 'columnheader' }, '日志内容') ]), this.logBody ]),
                 E('div', { 'class': 'vh-log-footer' }, [ this.logCount, this.updated ])
