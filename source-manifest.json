@@ -13,7 +13,7 @@
   "source_correspondence": "Built from source/vohive-plus with embedded rebuilt web UI; deployed binary SHA-256 matches build artifact",
   "secret_scan": "Passed: live Bot credentials and private key material absent from source; existing historical recovery assets unchanged",
   "file_count": 2607,
-  "total_bytes": 20816717,
+  "total_bytes": 20816888,
   "files": [
     {
       "path": "source/VoHivePlus-unlimited-devices.patch",
@@ -182,8 +182,8 @@
     },
     {
       "path": "source/router-ui/check-browser.cjs",
-      "size": 19089,
-      "sha256": "fa774a38c9b0a23cf958143c6aac5363294467d576a8e89f1c70718070a121fe"
+      "size": 19260,
+      "sha256": "7686750614aa690cbb863e9783b099dcd5591224ed67221c78d3b9e8e151b50f"
     },
     {
       "path": "source/router-ui/check-logs.lua",
