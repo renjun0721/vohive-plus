@@ -46,6 +46,7 @@
 .vh-page .vh-card-button { width: 40px; height: 40px; min-width: 40px; padding: 0; margin: 0; border: 0; box-shadow: none; cursor: pointer; transition: background .15s, opacity .15s; }
 .vh-page .vh-card-button:hover:not(:disabled) { background: #6264e825; }
 .vh-page .vh-power-toggle { color: var(--vh-muted); background: var(--vh-soft); }
+.vh-page .vh-power-toggle:hover:not(:disabled) { background: var(--vh-border); }
 .vh-page .vh-power-toggle.green { color: var(--vh-green); background: var(--vh-green-bg); }
 .vh-page .vh-power-toggle.green:hover:not(:disabled) { background: #0ba88025; }
 .vh-page .vh-card-button:disabled { opacity: .45; cursor: not-allowed; }

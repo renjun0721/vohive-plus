@@ -261,7 +261,7 @@ return view.extend({
         this.logNote = E('p', { 'class': 'vh-description' }, '最近 200 条记录 · 最新记录在前');
         this.diagnostics = E('div', { 'class': 'vh-diagnostic-content' });
         var page = E('div', { 'class': 'vh-page' }, [
-            E('link', { 'rel': 'stylesheet', 'href': L.resource('view/services/vohive.css') + '?v=20261005-2' }),
+            E('link', { 'rel': 'stylesheet', 'href': L.resource('view/services/vohive.css') + '?v=20261005-3' }),
             E('div', { 'class': 'vh-hero' }, [
                 E('div', { 'class': 'vh-brand' }, [ E('div', { 'class': 'vh-logo' }, icon('hive')), E('div', {}, [ E('div', { 'class': 'vh-title' }, [ E('h2', { 'class': 'vh-heading' }, 'VoHive'), E('span', { 'class': 'vh-plus' }, 'PLUS') ]), E('p', { 'class': 'vh-subtitle' }, '设备互联，轻松掌控 · iStoreOS 服务管理') ]) ]),
                 E('div', { 'class': 'vh-hero-tools' }, [ this.badge, E('a', { 'class': 'vh-button vh-primary', 'href': localManagementUrl(window.location.hostname), 'target': '_blank', 'rel': 'noopener noreferrer' }, [ E('span', {}, '本地管理'), icon('external') ]), E('a', { 'class': 'vh-button', 'href': 'https://xjp.721609.xyz/#/phone', 'target': '_blank', 'rel': 'noopener noreferrer' }, [ E('span', {}, '通话中心'), icon('external') ]) ])

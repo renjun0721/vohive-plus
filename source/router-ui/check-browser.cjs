@@ -117,6 +117,8 @@ const server = http.createServer((req, res) => {
     assert.equal(await page.locator('.vh-badge').textContent(), '已停止');
     assert.equal(await page.locator('.vh-power-toggle').getAttribute('aria-pressed'), 'false');
     assert.equal(await page.evaluate(() => getComputedStyle(__view.powerButton).color === getComputedStyle(__view.cards.status.note).color), true);
+    await page.locator('.vh-power-toggle').hover();
+    assert.equal(await page.evaluate(() => getComputedStyle(__view.powerButton).backgroundColor === getComputedStyle(document.querySelector('.vh-status-card')).borderTopColor), true);
     assert.equal(await page.getByRole('button', { name: '重启服务', exact: true }).isDisabled(), true);
     await page.locator('.vh-status-card').screenshot({ path: '/check/preview-stopped-card.png' });
     await page.getByRole('button', { name: '启动服务', exact: true }).click();
