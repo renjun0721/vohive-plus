@@ -39,6 +39,11 @@
 .vh-page .vh-card-icon.green { color: var(--vh-green); background: var(--vh-green-bg); }
 .vh-page .vh-card-icon.blue { color: #4c8bdc; background: #eef5ff; }
 .vh-page .vh-card-icon.amber { color: #b58b37; background: #fdf6e8; }
+.vh-page .vh-power-toggle { width: 40px; height: 40px; min-width: 40px; padding: 0; margin: 0; border: 0; box-shadow: none; cursor: pointer; transition: background .15s, opacity .15s; }
+.vh-page .vh-power-toggle:hover:not(:disabled) { background: #6264e825; }
+.vh-page .vh-power-toggle.green:hover:not(:disabled) { background: #0ba88025; }
+.vh-page .vh-power-toggle:disabled { opacity: .45; cursor: not-allowed; }
+.vh-page .vh-power-toggle[aria-busy="true"] { cursor: wait; }
 .vh-page .vh-value { font-size: 23px; font-weight: 650; margin: 8px 0 3px; line-height: 1.35; letter-spacing: -.4px; font-variant-numeric: tabular-nums; }
 .vh-page .vh-card-note { color: var(--vh-muted); font-size: 12px; min-height: 19px; }
 .vh-page .vh-panel { background: var(--vh-bg); border: 1px solid var(--vh-border); border-radius: 14px; box-shadow: var(--vh-shadow); margin: 0 0 20px; overflow: hidden; }

@@ -2,7 +2,7 @@
 
 访问地址：**https://xjp.721609.xyz/**。使用原 VoHive Plus 网页账号登录，并允许浏览器使用麦克风。
 
-iStoreOS 的 VoHive Plus 服务管理页提供“智能 HTTPS”和“通话中心”入口，均使用这个域名，不再从入口打开 HTTP 页面。
+iStoreOS 的 VoHive Plus 服务管理页提供“本地管理”和“通话中心”入口。“本地管理”直接打开当前路由器地址的 HTTP 7575 端口，提高局域网或 Tailscale 管理访问速度；“通话中心”使用 `https://xjp.721609.xyz/#/phone`，以便浏览器申请麦克风权限。下述域名访问与智能 DNS 配置继续用于 HTTPS 通话。
 
 ## 按网络选择连接
 

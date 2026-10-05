@@ -4,7 +4,7 @@ const http = require('node:http');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const { chromium } = require('/check/node_modules/playwright');
-const root = '/work';
+const root = process.env.VOHIVE_UI_DIR || '/work';
 const fixture = JSON.parse(fs.readFileSync('/check/status.json', 'utf8'));
 const source = fs.readFileSync(path.join(root, 'vohive.js'), 'utf8');
 new Function(source); // LuCI view modules intentionally have a top-level return.
@@ -30,6 +30,7 @@ window.__notifications = [];
 window.__actions = [];
 window.__polls = [];
 window.__rpcResult = 0;
+window.__deferAction = false;
 window.__readonly = false;
 window.__fail = false;
 window.__fixture = null;
@@ -38,7 +39,7 @@ Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: 
 document.execCommand = function(action) { if (action === 'copy') { window.__copied = document.querySelector('textarea').value; return true; } return false; };
 var L = { hasViewPermission: function() { return !window.__readonly; }, resource: function(p) { return '/assets/' + p.split('/').pop(); }, bind: function(fn, scope) { return fn.bind(scope); } };
 var view = { extend: function(v) { return v; } };
-var rpc = { declare: function(spec) { return function(name, action) { if (spec.method === 'init') { window.__actions.push(action); return Promise.resolve(window.__rpcResult); } return window.__fail ? Promise.reject(new Error('network failed')) : Promise.resolve({ vohive: { enabled: true, running: true } }); }; } };
+var rpc = { declare: function(spec) { return function(name, action) { if (spec.method === 'init') { window.__actions.push(action); return window.__deferAction ? new Promise(function(resolve) { window.__resolveAction = resolve; }) : Promise.resolve(window.__rpcResult); } return window.__fail ? Promise.reject(new Error('network failed')) : Promise.resolve({ vohive: { enabled: true, running: true } }); }; } };
 var fileApi = { exec: function() { return window.__fail ? Promise.reject(new Error('network failed')) : Promise.resolve({code:0, stdout:JSON.stringify(window.__fixture)}); } };
 var ui = { createHandlerFn: function(scope, name, arg) { return function() { return scope[name](arg); }; }, addNotification: function(title, node, type) { window.__notifications.push({ text:node.textContent, type:type }); } };
 var poll = { add: function(fn) { window.__polls.push(fn); }, remove: function(fn) { window.__polls = window.__polls.filter(function(p) { return p !== fn; }); } };
@@ -81,6 +82,59 @@ const server = http.createServer((req, res) => {
     assert.equal(await page.locator('.vh-badge').textContent(), '运行中');
     assert.equal(await page.locator('button:has-text("启动")').isDisabled(), true);
     assert.equal(await page.locator('button:has-text("停止")').isDisabled(), false);
+    assert.equal(await page.getByRole('link', { name: '本地管理' }).getAttribute('href'), 'http://127.0.0.1:7575/');
+    assert.equal(await page.getByRole('link', { name: '通话中心' }).getAttribute('href'), 'https://xjp.721609.xyz/#/phone');
+    // Exercise the same view using the addresses used to open LuCI, without navigation.
+    for (const [host, expected] of [['192.168.100.1', 'http://192.168.100.1:7575/'], ['100.71.142.28', 'http://100.71.142.28:7575/'], ['fd7a:115c:a1e0::1', 'http://[fd7a:115c:a1e0::1]:7575/'], ['[fd7a:115c:a1e0::1]', 'http://[fd7a:115c:a1e0::1]:7575/']]) {
+        const href = await page.evaluate(({host}) => {
+            // URL helper is scoped to the module; use a fresh module with a location-only wrapper.
+            return fetch('/source').then(r => r.text()).then(text => {
+                const context = Object.create(window);
+                Object.defineProperty(context, 'location', {value:{hostname:host}});
+                context.getComputedStyle = window.getComputedStyle.bind(window);
+                const v = new Function('view','rpc','fs','ui','poll','L','E','window',text)(view,rpc,fileApi,ui,{add:function(){},remove:function(){}},L,E,context);
+                return v.render(null).querySelector('.vh-primary').getAttribute('href');
+            });
+        }, {host});
+        assert.equal(href, expected);
+    }
+    console.log('通过：局域网、Tailscale、IPv6 本地管理入口与 HTTPS 通话入口');
+
+    await page.evaluate(() => { __deferAction = true; });
+    await page.getByRole('button', { name: '停止服务', exact: true }).click();
+    assert.equal(await page.evaluate(() => __actions.at(-1)), 'stop');
+    assert.equal(await page.locator('.vh-power-toggle').getAttribute('aria-busy'), 'true');
+    assert.equal(await page.locator('.vh-power-toggle').isDisabled(), true);
+    assert.equal(await page.locator('.vh-card-note').first().textContent(), '正在停止服务，请稍候…');
+    const pendingActionCount = await page.evaluate(() => __actions.length);
+    await page.evaluate(() => { __view.powerButton.click(); return __view.runAction('restart'); });
+    assert.equal(await page.evaluate(() => __actions.length), pendingActionCount);
+    await page.evaluate(() => { __fixture.running = false; __resolveAction(0); });
+    await page.waitForFunction(() => !__view.busy);
+    assert.equal(await page.locator('.vh-badge').textContent(), '已停止');
+    await page.getByRole('button', { name: '启动服务', exact: true }).click();
+    assert.equal(await page.evaluate(() => __actions.at(-1)), 'start');
+    await page.evaluate(() => { __fixture.running = true; __resolveAction(0); });
+    await page.waitForFunction(() => !__view.busy);
+    assert.equal(await page.locator('.vh-badge').textContent(), '运行中');
+    await page.evaluate(() => { __deferAction = false; __rpcResult = 1; });
+    await page.getByRole('button', { name: '停止服务', exact: true }).click();
+    await page.waitForFunction(() => !__view.busy);
+    assert.equal(await page.evaluate(() => __notifications.at(-1).type), 'error');
+    assert.equal(await page.getByRole('button', { name: '停止服务', exact: true }).isDisabled(), false);
+    await page.evaluate(() => { __rpcResult = 0; __fail = true; return __view.toggleService(); });
+    assert.equal(await page.locator('.vh-notice').isVisible(), true);
+    assert.equal(await page.locator('.vh-power-toggle').getAttribute('aria-busy'), 'false');
+    await page.evaluate(() => { __fail = false; return __view.refreshStatus(); });
+    for (const state of ['unknown', 'restarting']) {
+        await page.evaluate(state => { __fixture.available = state !== 'unknown'; __fixture.restarting = state === 'restarting'; __view.updateStatus({service:{enabled:true},info:__fixture}); }, state);
+        assert.equal(await page.locator('.vh-power-toggle').isDisabled(), true);
+        const count = await page.evaluate(() => __actions.length);
+        await page.evaluate(() => __view.toggleService());
+        assert.equal(await page.evaluate(() => __actions.length), count);
+    }
+    await page.evaluate(() => { __rpcResult = 0; __fixture.available = true; __fixture.restarting = false; __view.updateStatus({service:{enabled:true},info:__fixture}); });
+    console.log('通过：电源启停、进度显示、防重复操作、失败恢复与未知/重启状态保护（模拟 RPC）');
     assert.equal(await page.locator('.vh-log-body').textContent().then(s => /Worker|active_workers|\[GIN\]|\x1b/.test(s)), false);
     assert.equal(await page.locator('.vh-log-row').count(), fixture.logs.filter(l => !l.heartbeat).length);
     console.log('通过：真实状态、中文日志、默认心跳筛选与按钮状态');
@@ -118,6 +172,8 @@ const server = http.createServer((req, res) => {
     await page.evaluate(() => { __readonly = true; const data = {service:{enabled:true},info:__fixture}; document.getElementById('app').replaceChildren(__view.render(data)); });
     assert.equal(await page.locator('button:has-text("启动")').isDisabled(), true);
     const actionCount = await page.evaluate(() => __actions.length);
+    assert.equal(await page.locator('.vh-power-toggle').isDisabled(), true);
+    await page.evaluate(() => __view.toggleService());
     await page.evaluate(() => __view.runAction('start'));
     assert.equal(await page.evaluate(() => __actions.length), actionCount);
     console.log('通过：操作成功与失败提示、只读权限（模拟操作）');

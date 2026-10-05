@@ -56,6 +56,12 @@ function timeText(epoch) {
     return new Date(epoch * 1000).toLocaleTimeString('zh-CN', { hour12: false });
 }
 
+function localManagementUrl(hostname) {
+    var host = hostname;
+    if (host.indexOf(':') >= 0 && host.charAt(0) !== '[') host = '[' + host + ']';
+    return 'http://' + host + ':7575/';
+}
+
 return view.extend({
     load: function() {
         return this.fetchStatus().catch(function() { return null; });
@@ -92,11 +98,29 @@ return view.extend({
         Object.keys(this.actionButtons).forEach(L.bind(function(action) {
             this.actionButtons[action].disabled = this.readonly || this.busy || !known || transitioning || (action === 'start' ? running : !running);
         }, this));
+        var label = this.busy ? '正在' + actionNames[this.pendingAction] + '服务，请稍候…' : this.readonly ? '当前为只读模式' : !known ? '等待服务状态' : transitioning ? '服务正在重启' : running ? '停止服务' : '启动服务';
+        this.powerButton.disabled = this.readonly || this.busy || !known || transitioning;
+        this.powerButton.title = label;
+        this.powerButton.setAttribute('aria-label', label);
+        this.powerButton.setAttribute('aria-busy', String(this.busy));
+        this.powerButton.classList.toggle('green', Boolean(running));
+        if (this.busy) this.cards.status.note.textContent = label;
+        else if (this.snapshot) {
+            var info = this.snapshot.info;
+            var health = { healthy: '健康检查正常', unhealthy: '健康检查异常', starting: '正在进行健康检查', unknown: '未配置健康检查' };
+            this.cards.status.note.textContent = !known ? '暂时无法读取容器信息' : running ? (health[info.health] || '健康状态未知') : '服务尚未运行';
+        }
+    },
+
+    toggleService: function() {
+        if (this.powerButton.disabled) return Promise.resolve();
+        return this.runAction(this.snapshot.info.running ? 'stop' : 'start');
     },
 
     runAction: function(action) {
         if (this.readonly || this.busy || !actionNames[action]) return Promise.resolve();
         this.busy = true;
+        this.pendingAction = action;
         this.updateButtons();
         this.controlNote.textContent = '正在' + actionNames[action] + '服务，请稍候…';
         return callRcInit('vohive', action).then(L.bind(function(result) {
@@ -108,6 +132,7 @@ return view.extend({
             ui.addNotification(null, E('p', {}, '服务操作失败，请检查管理权限和服务启动脚本。'), 'error');
         }).finally(L.bind(function() {
             this.busy = false;
+            this.pendingAction = null;
             this.controlNote.textContent = this.readonly ? '当前为只读模式' : '管理服务的启动、重启与停止';
             this.updateButtons();
         }, this));
@@ -120,8 +145,6 @@ return view.extend({
         this.badge.className = 'vh-badge ' + (!known ? '' : info.restarting || info.paused ? 'warning' : info.running ? 'running' : 'stopped');
         this.badgeLabel.textContent = state;
         this.cards.status.value.textContent = state;
-        var health = { healthy: '健康检查正常', unhealthy: '健康检查异常', starting: '正在进行健康检查', unknown: '未配置健康检查' };
-        this.cards.status.note.textContent = !known ? '暂时无法读取容器信息' : info.running ? (health[info.health] || '健康状态未知') : '服务尚未运行';
         this.cards.status.value.style.color = known && info.running && !info.paused ? 'var(--vh-green)' : 'var(--vh-text)';
         this.cards.boot.value.textContent = typeof data.service.enabled === 'boolean' ? (data.service.enabled ? '已开启' : '已关闭') : '未知';
         this.cards.boot.note.textContent = data.service.enabled ? '设备开机后自动启动' : '可在系统启动项中设置';
@@ -203,6 +226,7 @@ return view.extend({
     render: function(data) {
         this.readonly = !L.hasViewPermission();
         this.busy = false;
+        this.pendingAction = null;
         this.snapshot = null;
         this.logSignature = null;
         this.actionButtons = {};
@@ -212,7 +236,8 @@ return view.extend({
         var card = function(key, title, symbol, color) {
             var value = E('div', { 'class': 'vh-value' }, '—'), note = E('div', { 'class': 'vh-card-note' }, '正在读取状态');
             self.cards[key] = { value: value, note: note };
-            return E('div', { 'class': 'vh-card' }, [ E('div', { 'class': 'vh-card-top' }, [ E('span', {}, title), E('span', { 'class': 'vh-card-icon ' + color }, icon(symbol)) ]), value, note ]);
+            var cardIcon = key === 'status' ? (self.powerButton = E('button', { 'type': 'button', 'class': 'vh-card-icon vh-power-toggle ' + color, 'disabled': true, 'aria-label': '等待服务状态', 'click': ui.createHandlerFn(self, 'toggleService') }, icon(symbol))) : E('span', { 'class': 'vh-card-icon ' + color }, icon(symbol));
+            return E('div', { 'class': 'vh-card' }, [ E('div', { 'class': 'vh-card-top' }, [ E('span', {}, title), cardIcon ]), value, note ]);
         };
         this.notice = E('div', { 'class': 'vh-notice', 'role': 'status', 'hidden': true });
         this.badgeLabel = E('span', {}, '正在读取');
@@ -233,10 +258,10 @@ return view.extend({
         this.logNote = E('p', { 'class': 'vh-description' }, '最近 200 条记录 · 最新记录在前');
         this.diagnostics = E('div', { 'class': 'vh-diagnostic-content' });
         var page = E('div', { 'class': 'vh-page' }, [
-            E('link', { 'rel': 'stylesheet', 'href': L.resource('view/services/vohive.css') + '?v=20261001-1' }),
+            E('link', { 'rel': 'stylesheet', 'href': L.resource('view/services/vohive.css') + '?v=20261005-1' }),
             E('div', { 'class': 'vh-hero' }, [
                 E('div', { 'class': 'vh-brand' }, [ E('div', { 'class': 'vh-logo' }, icon('hive')), E('div', {}, [ E('div', { 'class': 'vh-title' }, [ E('h2', { 'class': 'vh-heading' }, 'VoHive'), E('span', { 'class': 'vh-plus' }, 'PLUS') ]), E('p', { 'class': 'vh-subtitle' }, '设备互联，轻松掌控 · iStoreOS 服务管理') ]) ]),
-                E('div', { 'class': 'vh-hero-tools' }, [ this.badge, E('a', { 'class': 'vh-button vh-primary', 'href': 'https://xjp.721609.xyz/', 'target': '_blank', 'rel': 'noopener noreferrer' }, [ E('span', {}, '智能 HTTPS'), icon('external') ]), E('a', { 'class': 'vh-button', 'href': 'https://xjp.721609.xyz/#/phone', 'target': '_blank', 'rel': 'noopener noreferrer' }, [ E('span', {}, '通话中心'), icon('external') ]) ])
+                E('div', { 'class': 'vh-hero-tools' }, [ this.badge, E('a', { 'class': 'vh-button vh-primary', 'href': localManagementUrl(window.location.hostname), 'target': '_blank', 'rel': 'noopener noreferrer' }, [ E('span', {}, '本地管理'), icon('external') ]), E('a', { 'class': 'vh-button', 'href': 'https://xjp.721609.xyz/#/phone', 'target': '_blank', 'rel': 'noopener noreferrer' }, [ E('span', {}, '通话中心'), icon('external') ]) ])
             ]),
             this.notice,
             E('div', { 'class': 'vh-cards' }, [ card('status', '服务状态', 'power', 'green'), card('boot', '开机自启', 'check', ''), card('port', '访问端口', 'port', 'blue'), card('uptime', '运行时长', 'clock', 'amber') ]),
