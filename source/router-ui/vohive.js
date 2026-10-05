@@ -236,8 +236,9 @@ return view.extend({
             var value = E('div', { 'class': 'vh-value' }, '—'), note = E('div', { 'class': 'vh-card-note' }, '正在读取状态');
             self.cards[key] = { value: value, note: note };
             if (key === 'status') {
-                self.powerButton = E('button', { 'type': 'button', 'class': 'vh-card-icon vh-card-button vh-power-toggle', 'disabled': true, 'aria-label': '等待服务状态', 'click': ui.createHandlerFn(self, 'toggleService') }, icon('power'));
-                self.actionButtons.restart = E('button', { 'type': 'button', 'class': 'vh-card-icon vh-card-button vh-restart', 'disabled': true, 'title': '重启服务', 'aria-label': '重启服务', 'click': ui.createHandlerFn(self, 'runAction', 'restart') }, icon('refresh'));
+                // This view owns disabled state; LuCI's handler disables before invoking us.
+                self.powerButton = E('button', { 'type': 'button', 'class': 'vh-card-icon vh-card-button vh-power-toggle', 'disabled': true, 'aria-label': '等待服务状态', 'click': L.bind(self.toggleService, self) }, icon('power'));
+                self.actionButtons.restart = E('button', { 'type': 'button', 'class': 'vh-card-icon vh-card-button vh-restart', 'disabled': true, 'title': '重启服务', 'aria-label': '重启服务', 'click': function() { return self.runAction('restart'); } }, icon('refresh'));
                 return E('div', { 'class': 'vh-card vh-status-card' }, [
                     E('div', { 'class': 'vh-status-copy' }, [ E('div', { 'class': 'vh-card-top' }, title), value, note ]),
                     E('div', { 'class': 'vh-status-actions', 'role': 'group', 'aria-label': '服务启停与重启' }, [ self.powerButton, self.actionButtons.restart ])
@@ -261,7 +262,7 @@ return view.extend({
         this.logNote = E('p', { 'class': 'vh-description' }, '最近 200 条记录 · 最新记录在前');
         this.diagnostics = E('div', { 'class': 'vh-diagnostic-content' });
         var page = E('div', { 'class': 'vh-page' }, [
-            E('link', { 'rel': 'stylesheet', 'href': L.resource('view/services/vohive.css') + '?v=20261005-3' }),
+            E('link', { 'rel': 'stylesheet', 'href': L.resource('view/services/vohive.css') + '?v=20261005-4' }),
             E('div', { 'class': 'vh-hero' }, [
                 E('div', { 'class': 'vh-brand' }, [ E('div', { 'class': 'vh-logo' }, icon('hive')), E('div', {}, [ E('div', { 'class': 'vh-title' }, [ E('h2', { 'class': 'vh-heading' }, 'VoHive'), E('span', { 'class': 'vh-plus' }, 'PLUS') ]), E('p', { 'class': 'vh-subtitle' }, '设备互联，轻松掌控 · iStoreOS 服务管理') ]) ]),
                 E('div', { 'class': 'vh-hero-tools' }, [ this.badge, E('a', { 'class': 'vh-button vh-primary', 'href': localManagementUrl(window.location.hostname), 'target': '_blank', 'rel': 'noopener noreferrer' }, [ E('span', {}, '本地管理'), icon('external') ]), E('a', { 'class': 'vh-button', 'href': 'https://xjp.721609.xyz/#/phone', 'target': '_blank', 'rel': 'noopener noreferrer' }, [ E('span', {}, '通话中心'), icon('external') ]) ])

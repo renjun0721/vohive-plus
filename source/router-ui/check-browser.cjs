@@ -8,6 +8,11 @@ const root = process.env.VOHIVE_UI_DIR || '/work';
 const fixture = JSON.parse(fs.readFileSync('/check/status.json', 'utf8'));
 const source = fs.readFileSync(path.join(root, 'vohive.js'), 'utf8');
 new Function(source); // LuCI view modules intentionally have a top-level return.
+// Use the installed LuCI handler: it disables currentTarget before calling the view.
+const installedUI = fs.readFileSync('/luci/resources/ui.js', 'utf8');
+const handlerMatch = installedUI.match(/createHandlerFn\(ctx,fn,\.\.\.args\)\{[\s\S]*?\},instantiateView/);
+assert(handlerMatch, 'Cannot locate the installed LuCI click handler');
+const handlerMethod = handlerMatch[0].slice(0, -',instantiateView'.length);
 const harness = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/luci/argon/css/cascade.css"><style>
 body { margin:0; background:#f4f5f8; } .preview-sidebar{position:fixed;inset:0 auto 0 0;width:215px;background:#fff;padding:24px 14px;border-right:1px solid #e8eaf0;color:#4f5970;font:15px sans-serif}.preview-logo{font-size:30px;font-weight:bold;color:#606fe8;margin:8px 22px 32px}.preview-nav{padding:14px 18px;border-radius:9px;margin:3px 0}.preview-nav.active{background:#6264e8;color:white}.preview-subnav{padding:14px 22px 14px 38px;font-size:13px}.preview-subnav.active{color:#6264e8;background:#f3f3fd}.preview-main{margin-left:215px;padding:32px}.preview-breadcrumb{font:12px sans-serif;color:#8590a4;margin:0 0 18px} @media(max-width:700px){.preview-sidebar{display:none}.preview-main{margin-left:0;padding:14px}.preview-breadcrumb{margin:4px 0 14px}}
 </style></head><body><aside class="preview-sidebar"><div class="preview-logo">iStoreOS</div><div class="preview-nav">⌂　首页</div><div class="preview-nav">◎　网络向导</div><div class="preview-nav">▦　状态</div><div class="preview-nav">⚙　系统</div><div class="preview-nav">▧　iStore</div><div class="preview-nav active">⚙　服务</div><div class="preview-subnav">PassWall</div><div class="preview-subnav">应用过滤</div><div class="preview-subnav">易有云文件管理器</div><div class="preview-subnav">Tailscale</div><div class="preview-subnav">动态 DNS</div><div class="preview-subnav active">VoHive Plus</div><div class="preview-subnav">网络唤醒</div></aside><main class="preview-main"><div class="preview-breadcrumb">服务　/　VoHive Plus</div><div id="app"></div></main><script>
@@ -37,11 +42,11 @@ window.__fixture = null;
 window.__copied = '';
 Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
 document.execCommand = function(action) { if (action === 'copy') { window.__copied = document.querySelector('textarea').value; return true; } return false; };
-var L = { hasViewPermission: function() { return !window.__readonly; }, resource: function(p) { return '/assets/' + p.split('/').pop(); }, bind: function(fn, scope) { return fn.bind(scope); } };
+var L = { hasViewPermission: function() { return !window.__readonly; }, resource: function(p) { return '/assets/' + p.split('/').pop(); }, bind: function(fn, scope, ...args) { return fn.bind(scope, ...args); } };
 var view = { extend: function(v) { return v; } };
 var rpc = { declare: function(spec) { return function(name, action) { if (spec.method === 'init') { window.__actions.push(action); return window.__deferAction ? new Promise(function(resolve) { window.__resolveAction = resolve; }) : Promise.resolve(window.__rpcResult); } return window.__fail ? Promise.reject(new Error('network failed')) : Promise.resolve({ vohive: { enabled: true, running: true } }); }; } };
 var fileApi = { exec: function() { return window.__fail ? Promise.reject(new Error('network failed')) : Promise.resolve({code:0, stdout:JSON.stringify(window.__fixture)}); } };
-var ui = { createHandlerFn: function(scope, name, arg) { return function() { return scope[name](arg); }; }, addNotification: function(title, node, type) { window.__notifications.push({ text:node.textContent, type:type }); } };
+var ui = { ${handlerMethod}, addNotification: function(title, node, type) { window.__notifications.push({ text:node.textContent, type:type }); } };
 var poll = { add: function(fn) { window.__polls.push(fn); }, remove: function(fn) { window.__polls = window.__polls.filter(function(p) { return p !== fn; }); } };
 Promise.all([fetch('/source').then(function(r) { return r.text(); }),fetch('/fixture').then(function(r) { return r.json(); })]).then(function(data) {
     window.__fixture = data[1];
