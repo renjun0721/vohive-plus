@@ -8,5 +8,7 @@
   "go": "1.27.1",
   "node": "24.21.0",
   "pnpm": "11.25.0",
-  "codec_runtime": "Use source/deployment/Personal.Dockerfile; iStoreOS native musl execution is unsupported"
+  "codec_runtime": "Use source/deployment/Personal.Dockerfile; iStoreOS native musl execution is unsupported",
+  "source_commit": "cb5fe77aed44a2c01d47b4e201ff8eace73945ec",
+  "build_time": "2026-10-10T14:19:02Z"
 }
