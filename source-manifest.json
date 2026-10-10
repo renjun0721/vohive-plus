@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-03",
-  "version": "0.1.3-personal-classic",
+  "date": "2026-10-10",
+  "version": "0.1.4-personal-classic",
   "base_source_commit": "f1c24573bdc0326cbf8800ba5feab544838e60d7",
   "github_base_commit": "581a5e38fa72b85900f8a6a1ad0a4b39720b6f70",
   "upstream_hideck_commit": "3fd3d6aaf55924c338c2cf3f092e1af1f588d152",
@@ -9,11 +9,11 @@
     "3cbb6c1aa0e9bd77a1da98f6c4d60cd866b4e4c1",
     "a1273f0281cf74b288bab329d734c83c5afc3f48"
   ],
-  "running_binary_sha256": "9a4df904a903a68fe0e54816c52712e29dc7abd2dc63d920cd023ce9fc530631",
+  "running_binary_sha256": "5684a750fbe68f0f4b301133b3f77e03d149e630ec07755c79db66390a148fe7",
   "source_correspondence": "Built from source/vohive-plus with embedded rebuilt web UI; deployed binary SHA-256 matches build artifact",
   "secret_scan": "Passed: live Bot credentials and private key material absent from source; existing historical recovery assets unchanged",
-  "file_count": 2607,
-  "total_bytes": 20817808,
+  "file_count": 2612,
+  "total_bytes": 20841438,
   "files": [
     {
       "path": "source/VoHivePlus-unlimited-devices.patch",
@@ -22,8 +22,8 @@
     },
     {
       "path": "source/deployment/Personal.Dockerfile",
-      "size": 1219,
-      "sha256": "0f7a395e206ef0d1439b759da12f6c1c639cf50369d9cc3e4949b692eb7e372b"
+      "size": 1244,
+      "sha256": "b54ef7936788b1b8e40c18c8312105265031ae4f51d7937a2f5e40d11d52e283"
     },
     {
       "path": "source/deployment/vohive-plus-run",
@@ -317,8 +317,8 @@
     },
     {
       "path": "source/vohive-plus/PERSONAL-NOTICE.md",
-      "size": 2735,
-      "sha256": "d43554d618a6b19ef625510de38e287c428258f6687b8b3a68040f97219717cc"
+      "size": 3217,
+      "sha256": "790568b50ae4731c53f95ee43d76b41af115833e6b2478cc23313f7858c1d6d9"
     },
     {
       "path": "source/vohive-plus/README.md",
@@ -333,7 +333,7 @@
     {
       "path": "source/vohive-plus/build-personal.sh",
       "size": 743,
-      "sha256": "2d68fdc0382c3e24622522409bb4b7af58be8fa4909d5fc286ed815e8c7c319e"
+      "sha256": "38ccdbb8b297b560ca434ee88db5cd8bfc29343228525fcb1706050cf3ee3bd8"
     },
     {
       "path": "source/vohive-plus/caddy-dns/alidns.caddy",
@@ -472,8 +472,8 @@
     },
     {
       "path": "source/vohive-plus/docs/operator-notes.md",
-      "size": 16793,
-      "sha256": "f487e8e08ba60a56e0de7e3bf5ed54d81e26aab5713edb3f87fc2abcfbedd412"
+      "size": 17616,
+      "sha256": "d14d8e1c69b4e9c4192275524ff0a66cd482dab04c450cf323670119ef946513"
     },
     {
       "path": "source/vohive-plus/docs/volte-native.md",
@@ -6932,18 +6932,18 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/child_rekey.go",
-      "size": 7594,
-      "sha256": "7b531c1980cecbadd51a170776e8a32e9d3a9f08b7b8f453c2a7c0a62d47117f"
+      "size": 7735,
+      "sha256": "2aff17b39cc63eb6591366c478854fd0093880b5e979d8ee834c4e8228639474"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/child_rekey_lifecycle.go",
-      "size": 6832,
-      "sha256": "beb90a291a1768e78470fd8d7a0818c0176ceba9d037021c056b514da01960f7"
+      "size": 6912,
+      "sha256": "d862cf4f1e8bbdda45de95bc38dca9ca898a8322c08aab69c1e12a12cfe0f24b"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/child_rekey_peer.go",
-      "size": 8467,
-      "sha256": "0062f432c0ee7fed8fc830d208668ef004f91b9be76a74f2515429509f19cec6"
+      "size": 9019,
+      "sha256": "b830729542d9256c03060b941ac13234b3742f6d06403902bf6d5e45c43a174a"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/child_sa_diagnostics.go",
@@ -6986,6 +6986,16 @@
       "sha256": "2a41868afca3cd4dbb7f4a7d98062c969ba5d07a7968d6b1e79a383699b331f1"
     },
     {
+      "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/device_identity.go",
+      "size": 2485,
+      "sha256": "e8d030b9ea0bb7a68f7579bace035d79d291487cfe854e1d5155e89f9d54c017"
+    },
+    {
+      "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/device_identity_test.go",
+      "size": 6750,
+      "sha256": "a723d6ab8f8507de38de1fea8e50ca77c0cb24264f10c8ffbe83b21f7564394c"
+    },
+    {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/driver_compat.go",
       "size": 3610,
       "sha256": "add0da8b3e9ba9532b5934e7e590e83b574157d341a578b2baf3c812e51f7e02"
@@ -7022,8 +7032,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/eap_auth_rfc.go",
-      "size": 9963,
-      "sha256": "a4f257567cec2095f72f19b7570db3d481a06b014dd5db00d7364672cc2b516f"
+      "size": 10025,
+      "sha256": "83d758c6e61a113422324a161aac14bc73122b35358708455c7ece9dbef215f6"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/eap_auth_rfc_test.go",
@@ -7082,8 +7092,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/established_control_test.go",
-      "size": 21807,
-      "sha256": "9c4fc5b655c67b05c74dc41b822e29fb1e734557bb8244bb0fe3671019ae2287"
+      "size": 21880,
+      "sha256": "f540ff87495a25138fca53d843f2bbea4fffdd17544757bb36712c511946e84f"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/fragment.go",
@@ -7172,8 +7182,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/ike_rekey.go",
-      "size": 8229,
-      "sha256": "d81f7c374dc5644fd79d7e527c86bfc5ac673af9eca8c9817a3f206d16b98b6d"
+      "size": 8275,
+      "sha256": "ef4c3b96884bdbc5b8bd8a847350e17e5e94e7954bb367aa05b2cbddedc20e01"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/ike_rekey_retired.go",
@@ -7342,8 +7352,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/rekey_api.go",
-      "size": 5522,
-      "sha256": "2719ba2f3e8354145b5ef9391d8794d32cd62c8e9a2f85f7f66f361a7ec8a46d"
+      "size": 5684,
+      "sha256": "fbd9aedb23fea0e942e12186f7b0c5c4b48a2654879b9067e520cf9420203e7d"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/rekey_delete.go",
@@ -7352,23 +7362,23 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/rekey_delete_test.go",
-      "size": 5638,
-      "sha256": "dd994d16993884e2b68c0364adb73cfacb7356f7c109d1b278118e42d11996da"
+      "size": 5714,
+      "sha256": "0c20622dbb3dba78fc9ee9eca33824f2d4685f33904ef7619b435bd7e3569de8"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/rekey_restoration_test.go",
-      "size": 12415,
-      "sha256": "10605d8507884f76fbd5146e6b2aa55a083491e122cfdf43b4d67a1c43ccf3af"
+      "size": 12453,
+      "sha256": "748ba6d5420f42f5f48f73a835a3d1fb35b31dcadf78b78bff6eb2c6a6ab322d"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/rekey_timer.go",
-      "size": 4252,
-      "sha256": "3fa5b7273cf41313abc02d52c851c3280bbcb430ba96188400ca45d168c73c1c"
+      "size": 5291,
+      "sha256": "0a2e4985b506756b5e46152eb2ac3bd4235758b4cd5ab52c37988cab8b45c3b3"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/rekey_timer_test.go",
-      "size": 1512,
-      "sha256": "2d7c67e6896c96b614ad7c113b90c8486a49521712b898d637e9f254f8652864"
+      "size": 3085,
+      "sha256": "8b658a5f9b0120b0948ccfa39bb7eb1b481c634bf1bb68d3639b214db60d98da"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/rekey_xfrm.go",
@@ -7377,13 +7387,13 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/resume_lifecycle.go",
-      "size": 4637,
-      "sha256": "614d849f26c1302b2a718703f8b6a31503be9ef707490d9ba1f2a91838d9f491"
+      "size": 4709,
+      "sha256": "2f958ed01370df01f29c451676fe74730569c60c53866f1dc8beccad9053bf24"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/session.go",
-      "size": 37851,
-      "sha256": "1501ef9b0330e6de6220702a600e809b6ea2941ab60757fdea60dae862dedf9b"
+      "size": 38368,
+      "sha256": "72f613a52bf1d6b84a487d38ab06fab81783ca3a307920acf1d9d6e4ae7ed844"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/session_activity.go",
@@ -7452,13 +7462,13 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/state_auth.go",
-      "size": 24376,
-      "sha256": "496f515c91e262d23588ade84e95f414e5b4fee0cf8c0235d2a8d458e159148d"
+      "size": 24819,
+      "sha256": "1b891dfd46aca5a9841b39d2115ac71cf1894fbd434d6eb4318ee1400407be3d"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/state_auth_eap_helpers.go",
-      "size": 6041,
-      "sha256": "7c851a10455e9c3c347b9b3c37c7df010667cb9b2d72e88f815713328148255f"
+      "size": 5918,
+      "sha256": "a10f70f1b5a2f503926bbb2e74b5bc5cf01eb309817ceebd86e0b9db99000c8a"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/state_auth_eap_validation.go",
@@ -7467,8 +7477,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/state_auth_restoration_test.go",
-      "size": 7065,
-      "sha256": "8cec4c855b8eb4c5e2e2d5e30cd532d0e9d188f225f39cd675e4d163167f7718"
+      "size": 9207,
+      "sha256": "8987f68fd1067587a88125b0d939f2c1c9dac02d685e75e2a6d92348b430d661"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/state_init.go",
@@ -7572,13 +7582,13 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/runtimehostcarrier/convert.go",
-      "size": 10781,
-      "sha256": "48db842d2707475b8efe20e1f67e40b8cf6abac2092082a0a53b885b573a8a73"
+      "size": 11033,
+      "sha256": "0df4476b2cfc0a812b6453edc713eb56257b656d13ce876a9f7d3fbc38765d12"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/runtimehostcarrier/convert_test.go",
-      "size": 7488,
-      "sha256": "fc0902249ae31fcc10fb2887db36f7c125ed51c01a2d8c87b960ea93d383990a"
+      "size": 7553,
+      "sha256": "419b6edef77abceb7d75afcf095ff5fb87a1718cde92ea6a633a0262eeca030c"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/smscodec/classifier.go",
@@ -9327,8 +9337,13 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/carrier_plan.go",
-      "size": 6779,
-      "sha256": "3daaf28ab1270aecd358a006815b0d12971e1500a8f4bafc58d4d1197e367865"
+      "size": 7001,
+      "sha256": "792c0a8c0acf19101fbce2381c2f4095fb18a77b8be811ef81c3084663aa2bb3"
+    },
+    {
+      "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/carrier_switch_override_test.go",
+      "size": 1791,
+      "sha256": "60701dfbc2aeb4ca566522331055086d1b941b60e162f258cb4984e5472740fb"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/defaults.go",
@@ -9347,8 +9362,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/merge.go",
-      "size": 6942,
-      "sha256": "e69b6df62030e29d9a62ba27aca19f2872eeb945da5a51d3b291d990e2011231"
+      "size": 7104,
+      "sha256": "69bc248c918ba69a25d66119a072103e44697f1f0819f42d7c0a88fa7a21d62f"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/merge_test.go",
@@ -9367,13 +9382,13 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/override_merge.go",
-      "size": 11617,
-      "sha256": "557b44e00bd4074ba7c30f26c11ec40ff38c7b80ec764a9049f9d93e2fdc64af"
+      "size": 11781,
+      "sha256": "1c771c6c9ecb7fe8656aba51a91e40e98a1d79307c973581421c6e3db6dad598"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/override_store.go",
-      "size": 4994,
-      "sha256": "d2dae49080ec0bc87601fc22281d79c560b36352ca837df429bfb8090a6ceab8"
+      "size": 5158,
+      "sha256": "0d4b1f9404dade65ffbbc5ac844debce93ff336504a483c81694f5031458c6bc"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/pdn.go",
@@ -9382,8 +9397,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/policy_test.go",
-      "size": 16301,
-      "sha256": "64bd14af4d689fddeb6b135e547b141f3f81b6655cb85252f703ac23ca1e773f"
+      "size": 16756,
+      "sha256": "68914dda8fc3e4985ef572eecc5aa25734371d0c201477ff17642d3d5ff013e4"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/preset_loader.go",
@@ -9393,7 +9408,7 @@
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/preset_original_test.go",
       "size": 5529,
-      "sha256": "fae9d54f4856411b6241d60ea8608e428efb0f436abec38df26076afb7346c8d"
+      "sha256": "5f26b5bb1f1d27a1a0862ded999902c7730fc26d294d37c8f75b10d18364180c"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/presets/2degrees_nz_53024.yaml",
@@ -9402,13 +9417,13 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/presets/ais_th_52001.yaml",
-      "size": 808,
-      "sha256": "2cd640d7fd2983d203f13c4f4a1687bd64ea4961a3325022b1888ee5088060ff"
+      "size": 838,
+      "sha256": "f02b536317933c00c1960bfcceaf1b3f2ec8e22e1106917854231953832ccaa0"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/presets/ais_th_52003.yaml",
-      "size": 808,
-      "sha256": "60abafbf24b623df3e6a1e1c30476b414a75f67d9c05ea5b159670314d864749"
+      "size": 838,
+      "sha256": "7b7c444a9c641d19c9ea184997c27c24eacc52d6b31db729b448fe9e1f50d0fd"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/presets/att_310280.yaml",
@@ -9497,8 +9512,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/presets/lebara_uk_23487.yaml",
-      "size": 778,
-      "sha256": "b972d1eb613659a6fbad16791f8b5aca8d2aed6ccab59cea53680eed59aab7bc"
+      "size": 811,
+      "sha256": "4c469de01cd7fc78119045a5855547d1b7ed862e557d0c8486770eecc038605a"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/presets/lycamobile_uk_23426.yaml",
@@ -9547,8 +9562,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/presets/spark_nz_53005.yaml",
-      "size": 379,
-      "sha256": "6f155b103e975d8355ed1a35ec3b4b4ecf508187fd88cddc281f697fb300a443"
+      "size": 447,
+      "sha256": "866b6142a772bb8f31a98143732bc3bcb618e985b7b9f868b9ef2d0401e5c85e"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/presets/sunrise_22802.yaml",
@@ -9612,8 +9627,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/types.go",
-      "size": 14578,
-      "sha256": "cdbc60a5aef96a081439dbf225c3d93d761789d64ba359921b6352831f40905f"
+      "size": 15041,
+      "sha256": "d0f6ed42319b31dbcbaa3ed8f8ea1f21b5856d1cf7be7a62297d9968af7620ba"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/vowifi_blocklist.go",
@@ -9667,8 +9682,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/runtimecore/compat.go",
-      "size": 8982,
-      "sha256": "f25e0f40dca327f569f28fa8aa75fc899f6cc596694ce57f39a2e1be47b8abfb"
+      "size": 9111,
+      "sha256": "1e6fce415a605316294b41d7f67141af2636931d6bd6891e4c2f62430ca383d7"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/runtimecore/dataplane_linux.go",
@@ -9692,8 +9707,13 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/runtimecore/fast_reauth_store.go",
-      "size": 1483,
-      "sha256": "847672b0a5bbd6675b36c2256a1ff823bfc6dfb5560e4f42d872d523dca70042"
+      "size": 1437,
+      "sha256": "25a0524fb4086db67f3cf0a5ec851b06bfe4d7df4ffaee1c461fa1a2da16badc"
+    },
+    {
+      "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/runtimecore/fast_reauth_store_test.go",
+      "size": 468,
+      "sha256": "ad251049324e07a257fe53775ede84faefadce605b149deff6dce3605c1c73bb"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/runtimecore/ike_address_retry.go",
@@ -9772,13 +9792,13 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/runtimecore/runtime_reauth_test.go",
-      "size": 5878,
-      "sha256": "7041c90d69e94f79f6434c29a962f9237cc90fb4ddb5f1e80a006fb9b78e2793"
+      "size": 5880,
+      "sha256": "a5c6dff8608f06e83bede7234b906398849ece35d4ab23d90656fa11b0c39596"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/runtimecore/runtimecore_test.go",
-      "size": 34682,
-      "sha256": "14ff81795f98fa7509c60ba3f4456a7681bd29fa8007f7b2cc1a65eec541613e"
+      "size": 34843,
+      "sha256": "22bb58270ddab704b9ddf1dd814589abfa09a67e1ea1f4ad322372bdaace8c0e"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/runtimecore/session.go",
@@ -9802,8 +9822,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/runtimecore/swu_config.go",
-      "size": 3771,
-      "sha256": "a54771320a38e5533aa18eb54dce221c6d20d4716b156b4db893d3b2042d33a4"
+      "size": 3887,
+      "sha256": "f97e2048cf666153d3868d388b3ff61f8e9b04de2e3425ef730803a77db81aa9"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/runtimecore/types.go",
@@ -9912,8 +9932,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/startup/carrier_presets_production_test.go",
-      "size": 14448,
-      "sha256": "dec88d4252091475de69d544044116b2e6de73afbb3464910aae600e9e0bade1"
+      "size": 14452,
+      "sha256": "e2c4aeada979826db1ab0140d8a501f84f6ad6ceaf18c62e28e8b9389ec25857"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/startup/prepare.go",
@@ -10652,13 +10672,13 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/runtimehost/carrier/conversion.go",
-      "size": 5790,
-      "sha256": "973d99a201127bd26e2fa44ae68bc6640de3552da1fdc36d3109b248b488cbfd"
+      "size": 5920,
+      "sha256": "dfbfb42f14fc03ffe713859b26264e2fbc8453dad819e651cd3848c027f2014a"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/runtimehost/carrier/override_json.go",
-      "size": 9859,
-      "sha256": "70d5e3160de08706f9aaa3f11a619865a55408f3a6774f6537be17d6d1479ed5"
+      "size": 9992,
+      "sha256": "2888321d563d13956a8e538eb0353b958f8160a6a0d784966614f664153c0cce"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/runtimehost/carrier/override_restoration_test.go",
@@ -10671,9 +10691,14 @@
       "sha256": "0230be9353c2fbbf6700745ed25ea8e4755b5f059d40db6c47ce9bb07133a4b6"
     },
     {
+      "path": "source/vohive-plus/third_party/vowifi-go/runtimehost/carrier/switch_override_test.go",
+      "size": 1018,
+      "sha256": "9e37a0765f2b93c43245d6592c64fde1c94efb69b6123787776ac9eb7d538b39"
+    },
+    {
       "path": "source/vohive-plus/third_party/vowifi-go/runtimehost/carrier/types.go",
-      "size": 6579,
-      "sha256": "e1d155f0a64538b1294ea0b9a62c015b38f470ebc6bc43fce7911b9c8a282fd6"
+      "size": 6737,
+      "sha256": "f273e52462339c566f665d064e1282687bfb774b66d06549511d488b7958eb57"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/runtimehost/carrier/validation.go",
@@ -13052,5 +13077,40 @@
     }
   ],
   "router_network_updated_at": "2026-10-04",
-  "router_ui_updated_at": "2026-10-05"
+  "router_ui_updated_at": "2026-10-05",
+  "base_personal_source_commit": "f5dc80e2f9a180ea16fbc3400f3baa2aac7e807c",
+  "selected_hideck_commits": [
+    {
+      "sha": "b9fbdbebac0fe925198da31da980faefe43966f8",
+      "subject": "fix(vowifi): complete AIS EAP-AKA challenge response"
+    },
+    {
+      "sha": "334f68be25bfcdbf90017c586841a5d1082d1289",
+      "subject": "fix(swu): use RFC 7296 SPI directions for CHILD_SA rekey and delete"
+    },
+    {
+      "sha": "27be05ea4fb6c4116393f783eca8a7d22236a70b",
+      "subject": "fix(runtimecore): stop replaying the fast reauth identity on reconnect"
+    },
+    {
+      "sha": "f19e0d365ec62e0918d4870629c65201f104cd0b",
+      "subject": "feat(swu): log session failure causes and rekey completions"
+    },
+    {
+      "sha": "27841996371ac552cd2614b15e5676333726385e",
+      "subject": "feat(policy): rekey the Lebara UK IKE SA every 9000 seconds"
+    },
+    {
+      "sha": "aa20775ab835221114d29a0930cdfcd2301b3055",
+      "subject": "fix(policy): withhold DEVICE_IDENTITY from the first IKE_AUTH on Spark NZ"
+    },
+    {
+      "sha": "eae1fd9eb026c03ea8dbeb8f3f84558a6fbd3ad2",
+      "subject": "fix(policy): keep the Spark NZ CHILD_SA when its rekey is declined"
+    },
+    {
+      "sha": "d95b8b162a777b15eaf8e8b4349c540992430571",
+      "subject": "fix(swu): respond to device identity requests and honor carrier overrides"
+    }
+  ]
 }

@@ -1,6 +1,6 @@
 # VoHive Plus 个人版
 
-本版本由用户授权，为其个人 iStoreOS 环境定制。版本：0.1.3-personal-classic，2026-10-03。
+本版本由用户授权，为其个人 iStoreOS 环境定制。版本：0.1.4-personal-classic，2026-10-10。
 
 基础源码来自 [HiDeck](https://github.com/yibaiba/hideck)，固定提交 `3fd3d6aaf55924c338c2cf3f092e1af1f588d152`（v2.1.23 之后的源码快照）。HiDeck 继承 VoHive，项目原有作者声明、LICENSE 与 THIRD_PARTY_NOTICES.md 均保留；third_party 中的组件仍适用各自的许可，包括 vowifi-go 的 AGPL-3.0。
 
@@ -15,3 +15,5 @@
 0.1.3：参考 VoCat 的 eSIM 兼容修复（3cbb6c1）和 USSI 多轮会话修复（a1273f0），按个人版现有通信接口适配：ICCID 启用/禁用失败时，针对指定兼容错误查询目标 Profile 的 ISD-P AID 并重试，保留刷新和 CAT Busy 处理；USSD 后续输入与取消按原会话渠道执行，IMS 断开后不误发蜂窝 AT 指令。现有 vowifi-go 已支持网络 Session ID、SIP INFO 续接和 BYE 取消，保留该实现。
 
 本地 2026-10-02 的未插入设备显示已迁入 TypeScript 源码：只读查询硬件发现，确认未接入才显示灰色“未插入设备”，保留初始化、重启缓冲及自动接管。智能 HTTPS、中文 LuCI 页面和网络部署脚本同步到仓库，个人配置与数据库不放入源码目录。
+
+0.1.4：以现有个人版完整源码为基线，选择性同步 HiDeck 的 AIS EAP-AKA 挑战响应、CHILD_SA 重协商/删除 SPI 方向、重连时的快速重认证身份清理、SWu 失败与重协商日志，以及 Lebara UK / Spark NZ 的密钥更新和 DEVICE_IDENTITY 兼容配置。保留现有 eSIM AID 重试、USSD 会话渠道、设备无限制、QQ/TG、经典中文 UI 和未插入设备显示。没有引入整套模组直拨、重做界面或替换数据库。

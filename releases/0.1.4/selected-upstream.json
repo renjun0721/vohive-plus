@@ -1,0 +1,39 @@
+{
+  "version": "0.1.4-personal-classic",
+  "date": "2026-10-10",
+  "base_personal_version": "0.1.3-personal-classic",
+  "selected_hideck_commits": [
+    {
+      "sha": "b9fbdbebac0fe925198da31da980faefe43966f8",
+      "subject": "fix(vowifi): complete AIS EAP-AKA challenge response"
+    },
+    {
+      "sha": "334f68be25bfcdbf90017c586841a5d1082d1289",
+      "subject": "fix(swu): use RFC 7296 SPI directions for CHILD_SA rekey and delete"
+    },
+    {
+      "sha": "27be05ea4fb6c4116393f783eca8a7d22236a70b",
+      "subject": "fix(runtimecore): stop replaying the fast reauth identity on reconnect"
+    },
+    {
+      "sha": "f19e0d365ec62e0918d4870629c65201f104cd0b",
+      "subject": "feat(swu): log session failure causes and rekey completions"
+    },
+    {
+      "sha": "27841996371ac552cd2614b15e5676333726385e",
+      "subject": "feat(policy): rekey the Lebara UK IKE SA every 9000 seconds"
+    },
+    {
+      "sha": "aa20775ab835221114d29a0930cdfcd2301b3055",
+      "subject": "fix(policy): withhold DEVICE_IDENTITY from the first IKE_AUTH on Spark NZ"
+    },
+    {
+      "sha": "eae1fd9eb026c03ea8dbeb8f3f84558a6fbd3ad2",
+      "subject": "fix(policy): keep the Spark NZ CHILD_SA when its rekey is declined"
+    },
+    {
+      "sha": "d95b8b162a777b15eaf8e8b4349c540992430571",
+      "subject": "fix(swu): respond to device identity requests and honor carrier overrides"
+    }
+  ]
+}
