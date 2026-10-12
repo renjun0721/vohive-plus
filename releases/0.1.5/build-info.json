@@ -1,0 +1,13 @@
+{
+  "version": "0.1.5-personal-classic",
+  "date": "2026-10-12",
+  "binary_sha256": "54f13e6600fbc6eb473819daf874ef77f4717a2b43e335f555862202c8c8ff0e",
+  "binary_bytes": 78414087,
+  "archive_sha256": "862aee7c807b50359353da54b6cb4bbcefff2ff46f5672557432b9b051a0fdac",
+  "build_time": "2026-10-12T14:48:00Z",
+  "platform": "linux/amd64",
+  "go": "1.27.1",
+  "node": "24.21.0",
+  "pnpm": "11.25.0",
+  "codec_runtime": "Use source/deployment/Personal.Dockerfile; iStoreOS native musl execution is unsupported"
+}

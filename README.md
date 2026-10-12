@@ -1,6 +1,6 @@
 # VoHive Plus 个人版源码与恢复备份
 
-本仓库公开保存 iStoreOS 上的 VoHive Plus 完整个人版源码、部署文件、LuCI 页面及恢复说明。当前版本为 **0.1.4-personal-classic（2026-10-10）**，选择性纳入 VoWiFi 重认证、密钥更新和运营商兼容修复，并保留 eSIM AID 重试、USSD 会话渠道、设备无限制、经典中文界面和当前 LuCI/Tailscale 定制。完整运行镜像、应用配置、短信数据库、TLS 证书和日志放在 Release 的加密附件中。
+本仓库公开保存 iStoreOS 上的 VoHive Plus 完整个人版源码、部署文件、LuCI 页面及恢复说明。当前版本为 **0.1.5-personal-classic（2026-10-12）**，包含按物理 IMEI 识别短信身份和 QMI LTE Band 转换修复，并保留此前 VoWiFi 更新，并保留 eSIM AID 重试、USSD 会话渠道、设备无限制、经典中文界面和当前 LuCI/Tailscale 定制。完整运行镜像、应用配置、短信数据库、TLS 证书和日志放在 Release 的加密附件中。
 
 ## 历史恢复备份（2026-10-01）
 
@@ -12,7 +12,7 @@
 - 数据库：`vohive-plus-final.db`，通过 SQLite 在线备份接口生成快照，已通过完整性检查。
 - 短信接收、QQ 和 Telegram 实际送达均已验证；本次备份未停止正在运行的服务。
 
-完整后端、原版布局前端和第三方源码已同步到当前 0.1.4-personal-classic，LuCI UI、中文日志和 HTTPS 部署脚本一并保存。详见 [完整源码与构建恢复说明](SOURCE-README.md)。原 Release 加密备份保持原样。
+完整后端、原版布局前端和第三方源码已同步到当前 0.1.5-personal-classic，LuCI UI、中文日志和 HTTPS 部署脚本一并保存。详见 [完整源码与构建恢复说明](SOURCE-README.md)。原 Release 加密备份保持原样。
 
 ## 下载和解密
 

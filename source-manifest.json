@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-10",
-  "version": "0.1.4-personal-classic",
+  "date": "2026-10-12",
+  "version": "0.1.5-personal-classic",
   "base_source_commit": "f1c24573bdc0326cbf8800ba5feab544838e60d7",
   "github_base_commit": "581a5e38fa72b85900f8a6a1ad0a4b39720b6f70",
   "upstream_hideck_commit": "3fd3d6aaf55924c338c2cf3f092e1af1f588d152",
@@ -9,11 +9,11 @@
     "3cbb6c1aa0e9bd77a1da98f6c4d60cd866b4e4c1",
     "a1273f0281cf74b288bab329d734c83c5afc3f48"
   ],
-  "running_binary_sha256": "5684a750fbe68f0f4b301133b3f77e03d149e630ec07755c79db66390a148fe7",
+  "running_binary_sha256": "54f13e6600fbc6eb473819daf874ef77f4717a2b43e335f555862202c8c8ff0e",
   "source_correspondence": "Built from source/vohive-plus with embedded rebuilt web UI; deployed binary SHA-256 matches build artifact",
   "secret_scan": "Passed: live Bot credentials and private key material absent from source; existing historical recovery assets unchanged",
-  "file_count": 2612,
-  "total_bytes": 20841438,
+  "file_count": 2618,
+  "total_bytes": 20858894,
   "files": [
     {
       "path": "source/VoHivePlus-unlimited-devices.patch",
@@ -23,7 +23,7 @@
     {
       "path": "source/deployment/Personal.Dockerfile",
       "size": 1244,
-      "sha256": "b54ef7936788b1b8e40c18c8312105265031ae4f51d7937a2f5e40d11d52e283"
+      "sha256": "1bf78c296affe8131e2b65400824a2902d59fc75413e599503af04434006f841"
     },
     {
       "path": "source/deployment/vohive-plus-run",
@@ -317,8 +317,8 @@
     },
     {
       "path": "source/vohive-plus/PERSONAL-NOTICE.md",
-      "size": 3217,
-      "sha256": "790568b50ae4731c53f95ee43d76b41af115833e6b2478cc23313f7858c1d6d9"
+      "size": 3595,
+      "sha256": "ac179b09b92312901c58f07da72ebe9e117ed489ee0ffcc1371867693c66bc62"
     },
     {
       "path": "source/vohive-plus/README.md",
@@ -333,7 +333,7 @@
     {
       "path": "source/vohive-plus/build-personal.sh",
       "size": 743,
-      "sha256": "38ccdbb8b297b560ca434ee88db5cd8bfc29343228525fcb1706050cf3ee3bd8"
+      "sha256": "906886930454471765d79968cb5e55b81f6200d7ee383415c0473fcf5f88f8a7"
     },
     {
       "path": "source/vohive-plus/caddy-dns/alidns.caddy",
@@ -1092,8 +1092,13 @@
     },
     {
       "path": "source/vohive-plus/internal/api/sms_identity.go",
-      "size": 5702,
-      "sha256": "92e52b4e5bc5c432e0f1663ef2efba1802f15ccb9366034b54941805eed624b8"
+      "size": 6126,
+      "sha256": "53961cc0bd1a788970c7d164ec63fbfbf4179d46f83db57a999dea395f5f0591"
+    },
+    {
+      "path": "source/vohive-plus/internal/api/sms_identity_modem_test.go",
+      "size": 3983,
+      "sha256": "0062e77edc368ab0336e9946eb2f7bfd6f2820c2a7e3011036b21fde9a6d7223"
     },
     {
       "path": "source/vohive-plus/internal/api/sms_identity_test.go",
@@ -1457,8 +1462,8 @@
     },
     {
       "path": "source/vohive-plus/internal/backend/qmi_backend.go",
-      "size": 33761,
-      "sha256": "d42c1b6e2c0a02899be47ed4e7312477a1777ead66c2af291375adb120c5c685"
+      "size": 33906,
+      "sha256": "5b023b58548393a86983179cf80c94a633796357db45312b4907bf49b0f0d075"
     },
     {
       "path": "source/vohive-plus/internal/backend/qmi_backend_msisdn_test.go",
@@ -1467,8 +1472,8 @@
     },
     {
       "path": "source/vohive-plus/internal/backend/qmi_backend_send_test.go",
-      "size": 49071,
-      "sha256": "da43ec01248176a4bfd23beb00ae503345e004737f7829b375b6f867c399bd31"
+      "size": 49073,
+      "sha256": "01f3dea9e63972d301b998c22c7f8b79647f36f857c39726ff304710f34bef53"
     },
     {
       "path": "source/vohive-plus/internal/backend/qmi_backend_shortcode_test.go",
@@ -1479,6 +1484,11 @@
       "path": "source/vohive-plus/internal/backend/qmi_backend_ussd.go",
       "size": 16446,
       "sha256": "fcb855265c5c36928106d557bcac3bb19d5102170f6462212b766e94d799e084"
+    },
+    {
+      "path": "source/vohive-plus/internal/backend/qmi_band_test.go",
+      "size": 1699,
+      "sha256": "9e4d7d06ba80fc4ebed62c38cebfb331c0b3e0b48b6af4859aed6d7604a6dcfc"
     },
     {
       "path": "source/vohive-plus/internal/backend/qmi_operator_selection.go",
@@ -1931,6 +1941,11 @@
       "sha256": "8cf7289c97a1f5f948421bef4d790722d608209df07f2047ec6442e9ff1e8bd7"
     },
     {
+      "path": "source/vohive-plus/internal/db/sms_device_identity_test.go",
+      "size": 1817,
+      "sha256": "eda58fb6bc681c6463ee23ab39b59834e6c6b903a12577833edbd70f8ee23184"
+    },
+    {
       "path": "source/vohive-plus/internal/db/sms_fragment_reconcile.go",
       "size": 4365,
       "sha256": "a58b68a6e34ace5f090c436b350c6d996f055c5031f698f7c708771ac3bfcda4"
@@ -1947,8 +1962,8 @@
     },
     {
       "path": "source/vohive-plus/internal/db/sms_identity.go",
-      "size": 4133,
-      "sha256": "c7dca9b864198ce5b9f82a102178a210ec8c90b9d36959ed11d902156b27418e"
+      "size": 4671,
+      "sha256": "6831e18de22c2b58aed98c33d5fdf2004897414e0311bffb698c69a34d0fa228"
     },
     {
       "path": "source/vohive-plus/internal/db/sms_inbound_fragment.go",
@@ -2667,13 +2682,18 @@
     },
     {
       "path": "source/vohive-plus/internal/device/sms_identity.go",
-      "size": 4941,
-      "sha256": "e84a86acf1adf5764ce2d41014bb631b866b79b33bc088763fce64a56a52f30a"
+      "size": 5588,
+      "sha256": "56b3aff37f1e1865d417b681cd3316b5c2c43fb5491c901615ec20ecc5ac9f13"
+    },
+    {
+      "path": "source/vohive-plus/internal/device/sms_identity_swap_test.go",
+      "size": 1752,
+      "sha256": "6e1a3d7a0ddfdf03d3d08666b83d5f17cc8b679d445f6e159b5de406803f3e65"
     },
     {
       "path": "source/vohive-plus/internal/device/sms_identity_test.go",
-      "size": 3214,
-      "sha256": "8720d61c86ae3f7711852d9e588379c87acfc29ffdc45669c2d901b471e25745"
+      "size": 5828,
+      "sha256": "6cacdaee45500116301cafe6f2864b63c351835ecd543955cf630ffd6d36cc65"
     },
     {
       "path": "source/vohive-plus/internal/device/sms_mode_at.go",
@@ -2687,8 +2707,8 @@
     },
     {
       "path": "source/vohive-plus/internal/device/sms_observer_test.go",
-      "size": 2086,
-      "sha256": "33cdbbaf28371a24ce84edf79de6847128d815ddb9b0254072d8baa66b5e352e"
+      "size": 2142,
+      "sha256": "bb1c773c0197589332ab25e5280a26f8e54175cda768b7c16813a075a85b887e"
     },
     {
       "path": "source/vohive-plus/internal/device/switch_reinit.go",
@@ -6362,13 +6382,23 @@
     },
     {
       "path": "source/vohive-plus/third_party/quectel-qmi-go/pkg/qmi/nas.go",
-      "size": 52321,
-      "sha256": "062665865e5b264441a8a2d89f3f51f0fa7f9f7d3006e49e2bdaaa46c55a8f2f"
+      "size": 52352,
+      "sha256": "9332d9065a5a64a8731dc822afe348b503d6b1779b5237e3975fabbbbc20c696"
+    },
+    {
+      "path": "source/vohive-plus/third_party/quectel-qmi-go/pkg/qmi/nas_band.go",
+      "size": 1121,
+      "sha256": "77a67561752c86035707fbb058d479b19eceb040f4a1efe02ddc8cc550d1abe3"
+    },
+    {
+      "path": "source/vohive-plus/third_party/quectel-qmi-go/pkg/qmi/nas_band_test.go",
+      "size": 2246,
+      "sha256": "9eb16fa5887b00c87e512b580e99bd388dccb7cab3a68fb6f906a064c2b454d4"
     },
     {
       "path": "source/vohive-plus/third_party/quectel-qmi-go/pkg/qmi/nas_test.go",
-      "size": 18076,
-      "sha256": "13f478ece6e5daedc2c846fdc2b763b959f4ed15e29baf9ac45a6f1dddc3b07d"
+      "size": 18079,
+      "sha256": "2206f953b3c95811d804cc243917ac3c1b2b858358ede80c2934be3a55ff3e58"
     },
     {
       "path": "source/vohive-plus/third_party/quectel-qmi-go/pkg/qmi/proxy_client_test.go",
@@ -13078,7 +13108,7 @@
   ],
   "router_network_updated_at": "2026-10-04",
   "router_ui_updated_at": "2026-10-05",
-  "base_personal_source_commit": "f5dc80e2f9a180ea16fbc3400f3baa2aac7e807c",
+  "base_personal_source_commit": "b13641f9f574b8dbadae30e347e6fb4fbd48aff0",
   "selected_hideck_commits": [
     {
       "sha": "b9fbdbebac0fe925198da31da980faefe43966f8",
@@ -13111,6 +13141,15 @@
     {
       "sha": "d95b8b162a777b15eaf8e8b4349c540992430571",
       "subject": "fix(swu): respond to device identity requests and honor carrier overrides"
+    },
+    {
+      "sha": "3aa92ab05b7cae27e983f5a296e4a69857e64072",
+      "subject": "fix: resolve SMS identity by current physical modem"
+    },
+    {
+      "sha": "b9434fc11fec2682455027af5f6dddf728f607e3",
+      "subject": "fix: map QMI active band enums to LTE band numbers"
     }
-  ]
+  ],
+  "reference_hideck_release": "v2.1.30"
 }

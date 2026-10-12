@@ -1,0 +1,16 @@
+{
+  "version": "0.1.5-personal-classic",
+  "date": "2026-10-12",
+  "base_personal_version": "0.1.4-personal-classic",
+  "reference_hideck_release": "v2.1.30",
+  "selected_hideck_commits": [
+    {
+      "sha": "3aa92ab05b7cae27e983f5a296e4a69857e64072",
+      "subject": "fix: resolve SMS identity by current physical modem"
+    },
+    {
+      "sha": "b9434fc11fec2682455027af5f6dddf728f607e3",
+      "subject": "fix: map QMI active band enums to LTE band numbers"
+    }
+  ]
+}
