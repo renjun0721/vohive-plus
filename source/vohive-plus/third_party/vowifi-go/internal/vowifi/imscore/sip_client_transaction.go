@@ -261,8 +261,15 @@ func transactionTransportError(err error) error {
 func (t *sipTransport) failTransaction(transaction *clientSIPTransaction, err error) error {
 	t.removeTransaction(transaction)
 	transaction.finish()
-	t.reportFatal(err)
+	t.reportClientTransportError(transaction, err)
 	return err
+}
+
+func (t *sipTransport) reportClientTransportError(transaction *clientSIPTransaction, err error) {
+	if transaction != nil && transaction.callbacks.isolatedTransport {
+		return
+	}
+	t.reportFatal(err)
 }
 
 func (t *sipTransport) startDetachedTransaction(request string) error {

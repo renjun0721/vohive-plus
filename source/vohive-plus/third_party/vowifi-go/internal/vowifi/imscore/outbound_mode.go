@@ -218,6 +218,7 @@ func (s *Service) sendByMode(operation outboundSendOperation) (*sipResponse, err
 		)
 	}
 	sender := func(raw string) error { return operation.Mode.send(operation.Context, raw) }
+	operation.Callbacks.isolatedTransport = operation.Mode.InboundPeer
 	return s.transport.roundTripWithSenderAndCallbacks(
 		operation.Context, built.String(), sender, operation.Callbacks,
 	)

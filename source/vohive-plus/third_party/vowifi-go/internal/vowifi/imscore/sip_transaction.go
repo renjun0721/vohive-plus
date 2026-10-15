@@ -18,6 +18,9 @@ type sipTransactionKey struct {
 }
 
 type sipTransactionCallbacks struct {
+	// An inbound peer has its own lifetime; its write failure must not retire
+	// the registered originating flow used to retry an RP report.
+	isolatedTransport bool
 	// Runs once after queueing, just before starting the outbound transaction.
 	// Returning an error cancels this attempt without reporting a transport failure.
 	onBeforeSend            func() error
@@ -119,7 +122,7 @@ func (t *sipTransport) startClientTransactionWithSender(
 	if err := sendClientTransaction(transaction, request); err != nil {
 		t.removeTransaction(transaction)
 		transaction.finish()
-		t.reportFatal(err)
+		t.reportClientTransportError(transaction, err)
 		return nil, fmt.Errorf("imscore: SIP transaction send: %w: %w", err, sip.ErrTransactionTransport)
 	}
 	return transaction, nil

@@ -100,7 +100,7 @@ func (t *sipTransport) handleRetainedClientResponse(
 	}
 	if final.StatusCode >= 300 && response.StatusCode >= 300 {
 		if err := sendClientTransaction(transaction, ack); err != nil {
-			t.reportFatal(err)
+			t.reportClientTransportError(transaction, err)
 			logging.WarnRate("ims-invite-ack-retransmit", "IMS INVITE ACK retransmission failed", "err", err)
 		}
 		return

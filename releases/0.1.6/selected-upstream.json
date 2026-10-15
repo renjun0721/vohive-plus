@@ -1,0 +1,84 @@
+{
+  "version": "0.1.6-personal-classic",
+  "date": "2026-10-15",
+  "base_personal_version": "0.1.5-personal-classic",
+  "reference_hideck_release": "v2.1.31",
+  "reference_hideck_main": "89c92454c53865b5d0615d311d76172169c41d50",
+  "selected_hideck_commits": [
+    {
+      "sha": "58ec51a1ec000bfb50c7bb168daed2351ced6a25",
+      "subject": "feat(swu): log every failed rekey attempt and undecryptable IKE responses"
+    },
+    {
+      "sha": "96888e67e180e783c0a51f004cc1a6c7a2e1dbbc",
+      "subject": "fix(swu): drop a stale old IKE SA instead of failing the next IKE rekey"
+    },
+    {
+      "sha": "c4498014e20de59f3ecb54cc3b83ff75f64d0a6f",
+      "subject": "fix(ipsec): treat every unmarked datagram from port 4500 as ESP"
+    },
+    {
+      "sha": "e8514511cbcc1c81a04e03e1bf3f5a9d3a4d04d4",
+      "subject": "fix(swu): drop invalid IKE packets instead of ending the session"
+    },
+    {
+      "sha": "0d129551506cbf92cefa5e1b95f32307ec521c43",
+      "subject": "fix(swu): drop unauthenticated IKE messages and count only authenticated liveness"
+    },
+    {
+      "sha": "464bb809fea0c4273fe10c4e0d11b2b4d431fc4e",
+      "subject": "fix(swu): keep authenticated syntax and local key errors fatal"
+    },
+    {
+      "sha": "5a80ee777f07b991f8876972596494542a790d95",
+      "subject": "fix(swu): validate IKE responses before completing transactions and retain NAT-T mode"
+    },
+    {
+      "sha": "232f3bdf8299015ce62756820da213474af1176f",
+      "subject": "fix(swu): request the inner IPv6 address without a value"
+    },
+    {
+      "sha": "ea2db5a5375c9444261d7c6032b14c88454e945d",
+      "subject": "fix(swu): answer DEVICE_IDENTITY requests after a verified fast reauthentication"
+    },
+    {
+      "sha": "eeae2c22a866c63df4ab022a5040ab9873b4826a",
+      "subject": "fix(ims): use current Contact expiration for registration refresh"
+    },
+    {
+      "sha": "901ebb99b76bf13aafb06d7a564b793f0fbd153f",
+      "subject": "fix(ims): fail REGISTER when the 200 omits our Contact"
+    },
+    {
+      "sha": "6fe210de0c719b49470fb522951b8c07815cf691",
+      "subject": "fix(imscore): match REGISTER Contact hosts as IPv6 addresses"
+    },
+    {
+      "sha": "7d299f447e73dfb63a6a432fd2cc0c22339f0c68",
+      "subject": "fix(imscore): retry SMS RP reports over the registered flow"
+    },
+    {
+      "sha": "67a8570d2a7159ea5d144009bf6d28300f2daed9",
+      "subject": "fix: isolate device lifecycle recovery ownership"
+    },
+    {
+      "sha": "88735c01f9ac72b613bf3823a59cbff536959695",
+      "subject": "fix: bind asynchronous recovery to worker ownership"
+    },
+    {
+      "sha": "5c8671a095251220fed5092d28505408677ad9c1",
+      "subject": "feat(policy): use weconnect.globe.com.ph as the Globe PH ePDG"
+    }
+  ],
+  "scope": "Engine fixes selected by path; Worker lifecycle changes adapted to the personal API without MBN/outbound quota framework; REGISTER expiry and missing-Contact fixes are required prerequisites.",
+  "personal_fixes": [
+    "Do not retire the registered IMS transport on a fatal write to an independent inbound peer; fall back and remember the working RP report flow.",
+    "Release the per-device lifecycle mutex while waiting for initialization to publish its Worker."
+  ],
+  "deferred": [
+    "Global DEVICE_IDENTITY default change",
+    "SMS channel filters and notification identity extensions",
+    "MBN management",
+    "Transactional managed-device/SIM ownership framework from later main commits"
+  ]
+}
