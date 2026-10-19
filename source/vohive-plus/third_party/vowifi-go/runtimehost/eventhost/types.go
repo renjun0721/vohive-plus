@@ -36,6 +36,8 @@ type SMSReceived struct {
 	TargetURI          string
 	FragmentSessionKey string
 	Incomplete         bool
+	// Synchronous durable-storage result; a failure affects only this message.
+	PersistenceResult chan<- error
 }
 
 // SMSSent is published when an SMS is sent.

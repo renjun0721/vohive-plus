@@ -147,7 +147,8 @@ func TestResolveEmbeddedCarrierPresets(t *testing.T) {
 		t.Fatalf("spark nz = %+v", spark)
 	}
 	if globe := ResolveEffectiveCarrierConfig("515", "02"); globe.PresetID != "globe_ph_51502" ||
-		globe.EPDGAddr != "weconnect.globe.com.ph" || globe.EPDGAddrSource != "preset" {
+		globe.EPDGAddr != "weconnect.globe.com.ph" || globe.EPDGAddrSource != "preset" ||
+		globe.IMSTransport != "tcp" || CarrierPlanFromEffectiveConfig(globe).IMS.Transport != "tcp" {
 		t.Fatalf("globe ph = %+v", globe)
 	}
 	lebaraUK := ResolveEffectiveCarrierConfig("234", "87")

@@ -27,6 +27,8 @@ type EventSMSReceived struct {
 	// degraded multipart notification with its eventual complete message.
 	FragmentSessionKey string
 	Incomplete         bool
+	// Synchronous durable-storage result; a failure affects only this message.
+	PersistenceResult chan<- error
 }
 
 // EventSMSSent is published when an SMS is sent.

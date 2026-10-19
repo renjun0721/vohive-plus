@@ -1,0 +1,65 @@
+{
+  "version": "0.1.7-personal-classic",
+  "date": "2026-10-19",
+  "base_personal_version": "0.1.6-personal-classic",
+  "reference_hideck_release": "v2.1.32",
+  "reference_hideck_main": "d5f64cfdfe05e000b972443399a9205c200e5ef4",
+  "reference_vocat_main": "162f7b6744c79b8e49916b0b0bd2427c7120a34a",
+  "selected_hideck_commits": [
+    {
+      "sha": "d02e3aa3c5d08a437d06a33b2f69634f86583415",
+      "subject": "fix(imscore): send an auto-transport REGISTER over the RFC 3261 UDP limit by TCP",
+      "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+    },
+    {
+      "sha": "10b217f72a6e85f845ac666ee74cae591d9bfdf5",
+      "subject": "fix(imscore): bound the oversized-REGISTER TCP dial so UDP keeps half the budget",
+      "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+    },
+    {
+      "sha": "1e04f9f0d14c46918857c2baae6f19f19fb7eb71",
+      "subject": "fix(imscore): retry an oversized REGISTER over UDP when its TCP attempt fails",
+      "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+    },
+    {
+      "sha": "860aba9551071fb6133122eb9fffacf87257f64e",
+      "subject": "fix(imscore): preserve SIP failures after TCP size switch",
+      "author": "yibaiba <946100224@qq.com>"
+    },
+    {
+      "sha": "b1027220d9214370eef97113cced6078af855d33",
+      "subject": "fix(imscore): recover Globe PH refreshes rejected for an IP and port conflict",
+      "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+    },
+    {
+      "sha": "4806dc607ac72c04593eeca959d3747669e588e9",
+      "subject": "fix(sms): read DITO zero-zone SMSC timestamps as Philippine time",
+      "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+    },
+    {
+      "sha": "88a339bfbb3d3593cf2592c9769aaec7bdc9528d",
+      "subject": "[webdav-archive-cleanup-SMS-01] fix: keep SMS persistence failures message-scoped",
+      "author": "yibaiba <946100224@qq.com>"
+    },
+    {
+      "sha": "d85a5f2d546e04126b082b0e1dcd32e68696a25c",
+      "subject": "fix(phone): keep playing IMS audio when early media mixes in another SSRC",
+      "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+    }
+  ],
+  "scope": "Selective backports; keep classic personal source and all existing integration.",
+  "personal_adaptations": [
+    "Adapt synchronous per-message persistence feedback without importing the newer SIM/ICCID transaction framework.",
+    "Apply jitter and monotonic browser RTP clock to the existing media session.",
+    "Use Chinese messages for newly added runtime logs.",
+    "Wait for a complete TCP REGISTER in the reset fixture so the test deterministically exercises an established connection failure; assertions preserved.",
+    "Remove an unreachable return from an existing phone test helper; assertions preserved."
+  ],
+  "deferred": [
+    "Full SIM/managed-device transaction and multi-IMSI framework; current personal source lacks prerequisite ownership/snapshot identity changes.",
+    "New automatic answering, WebDAV archiving, MBN and notification filtering.",
+    "VoCat AT Session, raw-SMS schema, USSD backend and notification scheduler use another architecture; no whole-stack replacement.",
+    "VoLTE native-UAC/adaptive jitter/media recovery chain needs EC20/EC25 real-call validation. Current inline RTP reader already joins on Close, so d5f64cf does not apply directly.",
+    "ICE interface pruning was removed upstream by d82752d; current personal version already retains VPN/cellular candidates."
+  ]
+}

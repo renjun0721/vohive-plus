@@ -41,6 +41,9 @@ type MediaSession struct {
 	fromIMS          atomic.Uint64
 	toIMS            atomic.Uint64
 	lost             atomic.Uint64
+	imsRejected      atomic.Uint64
+	imsLate          atomic.Uint64
+	imsRestarts      atomic.Uint64
 }
 
 func newMediaSession(ctx context.Context, options mediaSessionOptions) (*MediaSession, string, error) {
