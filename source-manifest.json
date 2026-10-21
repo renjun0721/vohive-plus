@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-19",
-  "version": "0.1.7-personal-classic",
+  "date": "2026-10-21",
+  "version": "0.1.8-personal-classic",
   "base_source_commit": "f1c24573bdc0326cbf8800ba5feab544838e60d7",
   "github_base_commit": "581a5e38fa72b85900f8a6a1ad0a4b39720b6f70",
   "upstream_hideck_commit": "3fd3d6aaf55924c338c2cf3f092e1af1f588d152",
@@ -9,11 +9,11 @@
     "3cbb6c1aa0e9bd77a1da98f6c4d60cd866b4e4c1",
     "a1273f0281cf74b288bab329d734c83c5afc3f48"
   ],
-  "running_binary_sha256": "9b77ef393b983a2da0a5d5abfa1bfec78ee08f4544dc51b8895895806f78560e",
-  "source_correspondence": "Built from source/vohive-plus; unchanged classic frontend embedded artifact reused from verified 0.1.6; deployed binary hash matches",
-  "secret_scan": "Passed: live Bot credentials and private key material absent from source; existing historical recovery assets unchanged",
-  "file_count": 2632,
-  "total_bytes": 20942740,
+  "running_binary_sha256": "75b2b8f0a99ac2bd5794f7cf7524e98f2511a317326f9d745a4af9c58200053e",
+  "source_correspondence": "Built from complete source/vohive-plus; unchanged classic frontend artifact reused; deployed hash verified",
+  "secret_scan": "Passed: live Bot credentials, passwords, actual roaming ICCID and private keys absent from source; historical recovery assets unchanged",
+  "file_count": 2636,
+  "total_bytes": 20967626,
   "files": [
     {
       "path": "source/VoHivePlus-unlimited-devices.patch",
@@ -23,7 +23,7 @@
     {
       "path": "source/deployment/Personal.Dockerfile",
       "size": 1244,
-      "sha256": "3cd29300c74392ce6ebc7f41c4a889c73ace44a38714fab14cbd0afd9def0d82"
+      "sha256": "385d2957e5c112e4724fb85161fae46b2c34bd66c652ed5b2f35e27245fd5fc7"
     },
     {
       "path": "source/deployment/vohive-plus-run",
@@ -317,13 +317,18 @@
     },
     {
       "path": "source/vohive-plus/PERSONAL-NOTICE.md",
-      "size": 4639,
-      "sha256": "e0c84edb105614419e9dd05374065f8502292483d49d1102a8402e78209bd491"
+      "size": 4933,
+      "sha256": "7cdba018552072fc2699b676a8f700dfe6e722d490b03a0345cb5b4d3fcf3ad4"
     },
     {
       "path": "source/vohive-plus/README.md",
       "size": 6432,
       "sha256": "705f399eafe81377dde5343eb17af5fbc3de616ff8cc9d7c269c1fa17aa19a3d"
+    },
+    {
+      "path": "source/vohive-plus/ROAMING-OPERATORS.md",
+      "size": 2427,
+      "sha256": "ae7033933d62fe03a6c45a35ba237796f03c7d2e0093703548c13dbf65e71b8d"
     },
     {
       "path": "source/vohive-plus/THIRD_PARTY_NOTICES.md",
@@ -333,7 +338,7 @@
     {
       "path": "source/vohive-plus/build-personal.sh",
       "size": 743,
-      "sha256": "a352c821cbe221cd6b41731e1e2e4cf5fa683989bb70a4103508f02157cc5cb9"
+      "sha256": "33445e2fc629e1b9b890972f83fb8e2f12f018de7c6981b1b470104ca3d43258"
     },
     {
       "path": "source/vohive-plus/caddy-dns/alidns.caddy",
@@ -367,8 +372,8 @@
     },
     {
       "path": "source/vohive-plus/cmd/hideck/main.go",
-      "size": 11303,
-      "sha256": "3a192a16c565781433065c5b2a93545d51e60a3be98c5a0b9522122db8e17797"
+      "size": 11516,
+      "sha256": "4226504a083d067c7e5c39e93df5232f2b1ebe3d419a9cd9729059499227dbc5"
     },
     {
       "path": "source/vohive-plus/cmd/mbimprobe/main.go",
@@ -379,6 +384,11 @@
       "path": "source/vohive-plus/config/config.example.yaml",
       "size": 2631,
       "sha256": "ac3edaad320181ab7d8f0a127cac35abe17b37d78d08acb38acaf777b843fbbb"
+    },
+    {
+      "path": "source/vohive-plus/config/roaming-operators.example.json",
+      "size": 200,
+      "sha256": "68072a1dfd7f3fda2c3fb8b45515c9510ba302131c2d57b68e7d8bcac2416a89"
     },
     {
       "path": "source/vohive-plus/deploy-binary.sh",
@@ -2257,8 +2267,8 @@
     },
     {
       "path": "source/vohive-plus/internal/device/operator_selection.go",
-      "size": 8135,
-      "sha256": "eb5174555b53d77de01443d21f4d3928b23991f3cccb9082493c7d31f432381a"
+      "size": 8307,
+      "sha256": "9d76eaa6a57166077c71b21bc193198cff6daaa79ce4eb98896a6f6e2c309a73"
     },
     {
       "path": "source/vohive-plus/internal/device/operator_selection_test.go",
@@ -2322,8 +2332,8 @@
     },
     {
       "path": "source/vohive-plus/internal/device/pool.go",
-      "size": 85222,
-      "sha256": "50edaf418ec31a309fcee81aac0b80a5e92add8edfed769d9085e85a3872c5c8"
+      "size": 85337,
+      "sha256": "5bc4bc2d5be15d42a69ab08ca42f990d95ee04076bf13d97fb8ee24afd97dbd1"
     },
     {
       "path": "source/vohive-plus/internal/device/pool_apdu_cleanup.go",
@@ -2647,8 +2657,8 @@
     },
     {
       "path": "source/vohive-plus/internal/device/qmi_registration.go",
-      "size": 24234,
-      "sha256": "4e8916154764b45e47f3e100daaaffd467c9b703f43f351d76466aabae2c2387"
+      "size": 24529,
+      "sha256": "f794d49abc8ed3e230a3f433bed40dbbc64160de633c56e3bb8acd382c0ff4e8"
     },
     {
       "path": "source/vohive-plus/internal/device/qmi_registration_test.go",
@@ -2684,6 +2694,16 @@
       "path": "source/vohive-plus/internal/device/qmi_usb_unstick_test.go",
       "size": 6771,
       "sha256": "c7afdb10e59955e8e79b154bfaf1b2eec1a9badffe309534a93afdf659124b16"
+    },
+    {
+      "path": "source/vohive-plus/internal/device/roaming_operators.go",
+      "size": 11459,
+      "sha256": "bbe2759691b55282eec0b9ea2abf3eee0599781e3c017194a9124264ab90a8cd"
+    },
+    {
+      "path": "source/vohive-plus/internal/device/roaming_operators_test.go",
+      "size": 9333,
+      "sha256": "37f9f818ee5ab9ef1220cc0eaecfc83738cc504b6fb86b877a6e43538e4eb8fe"
     },
     {
       "path": "source/vohive-plus/internal/device/sms_identity.go",
@@ -3902,8 +3922,8 @@
     },
     {
       "path": "source/vohive-plus/internal/phone/media_integration_test.go",
-      "size": 8125,
-      "sha256": "6ca9704e2ec828a0e5288dff26c2885199c9a96a5438479d552f307199514440"
+      "size": 8503,
+      "sha256": "90e2b8de8de02f7f3eb6a3fe350115f315bf9b6bbfa6fd8fefa3260af2a695ef"
     },
     {
       "path": "source/vohive-plus/internal/phone/media_jitter_test.go",
@@ -13327,5 +13347,6 @@
   ],
   "reference_hideck_release": "v2.1.32",
   "reference_hideck_main": "d5f64cfdfe05e000b972443399a9205c200e5ef4",
-  "reference_vocat_main": "162f7b6744c79b8e49916b0b0bd2427c7120a34a"
+  "reference_vocat_main": "162f7b6744c79b8e49916b0b0bd2427c7120a34a",
+  "personal_roaming_feature": "source/vohive-plus/ROAMING-OPERATORS.md"
 }

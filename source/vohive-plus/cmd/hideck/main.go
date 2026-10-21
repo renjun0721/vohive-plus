@@ -155,6 +155,10 @@ func main() {
 
 	dynamicInterfaceMapper := openwrt.NewMapper(cfg.System.OpenWRTDynamicInterfaces)
 	pool := device.NewPoolWithDynamicInterfaceMapper(cfg, dynamicInterfaceMapper)
+	if err := pool.ConfigureRoamingOperatorPolicies(filepath.Join(filepath.Dir(configPath), "roaming-operators.json")); err != nil {
+		logger.Error("加载按卡漫游选网策略失败", "err", err)
+		os.Exit(1)
+	}
 
 	pool.SetPolicyResolver(db.CardPolicyResolver{})
 

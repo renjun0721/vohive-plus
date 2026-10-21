@@ -1,6 +1,6 @@
 # VoHive Plus 个人版
 
-本版本由用户授权，为其个人 iStoreOS 环境定制。版本：0.1.7-personal-classic，2026-10-19。
+本版本由用户授权，为其个人 iStoreOS 环境定制。版本：0.1.8-personal-classic，2026-10-21。
 
 基础源码来自 [HiDeck](https://github.com/yibaiba/hideck)，固定提交 `3fd3d6aaf55924c338c2cf3f092e1af1f588d152`（v2.1.23 之后的源码快照）。HiDeck 继承 VoHive，项目原有作者声明、LICENSE 与 THIRD_PARTY_NOTICES.md 均保留；third_party 中的组件仍适用各自的许可，包括 vowifi-go 的 AGPL-3.0。
 
@@ -23,3 +23,5 @@
 0.1.6：定点移植 Worker 实例/代际与 VoWiFi 生命周期隔离，取消旧 SIM/恢复定时器，拦截旧 QMI/MBIM/AT 回调及迟到的 IP 查询；按现有个人版接口适配，不引入 MBN/外发额度等新框架。同步 NAT-T ESP/IKE 分流、IKE 响应认证/存活计时及旧 SA 清理、IPv6 CP 空值请求、认证后设备身份响应、IMS 短信 RP 回执连接回退、REGISTER 自身 Contact/有效期和 IPv6 地址匹配；增加 Globe PH ePDG 预设。保留现有 DEVICE_IDENTITY 默认策略、通知和经典界面，不启用通知过滤或自动 MBN 写入。
 
 0.1.7：定点适配 HiDeck v2.1.32 后主分支的超长 REGISTER TCP/UDP 有界回退、SIP 拒绝保护、Globe PH 安全端口冲突恢复、DITO 零时区短信时间修正、单条短信持久化失败隔离及浏览器 RTP 换流/序号连续性修复。新增日志使用中文；保留经典界面、无限设备、QQ/TG 和原运行配置。未整体合并自动应答、WebDAV、切卡事务或 VoCat 的独立 AT/数据库架构。
+
+0.1.8：新增可选 QMI 按卡漫游白名单，首选联通、移动备用且失败不回退自动选网；按实时 ICCID 隔离，支持配置热更新、等待和退避，保护通话/VoWiFi/换卡过程。未改变既有卡策略、短信和网络路由。详见 ROAMING-OPERATORS.md。

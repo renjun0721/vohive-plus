@@ -256,6 +256,7 @@ type Pool struct {
 	runtimeQMIAttachments map[string]config.DeviceConfig
 	pcscService           *pcsc.Service
 	pcscReconcileMu       sync.Mutex
+	roamingOperators      *roamingOperatorManager
 }
 
 func NewPool(cfg *config.Config) *Pool {
@@ -1654,6 +1655,9 @@ func (p *Pool) startPoolBackgroundServicesOnce() {
 		return
 	}
 	p.startOnce.Do(func() {
+		if p.roamingOperators != nil {
+			go p.roamingOperators.run()
+		}
 		go p.healthCheckLoop()
 		go p.overviewStreamLoop()
 		go p.startVoWiFiDesiredReconcileLoop()

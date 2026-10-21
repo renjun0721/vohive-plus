@@ -553,6 +553,14 @@ func (w *Worker) ensureQMIRegistration(ctx context.Context, requiredForData bool
 		logger.Debug("QMI 驻网协调跳过：蜂窝射频被 VoWiFi/飞行策略抑制", "device", w.ID)
 		return errQMIRegistrationSkipped
 	}
+	// The per-SIM allowlist owns registration even if the modem has already
+	// camped on a forbidden operator. Never let generic recovery re-enable auto.
+	if w.hasRoamingOperatorPolicy() {
+		if requiredForData {
+			return w.roamingOperatorDataReady(ctx)
+		}
+		return errQMIRegistrationSkipped
+	}
 	ctrl, ok := w.Backend.(qmiRegistrationController)
 	if !ok {
 		return nil

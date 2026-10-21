@@ -1,0 +1,21 @@
+{
+  "version": "0.1.8-personal-classic",
+  "date": "2026-10-21",
+  "base_personal_version": "0.1.7-personal-classic",
+  "selected_hideck_commits": [],
+  "scope": "Personal per-SIM roaming feature; no new upstream code cherry-picked in this release.",
+  "personal_changes": [
+    "Bind an ordered manual LTE PLMN allowlist to the live ICCID and Worker generation.",
+    "Correct an already-camped disallowed network; never fall back to automatic selection.",
+    "Wait 90 seconds per target; use the next target after failures; back off five minutes after exhaustion.",
+    "Keep a working fallback and prefer the first target again on sustained loss or reconstruction.",
+    "Hot reload a private local-only configuration; retain last valid policy on invalid or missing reload.",
+    "Cancel generic registration recovery while the SIM policy owns selection; preserve flight/VoWiFi and data preconditions.",
+    "Avoid persisting per-SIM targets into generic device config; restore the original device mode for another SIM.",
+    "Preserve exact RTP test assertions while waiting for asynchronous forwarding metrics."
+  ],
+  "limitations": [
+    "No real SMS/Bot send, cold power-cycle, real network failure, SIM switch or new call test was performed.",
+    "Real verification confirms Unicom LTE manual registration; fallback/boot correction covered by mocks."
+  ]
+}

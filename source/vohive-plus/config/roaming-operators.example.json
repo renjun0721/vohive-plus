@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "policies": [
+    {
+      "iccid": "8985000000000000001",
+      "operators": [
+        {"plmn": "46001", "rat": "lte"},
+        {"plmn": "46000", "rat": "lte"}
+      ]
+    }
+  ]
+}

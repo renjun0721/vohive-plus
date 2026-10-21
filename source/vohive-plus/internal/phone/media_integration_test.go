@@ -108,6 +108,14 @@ func testWebRTCBridge(t *testing.T, imsCodec string, imsPayloadType uint8) {
 		}
 	}
 	stats := session.Stats()
+	// UDP delivery can wake the peer before the forwarding goroutine executes
+	// its following atomic counter increment. Wait for that observable update,
+	// while preserving the exact packet/loss assertions below.
+	deadline := time.Now().Add(time.Second)
+	for stats.PacketsFromIMS < 5 && time.Now().Before(deadline) {
+		time.Sleep(time.Millisecond)
+		stats = session.Stats()
+	}
 	if stats.PacketsFromIMS != 5 || stats.PacketsToIMS == 0 || stats.PacketsLost != 1 {
 		t.Fatalf("media stats = %+v", stats)
 	}

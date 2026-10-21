@@ -19,3 +19,6 @@ recovery-keys/
 !recovery-keys/
 recovery-keys/*
 !recovery-keys/vohive-plus-20261001.agekey
+
+# Per-SIM runtime roaming identities stay on the router.
+**/roaming-operators.json

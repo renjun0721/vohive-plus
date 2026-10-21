@@ -255,6 +255,9 @@ func (w *Worker) SetOperatorSelection(ctx context.Context, req backend.SetOperat
 	if w.Backend == nil {
 		return backend.OperatorSelection{}, ErrBackendNotAvailable
 	}
+	if w.hasRoamingOperatorPolicy() {
+		return backend.OperatorSelection{}, errors.New("本卡由优先漫游白名单管理；请先停用该卡策略，再手动选网")
+	}
 
 	if w.Pool != nil {
 		if w.Pool.IsVoWiFiActive(w.ID) {
