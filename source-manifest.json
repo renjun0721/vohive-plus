@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-21",
-  "version": "0.1.8-personal-classic",
+  "date": "2026-10-22",
+  "version": "0.1.9-personal-classic",
   "base_source_commit": "f1c24573bdc0326cbf8800ba5feab544838e60d7",
   "github_base_commit": "581a5e38fa72b85900f8a6a1ad0a4b39720b6f70",
   "upstream_hideck_commit": "3fd3d6aaf55924c338c2cf3f092e1af1f588d152",
@@ -9,11 +9,11 @@
     "3cbb6c1aa0e9bd77a1da98f6c4d60cd866b4e4c1",
     "a1273f0281cf74b288bab329d734c83c5afc3f48"
   ],
-  "running_binary_sha256": "75b2b8f0a99ac2bd5794f7cf7524e98f2511a317326f9d745a4af9c58200053e",
-  "source_correspondence": "Built from complete source/vohive-plus; unchanged classic frontend artifact reused; deployed hash verified",
-  "secret_scan": "Passed: live Bot credentials, passwords, actual roaming ICCID and private keys absent from source; historical recovery assets unchanged",
-  "file_count": 2636,
-  "total_bytes": 20967626,
+  "running_binary_sha256": "f79b0001d74cc5df37862e63810683510747e91a10834e495631baecc3b8310a",
+  "source_correspondence": "Built from candidate 987c826; complete source/vohive-plus matches candidate tracked source; classic frontend embedded artifact reused unchanged; deployment receipt confirms hash",
+  "secret_scan": "Passed: current live passwords/Bot tokens/GitHub token and private roaming ICCID absent from source and new release files; historical recovery assets unchanged",
+  "file_count": 2637,
+  "total_bytes": 20974929,
   "files": [
     {
       "path": "source/VoHivePlus-unlimited-devices.patch",
@@ -23,7 +23,7 @@
     {
       "path": "source/deployment/Personal.Dockerfile",
       "size": 1244,
-      "sha256": "385d2957e5c112e4724fb85161fae46b2c34bd66c652ed5b2f35e27245fd5fc7"
+      "sha256": "0df7fd617e09bcdccc089bc3d86ef98a5f6e61fd4ef7289aac9a8b728fc6d7fc"
     },
     {
       "path": "source/deployment/vohive-plus-run",
@@ -338,7 +338,7 @@
     {
       "path": "source/vohive-plus/build-personal.sh",
       "size": 743,
-      "sha256": "33445e2fc629e1b9b890972f83fb8e2f12f018de7c6981b1b470104ca3d43258"
+      "sha256": "fa66bae508b382f68b05879f3787703336fa24ed633f414a2dda64dee2482a37"
     },
     {
       "path": "source/vohive-plus/caddy-dns/alidns.caddy",
@@ -4497,13 +4497,18 @@
     },
     {
       "path": "source/vohive-plus/internal/volte/voice.go",
-      "size": 23766,
-      "sha256": "647068d5fdda397f36bf1572a8c30d3fd504aa949bc198fc63759842e300353a"
+      "size": 25225,
+      "sha256": "36460615593424446caaee8e0745699955b886af7cfbefe19e02c38dd92265b3"
+    },
+    {
+      "path": "source/vohive-plus/internal/volte/voice_finalize_regression_test.go",
+      "size": 2785,
+      "sha256": "454c4a0203c3cf3885f6b336436a52a146f1b9f9b8eca8ba2cdb7aca7da5089c"
     },
     {
       "path": "source/vohive-plus/internal/volte/voice_test.go",
-      "size": 21221,
-      "sha256": "91f7d61d5df2c6e3d9fd93cdbf0a847d8c7d30ee6b6ab2444dee0c68cc0905ac"
+      "size": 24280,
+      "sha256": "dd1a608e0822a20cf1de4e96cf2f96467244defcae78da1c30abe34aeba06596"
     },
     {
       "path": "source/vohive-plus/internal/vowifihost/adapter.go",
@@ -13348,5 +13353,7 @@
   "reference_hideck_release": "v2.1.32",
   "reference_hideck_main": "d5f64cfdfe05e000b972443399a9205c200e5ef4",
   "reference_vocat_main": "162f7b6744c79b8e49916b0b0bd2427c7120a34a",
-  "personal_roaming_feature": "source/vohive-plus/ROAMING-OPERATORS.md"
+  "personal_roaming_feature": "source/vohive-plus/ROAMING-OPERATORS.md",
+  "local_candidate_commit": "987c82634cd06bb48153b668d7d81d240168cf33",
+  "github_previous_commit": "6fb5ecdf2564e86804695dfaa381603388b2033e"
 }

@@ -1,0 +1,25 @@
+Toolchain: Go 1.27.1 in vohive-plus-013-build; candidate /build/candidate-019 @ 987c826.
+Environment: PATH=/build/toolchain/go/bin:$PATH GOCACHE=/build/go-cache GOMODCACHE=/build/go-mod-cache
+
+Baseline reproduction: 0.1.8 runtime with only upstream new tests added (expected failure, saved separately):
+go test ./internal/volte -run 'TestVoice(AnsweredCallEmitsCallFinalized|LocalHangupEmitsCallFinalized|UnansweredCallDoesNotEmitCallFinalized)$' -count=1
+
+Candidate targeted tests:
+go test ./internal/volte ./internal/phone -count=1
+
+Backend:
+go test -tags 'with_utls nomsgpack' ./internal/backend ./internal/api ./internal/device ./internal/db ./internal/notify ./internal/esim ./internal/vowifihost ./internal/phone ./internal/volte ./internal/qmi ./internal/personal -count=1
+
+Race:
+go test -race -tags 'with_utls nomsgpack' ./internal/volte ./internal/phone -count=2
+go test -race -tags 'with_utls nomsgpack' ./internal/device ./internal/qmi -run 'Roaming|Registration' -count=2
+
+Vet:
+go vet -tags 'with_utls nomsgpack' ./internal/backend ./internal/api ./internal/device ./internal/db ./internal/notify ./internal/esim ./internal/vowifihost ./internal/phone ./internal/volte ./internal/qmi ./internal/personal
+
+Build: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod=readonly -trimpath -buildvcs=false -tags 'with_utls nomsgpack' -ldflags '-s -w -X github.com/yibaiba/hideck/internal/global.Version=0.1.9-personal-classic -X github.com/yibaiba/hideck/internal/global.BuildTime=2026-10-22T02:02:12Z' -o /build/vohive-plus_0.1.9_linux_amd64 ./cmd/hideck
+
+Image diagnostics: docker run --rm --network none vohive-plus-personal:0.1.9 --doctor
+No device mounts or production data were given to the candidate diagnostic container.
+Frontend source and embedded artifact are unchanged; no frontend tests/typecheck/build were run this round.
+All modem tests use mocks. No real SMS/call/Bot/SIM/power/RF acceptance was performed.

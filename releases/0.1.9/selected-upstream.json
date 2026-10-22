@@ -1,0 +1,31 @@
+{
+  "evaluated_heads": {
+    "hideck": "8ca988b1570d9b6b344c4817cc078270fb6dce9e",
+    "vocat": "06e94ed9c035082421452d9d33905a6942161b41"
+  },
+  "date": "2026-10-22",
+  "upstream_author": {
+    "commit": "5a855d8e11f7129f92abd40a494c5dd6868bdbcf",
+    "name": "miaoguoqiang",
+    "email": "646208823@qq.com"
+  },
+  "limitations": [
+    "No real SMS, Bot message, phone call, SIM swap, RF cycle or modem reset acceptance was performed."
+  ],
+  "version": "0.1.9-personal-classic",
+  "regression": "Reproduced missing finalization on the unchanged 0.1.8 runtime using new upstream mock tests; candidate covers explicit\/local\/disappeared terminal paths and answered\/unanswered incoming\/outgoing calls.",
+  "scope": "Native VoLTE CallFinalized recording lifecycle only; preserve all 0.1.8 functionality and private SIM policy.",
+  "base_personal_version": "0.1.8-personal-classic",
+  "deferred": [
+    "HiDeck Spark NZ CHILD_SA rekey negotiation and deferred SA switch: changes security association lifetime and carrier policy; needs separate protocol integration and carrier acceptance.",
+    "HiDeck per-SIM local phone override: depends on ICCID-first identity queries, historical migration and classic UI\/task restore adaptation.",
+    "HiDeck call history deletion: new API and destructive history\/file deletion feature, not a required repair.",
+    "HiDeck VOICE indication restoration\/subscription lifecycle: changes QMI service recovery, callback ownership and readiness; requires a separate candidate and real radio-cycle acceptance.",
+    "VoCat native QMI hot-swap\/cold-start recovery: changes RF mode and SIM power, differs from personal Pool\/Worker ownership and roaming identity guards; real SIM\/power validation is outside this unattended run.",
+    "VoCat carrier Contact policies (issue 180): different IMS implementation and carrier\/identity presentation changes; not a direct patch for the personal vendored core.",
+    "VoCat frontend dependency commits: no net web file change in the evaluated range; personal classic lockfile is independent."
+  ],
+  "selected_hideck_commits": [
+    "5a855d8e11f7129f92abd40a494c5dd6868bdbcf"
+  ]
+}

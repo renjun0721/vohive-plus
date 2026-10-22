@@ -1,0 +1,18 @@
+{
+  "archive_sha256": "d4f413602431c224b114b5318ae7c0bf684929e55722fe9effe9d9327e08c785",
+  "platform": "linux\/amd64",
+  "frontend": "Unchanged 0.1.8 classic frontend source and embedded artifact",
+  "binary_sha256": "f79b0001d74cc5df37862e63810683510747e91a10834e495631baecc3b8310a",
+  "date": "2026-10-22",
+  "pnpm": "11.25.0",
+  "image_id_prefix": "e16accbe1fb4",
+  "build_time": "2026-10-22T02:02:12Z",
+  "image": "vohive-plus-personal:0.1.9",
+  "local_candidate_commit": "987c826",
+  "version": "0.1.9-personal-classic",
+  "archive_bytes": 27787007,
+  "codec_runtime": "Use source\/deployment\/Personal.Dockerfile; iStoreOS native musl execution is unsupported",
+  "binary_bytes": 78504199,
+  "node": "24.21.0",
+  "go": "1.27.1"
+}
