@@ -13355,5 +13355,6 @@
   "reference_vocat_main": "162f7b6744c79b8e49916b0b0bd2427c7120a34a",
   "personal_roaming_feature": "source/vohive-plus/ROAMING-OPERATORS.md",
   "local_candidate_commit": "987c82634cd06bb48153b668d7d81d240168cf33",
-  "github_previous_commit": "6fb5ecdf2564e86804695dfaa381603388b2033e"
+  "github_previous_commit": "6fb5ecdf2564e86804695dfaa381603388b2033e",
+  "publication_code_commit": "61d3a84e1d0e788b363f9fc4c73a72fa33c0559a"
 }

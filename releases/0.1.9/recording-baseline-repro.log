@@ -1,0 +1,7 @@
+--- FAIL: TestVoiceAnsweredCallEmitsCallFinalized (0.00s)
+    voice_test.go:165: answered call must end with CallFinalized: [CallRinging CallAnswered CallEnded]
+--- FAIL: TestVoiceLocalHangupEmitsCallFinalized (0.00s)
+    voice_test.go:211: local hangup must end with CallFinalized: [CallRinging CallAnswered CallEnded]
+FAIL
+FAIL	github.com/yibaiba/hideck/internal/volte	0.009s
+FAIL

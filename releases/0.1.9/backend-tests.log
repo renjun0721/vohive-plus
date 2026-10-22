@@ -1,0 +1,11 @@
+ok  	github.com/yibaiba/hideck/internal/backend	0.035s
+ok  	github.com/yibaiba/hideck/internal/api	6.385s
+ok  	github.com/yibaiba/hideck/internal/device	51.562s
+ok  	github.com/yibaiba/hideck/internal/db	4.918s
+ok  	github.com/yibaiba/hideck/internal/notify	4.176s
+ok  	github.com/yibaiba/hideck/internal/esim	8.220s
+ok  	github.com/yibaiba/hideck/internal/vowifihost	0.113s
+ok  	github.com/yibaiba/hideck/internal/phone	1.258s
+ok  	github.com/yibaiba/hideck/internal/volte	0.513s
+ok  	github.com/yibaiba/hideck/internal/qmi	0.007s
+ok  	github.com/yibaiba/hideck/internal/personal	0.120s

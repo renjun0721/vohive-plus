@@ -1,0 +1,4 @@
+ok  	github.com/yibaiba/hideck/internal/volte	2.372s
+ok  	github.com/yibaiba/hideck/internal/phone	8.115s
+ok  	github.com/yibaiba/hideck/internal/device	5.845s
+ok  	github.com/yibaiba/hideck/internal/qmi	1.022s
