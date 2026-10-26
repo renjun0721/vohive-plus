@@ -13397,5 +13397,6 @@
       "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>",
       "scope": "Only create_child_sa_offer.go formatter, no negotiation/SA lifecycle changes"
     }
-  ]
+  ],
+  "publication_code_commit": "e54d0cf2d1512e610ead0fd050d987f2ed91e40c"
 }
