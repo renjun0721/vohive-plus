@@ -1,0 +1,34 @@
+{
+  "version": "0.1.10-personal-classic",
+  "date": "2026-10-26",
+  "base_personal_version": "0.1.9-personal-classic",
+  "evaluated_heads": {
+    "hideck": "df9eaed7b856bcc3ea0041e6d290cd87436cbadc",
+    "vocat": "a18dceba109205b4b115445a5ca456fd00acf57b"
+  },
+  "selected_hideck_commits": [
+    "55c46b7690b6b094dbed8ad62697ef3e83cc2fa7",
+    "f61966015fd6ce1f1f24466637cf4c5eb060eeeb"
+  ],
+  "upstream_author": {
+    "name": "BFNOC",
+    "email": "15773134+BFNOC@users.noreply.github.com"
+  },
+  "diagnostic_dependency": {
+    "commit": "6e4f7b1627a072c61b225eea7fe0068948bd8eb9",
+    "scope": "Only the pure create_child_sa_offer.go diagnostic formatter; exclude protocol selection, negotiation and SA lifecycle changes."
+  },
+  "scope": "Route engine logger to host file/SSE/level; append payload types and proposal metadata (no key material) to rejected IKE rekey errors. Existing classic frontend and all carrier/radio/SIM policies remain unchanged.",
+  "regression": "Two new IKE diagnostic cases fail on unchanged 0.1.9 runtime and pass on candidate; host integration checks real temporary log file/SSE, caller and debug filtering. No assertions in existing tests were removed or skipped.",
+  "deferred": [
+    "HiDeck MCP business tools, bearer-token storage, browser audio and broad API use-case refactor are a new architecture/feature surface, not needed for these repairs.",
+    "HiDeck registered-flow-first RP reports (2820ae3, 92ba726, 7f46bde) change SMS transport ordering and Vodafone UK policy; preserve personal existing fallback until independent protocol/carrier acceptance.",
+    "HiDeck userless REGISTER Contact and 2degrees idle-port handling (f60d7db, d7be6de) change explicit carrier/registration policy; require independent carrier validation and do not enable unattended.",
+    "VoCat DITO UTC+8 correction across ICCID/sponsor identities remains incompatible with personal true-UTC/backlog protections and persistent deduplication model; need authorized anonymized evidence and history-safe adaptation.",
+    "Earlier CHILD_SA lifecycle, VOICE subscription, SIM/RF recovery and per-SIM number features retain prior deferrals."
+  ],
+  "limitations": [
+    "Unit/mock and read-only device checks are separate from real SMS/call/carrier acceptance; no messages, calls, SIM swaps, RF cycles or modem resets were performed.",
+    "No frontend tests/typecheck/build this round because both source and embedded frontend artifact are byte-for-byte unchanged."
+  ]
+}

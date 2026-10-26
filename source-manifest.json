@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-22",
-  "version": "0.1.9-personal-classic",
+  "date": "2026-10-26",
+  "version": "0.1.10-personal-classic",
   "base_source_commit": "f1c24573bdc0326cbf8800ba5feab544838e60d7",
   "github_base_commit": "581a5e38fa72b85900f8a6a1ad0a4b39720b6f70",
   "upstream_hideck_commit": "3fd3d6aaf55924c338c2cf3f092e1af1f588d152",
@@ -9,11 +9,11 @@
     "3cbb6c1aa0e9bd77a1da98f6c4d60cd866b4e4c1",
     "a1273f0281cf74b288bab329d734c83c5afc3f48"
   ],
-  "running_binary_sha256": "f79b0001d74cc5df37862e63810683510747e91a10834e495631baecc3b8310a",
-  "source_correspondence": "Built from candidate 987c826; complete source/vohive-plus matches candidate tracked source; classic frontend embedded artifact reused unchanged; deployment receipt confirms hash",
-  "secret_scan": "Passed: current live passwords/Bot tokens/GitHub token and private roaming ICCID absent from source and new release files; historical recovery assets unchanged",
-  "file_count": 2637,
-  "total_bytes": 20974929,
+  "running_binary_sha256": "c41b4707d71e7f08a29168210e63ca849a963e627d99399302471fbf8bfd4677",
+  "source_correspondence": "Fresh per-file correspondence to candidate tracked sources; classic frontend reused byte for byte; controlled deployment receipt confirms running hash.",
+  "secret_scan": "Passed: five current sensitive values (credentials and private SIM identity) absent from full source, new release files and decompressed package; original recovery assets unchanged.",
+  "file_count": 2641,
+  "total_bytes": 20982877,
   "files": [
     {
       "path": "source/VoHivePlus-unlimited-devices.patch",
@@ -22,8 +22,8 @@
     },
     {
       "path": "source/deployment/Personal.Dockerfile",
-      "size": 1244,
-      "sha256": "0df7fd617e09bcdccc089bc3d86ef98a5f6e61fd4ef7289aac9a8b728fc6d7fc"
+      "size": 1211,
+      "sha256": "fa6a8f002acc65ac2adf95a929a1be5ec74be24d89290514be3e24781c0952d4"
     },
     {
       "path": "source/deployment/vohive-plus-run",
@@ -317,8 +317,8 @@
     },
     {
       "path": "source/vohive-plus/PERSONAL-NOTICE.md",
-      "size": 4933,
-      "sha256": "7cdba018552072fc2699b676a8f700dfe6e722d490b03a0345cb5b4d3fcf3ad4"
+      "size": 5840,
+      "sha256": "fad8c5f3e0c7b584f99a4be3134b33285c6c764af4d9ac630ba2baf4b3bfa00e"
     },
     {
       "path": "source/vohive-plus/README.md",
@@ -337,8 +337,8 @@
     },
     {
       "path": "source/vohive-plus/build-personal.sh",
-      "size": 743,
-      "sha256": "fa66bae508b382f68b05879f3787703336fa24ed633f414a2dda64dee2482a37"
+      "size": 744,
+      "sha256": "b74c0720c17bd868c7ef5ab5bd076ff313b79a5f5ee559953bcba76191cc8a4e"
     },
     {
       "path": "source/vohive-plus/caddy-dns/alidns.caddy",
@@ -371,9 +371,14 @@
       "sha256": "d8c483e980767c02caba9a8005a3fef8cc023e862d329345818e244444160633"
     },
     {
+      "path": "source/vohive-plus/cmd/hideck/engine_logger_test.go",
+      "size": 1585,
+      "sha256": "b4f559bddd4958baa3d3018b08dc1f00d455bbeaefcbfdc914c6a939cff79987"
+    },
+    {
       "path": "source/vohive-plus/cmd/hideck/main.go",
-      "size": 11516,
-      "sha256": "4226504a083d067c7e5c39e93df5232f2b1ebe3d419a9cd9729059499227dbc5"
+      "size": 11812,
+      "sha256": "ffdad4933191e6c3298e0dd35120d106a7ed1c2a604808ac79f3d4ca9daec45c"
     },
     {
       "path": "source/vohive-plus/cmd/mbimprobe/main.go",
@@ -6977,13 +6982,13 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/logger/logger.go",
-      "size": 3322,
-      "sha256": "d721953575eb19542f63d528d6d6b9cc76361290b0bc2ef9889717921c2de053"
+      "size": 3641,
+      "sha256": "ee13f2bd5012e84d7ece9e582ce20d552cd76af1654399844969605b00781295"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/logger/logger_test.go",
-      "size": 6119,
-      "sha256": "6321c3f08e9cb7aa2b758102345f5756e7059bc3370a3c55f76191fc92b18a54"
+      "size": 6886,
+      "sha256": "3b25514a504f2a374ee38f45700869dcc66629563d7b5678eb07e5819f7931ba"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/logger/options.go",
@@ -7049,6 +7054,16 @@
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/cookie.go",
       "size": 416,
       "sha256": "b53631241decab716f07104ddd28b50f4f62d644c8e2d202ef6e748bdb550243"
+    },
+    {
+      "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/create_child_sa_offer.go",
+      "size": 1729,
+      "sha256": "6bfb5353f9bf0c577dd5663a9a454c97b6a55f862b206d60d96e88a6849634d0"
+    },
+    {
+      "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/create_child_sa_offer_test.go",
+      "size": 1525,
+      "sha256": "877818ca4bb8e2fb590fc273ce5f03472e11af6d7b292d308cdc756a21fa3bfa"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/crypto_keys.go",
@@ -7267,8 +7282,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/ike_rekey.go",
-      "size": 8275,
-      "sha256": "ef4c3b96884bdbc5b8bd8a847350e17e5e94e7954bb367aa05b2cbddedc20e01"
+      "size": 8344,
+      "sha256": "f7135b9d80926e82f1fd2061ad74ef1270bb67f3d39e23f0ed01557dec13bdd9"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/ike_rekey_retired.go",
@@ -7454,6 +7469,11 @@
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/rekey_delete_test.go",
       "size": 5714,
       "sha256": "0c20622dbb3dba78fc9ee9eca33824f2d4685f33904ef7619b435bd7e3569de8"
+    },
+    {
+      "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/rekey_diagnostics_test.go",
+      "size": 783,
+      "sha256": "2f17123ddb0f284918e09b1ded02efd1dd7301bbabb21d7edc6e507d69d093b0"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/swu/rekey_restoration_test.go",
@@ -13348,13 +13368,34 @@
       "sha": "d85a5f2d546e04126b082b0e1dcd32e68696a25c",
       "subject": "fix(phone): keep playing IMS audio when early media mixes in another SSRC",
       "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+    },
+    {
+      "sha": "5a855d8e11f7129f92abd40a494c5dd6868bdbcf",
+      "subject": "fix(volte): emit CallFinalized for recording lifecycle",
+      "author": "miaoguoqiang <646208823@qq.com>"
+    },
+    {
+      "sha": "55c46b7690b6b094dbed8ad62697ef3e83cc2fa7",
+      "subject": "fix(logger): write SWu engine logs to the log file",
+      "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+    },
+    {
+      "sha": "f61966015fd6ce1f1f24466637cf4c5eb060eeeb",
+      "subject": "fix(swu): name received payloads when IKE rekey response is rejected",
+      "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>"
     }
   ],
-  "reference_hideck_release": "v2.1.32",
-  "reference_hideck_main": "d5f64cfdfe05e000b972443399a9205c200e5ef4",
-  "reference_vocat_main": "162f7b6744c79b8e49916b0b0bd2427c7120a34a",
+  "reference_hideck_release": "v2.1.35",
+  "reference_hideck_main": "df9eaed7b856bcc3ea0041e6d290cd87436cbadc",
+  "reference_vocat_main": "a18dceba109205b4b115445a5ca456fd00acf57b",
   "personal_roaming_feature": "source/vohive-plus/ROAMING-OPERATORS.md",
-  "local_candidate_commit": "987c82634cd06bb48153b668d7d81d240168cf33",
-  "github_previous_commit": "6fb5ecdf2564e86804695dfaa381603388b2033e",
-  "publication_code_commit": "61d3a84e1d0e788b363f9fc4c73a72fa33c0559a"
+  "local_candidate_commit": "336ea9628e8a935ebbe049e06f20b94147445249",
+  "github_previous_commit": "3df3ba1dad4b3a50521d0c0cb4a7b3c106ac491a",
+  "partial_diagnostic_dependencies": [
+    {
+      "sha": "6e4f7b1627a072c61b225eea7fe0068948bd8eb9",
+      "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>",
+      "scope": "Only create_child_sa_offer.go formatter, no negotiation/SA lifecycle changes"
+    }
+  ]
 }

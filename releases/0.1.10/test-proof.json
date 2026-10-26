@@ -1,0 +1,27 @@
+{
+  "version": "0.1.10-personal-classic",
+  "binary_sha256": "c41b4707d71e7f08a29168210e63ca849a963e627d99399302471fbf8bfd4677",
+  "local_candidate_commit": "336ea9628e8a935ebbe049e06f20b94147445249",
+  "tests": [
+    {
+      "name": "backend",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive/updates/0.1.10/backend-tests.log"
+    },
+    {
+      "name": "engine-logger-swu",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive/updates/0.1.10/engine-full-tests.log"
+    },
+    {
+      "name": "targeted-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive/updates/0.1.10/race-tests.log"
+    },
+    {
+      "name": "vet",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive/updates/0.1.10/vet.log"
+    }
+  ]
+}

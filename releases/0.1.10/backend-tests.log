@@ -1,0 +1,13 @@
+ok  	github.com/yibaiba/hideck/cmd/hideck	0.086s
+?   	github.com/yibaiba/hideck/pkg/logger	[no test files]
+ok  	github.com/yibaiba/hideck/internal/backend	0.020s
+ok  	github.com/yibaiba/hideck/internal/api	9.994s
+ok  	github.com/yibaiba/hideck/internal/device	56.528s
+ok  	github.com/yibaiba/hideck/internal/db	13.797s
+ok  	github.com/yibaiba/hideck/internal/notify	6.687s
+ok  	github.com/yibaiba/hideck/internal/esim	8.371s
+ok  	github.com/yibaiba/hideck/internal/vowifihost	0.134s
+ok  	github.com/yibaiba/hideck/internal/phone	1.858s
+ok  	github.com/yibaiba/hideck/internal/volte	0.564s
+ok  	github.com/yibaiba/hideck/internal/qmi	0.026s
+ok  	github.com/yibaiba/hideck/internal/personal	0.260s

@@ -1,0 +1,11 @@
+=== RUN   TestIKERekeyResponseErrorNamesReceivedPayloads
+=== RUN   TestIKERekeyResponseErrorNamesReceivedPayloads/empty
+    rekey_diagnostics_test.go:24: error = swu: IKE rekey response missing SA, nonce, or KE, want "(response: none)"
+=== RUN   TestIKERekeyResponseErrorNamesReceivedPayloads/notify
+    rekey_diagnostics_test.go:24: error = swu: IKE rekey response missing SA, nonce, or KE, want "(response: N(35))"
+--- FAIL: TestIKERekeyResponseErrorNamesReceivedPayloads (0.00s)
+    --- FAIL: TestIKERekeyResponseErrorNamesReceivedPayloads/empty (0.00s)
+    --- FAIL: TestIKERekeyResponseErrorNamesReceivedPayloads/notify (0.00s)
+FAIL
+FAIL	github.com/iniwex5/vowifi-go/engine/swu	0.003s
+FAIL

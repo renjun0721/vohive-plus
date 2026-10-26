@@ -1,0 +1,7 @@
+ok  	github.com/yibaiba/hideck/cmd/hideck	1.401s
+ok  	github.com/yibaiba/hideck/internal/volte	2.168s
+ok  	github.com/yibaiba/hideck/internal/phone	6.479s
+ok  	github.com/yibaiba/hideck/internal/device	5.891s
+ok  	github.com/yibaiba/hideck/internal/qmi	1.022s
+ok  	github.com/iniwex5/vowifi-go/engine/logger	1.198s
+ok  	github.com/iniwex5/vowifi-go/engine/swu	4.649s

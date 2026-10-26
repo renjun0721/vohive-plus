@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/iniwex5/quectel-qmi-go/pkg/qmi"
+	enginelogger "github.com/iniwex5/vowifi-go/engine/logger"
 	"github.com/iniwex5/vowifi-go/runtimehost/carrier"
 	"github.com/iniwex5/vowifi-go/runtimehost/voicehost"
 	"github.com/yibaiba/hideck/internal/api"
@@ -30,10 +31,16 @@ import (
 	"github.com/yibaiba/hideck/internal/proxy/traffic"
 	"github.com/yibaiba/hideck/internal/upstreamproxy"
 	"github.com/yibaiba/hideck/internal/volte"
+	"go.uber.org/zap"
 
 	"github.com/yibaiba/hideck/internal/web"
 	"github.com/yibaiba/hideck/pkg/logger"
 )
+
+// configureEngineLogger shares the host file/SSE sinks without adding a caller skip.
+func configureEngineLogger() {
+	enginelogger.Set(logger.ZapLogger().WithOptions(zap.AddCallerSkip(-1)))
+}
 
 func main() {
 	const voiceRecordingDirectory = "data/recordings/voice"
@@ -74,6 +81,7 @@ func main() {
 	})
 	// 将内置 slog 重定向到已就绪的系统日志框架
 	slog.SetDefault(slog.New(logger.NewSlogHandler(logger.ZapLogger())))
+	configureEngineLogger()
 	logger.Info("VoHive Plus 个人版启动中（基于 HiDeck）...")
 
 	go func() {
