@@ -432,10 +432,20 @@ func TestOnlyCommandEventStreamsDisableWriteDeadline(t *testing.T) {
 
 func newCommandCenterAPITestServer(t *testing.T) (*Server, string, *apiBalanceGateway) {
 	t.Helper()
-	database, err := gorm.Open(sqlite.Open(fmt.Sprintf("file:%s?mode=memory&cache=shared", t.Name())), &gorm.Config{})
+	// Each invocation, including -count repetitions, owns a fresh database.
+	database, err := gorm.Open(sqlite.Open(filepath.Join(t.TempDir(), "command-center.db")), &gorm.Config{})
 	if err != nil {
 		t.Fatal(err)
 	}
+	sqlDB, err := database.DB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := sqlDB.Close(); err != nil {
+			t.Errorf("close command-center test database: %v", err)
+		}
+	})
 	if err := database.AutoMigrate(&db.CommandExecution{}, &db.CommandEvent{}, &db.BalanceQuery{}); err != nil {
 		t.Fatal(err)
 	}

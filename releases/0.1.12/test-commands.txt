@@ -1,0 +1,36 @@
+Toolchain: Go 1.27.1; vohive-plus-013-build; GOCACHE=/build/go-cache GOMODCACHE=/build/go-mod-cache.
+Baseline: /build/candidate-010 at 336ea9628e8a935ebbe049e06f20b94147445249.
+Candidate: /build/candidate-012, codex/scheduled-012-login-lockout, 232b95ba2c1aa64ba36c1dd54ef9c19a6ac301b0.
+All tests run isolated from production devices/configuration; no physical SMS/call/notification or balance task execution.
+
+Baseline HTTP login repro (only added tests, original runtime):
+go test -tags 'with_utls nomsgpack' ./internal/api -run 'TestLoginRateLimitIgnoresSpoofedForwardedFor|TestLoginAndRotateSuccessesDoNotCount' -count=1 -timeout=90s -v
+Both fail, preserved in login-baseline-repro.log, not counted as passed.
+
+Candidate login regression:
+go test -tags 'with_utls nomsgpack' ./internal/api -run 'TestLogin|TestLateRelease' -count=1 -timeout=90s -v
+
+Backend (initial and after fixture fixes):
+go test -p 2 -tags 'with_utls nomsgpack' ./cmd/hideck ./pkg/logger ./internal/backend ./internal/api ./internal/device ./internal/db ./internal/notify ./internal/esim ./internal/vowifihost ./internal/phone ./internal/volte ./internal/qmi ./internal/personal -count=1 -timeout=180s
+
+API/host/media race (initial failed; final rerun after fixing fixture data race and DB reuse):
+go test -race -p 2 -tags 'with_utls nomsgpack' ./internal/api ./cmd/hideck ./internal/volte ./internal/phone -count=2 -timeout=180s
+The initial race-tests.log is retained separately and cannot be used as passed proof.
+
+Old current baseline fixture repro:
+go test -race -p 2 -tags 'with_utls nomsgpack' ./internal/api -run 'TestPhoneEventStreamDisablesProxyBuffering|TestBalanceQueryRouteUsesInjectedProductionService' -count=2 -timeout=90s
+Candidate fixed fixture regression: same test selector, -count=20. All original header/body and balance status/call assertions retained.
+
+Roaming/registration race:
+go test -race -p 2 -tags 'with_utls nomsgpack' ./internal/device ./internal/qmi -run 'Roaming|Registration' -count=2 -timeout=90s
+
+Vet (initial and final):
+go vet -p 2 -tags 'with_utls nomsgpack' ./cmd/hideck ./pkg/logger ./internal/backend ./internal/api ./internal/device ./internal/db ./internal/notify ./internal/esim ./internal/vowifihost ./internal/phone ./internal/volte ./internal/qmi ./internal/personal
+
+Engine smoke (third_party/vowifi-go; all 884 engine Go files identical to deployed baseline):
+go test -p 2 ./runtimehost/... ./engine/logger ./engine/swu -count=1 -timeout=90s
+Full imscore suite not rerun: previous baseline/candidate MSS and UDP-stop failures remain unresolved and were not modified or represented as passing.
+
+Frontend source (288 files) and embedded artifact (112 files) byte-identical to current version: reuse without frontend test/typecheck/build.
+Production read-only health: authenticated GET system/info, devices, active calls and SMS contact counts; local/Tailscale/public index and /ping, TLS verified.
+No-device/no-network doctor is dependency verification, not physical modem acceptance.

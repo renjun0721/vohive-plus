@@ -1,0 +1,23 @@
+{
+  "version": "0.1.12-personal-classic",
+  "date": "2026-10-30",
+  "base_personal_version": "0.1.10-personal-classic",
+  "evaluated_heads": {"hideck":"087afaf0107c047cf46c45a697b6c3f6ba649edb","vocat":"33ecd4ca3fe595766ed598bcde7c6bc00fb536de"},
+  "selected_hideck_commits": ["8845a93045f71c858feab7d5bb066056115a3509","087afaf0107c047cf46c45a697b6c3f6ba649edb"],
+  "upstream_author": {"name":"BFNOC","email":"15773134+BFNOC@users.noreply.github.com"},
+  "scope": "Independent API login failure lockout and successful authentication reservation refund, concurrent capacity, window generations, expiry pruning and Retry-After. No protocol, carrier, modem, notification, frontend or user configuration changes. Local API test fixtures corrected without removing assertions.",
+  "regression": "Old 0.1.10 fails HTTP Retry-After and successful-login/rotate authentication tests; candidate passes. Initial broad API race exposes old SSE recorder and reused SQLite fixture failures on both old and candidate runtime; corrected fixture passes 20 race repetitions and final full relevant tests.",
+  "deferred": [
+    "IMS refresh Security-Client SPIs/port-c, parallel SA installation/retirement and DITO/2degrees/Lebara policy changes need newer ownership models and separate carrier acceptance.",
+    "SOCKS5 NAT-T UDP reassociation and IKE control generation switching, including subsequent error propagation correction, need combined adaptation and proxy validation.",
+    "Unrelated QMI diagnostic text and subscription test determinism changes are not dependencies of the selected API fix.",
+    "VoCat per-Bark-URL configuration, persistent API tokens/MCP and eSIM/QMI/remoteproc recovery architecture do not match current personal configuration and Worker ownership model.",
+    "Prior 0.1.11 readiness candidate remains undeployed. Earlier CHILD_SA, RP/carrier/SIM/RF and DITO backlog deferrals remain. No change to existing roaming policy."
+  ],
+  "limitations": [
+    "No physical SMS/call/recording, notification sending, SIM swap, modem reset, balance task or carrier acceptance. Isolated mocks and loopback tests are not real business acceptance.",
+    "Full imscore suite not rerun; prior baseline MSS ENOPROTOOPT and UDP-stop concurrency failures remain unresolved. All 884 engine Go source files are unchanged.",
+    "Classic frontend source (288 files) and embedded artifact (112 files) unchanged; no frontend tests/typecheck/build this round.",
+    "Existing proxy trust is preserved; rate limiting keys on the real TCP peer, so multiple clients behind one reverse proxy may share the IP limit."
+  ]
+}

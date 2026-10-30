@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-26",
-  "version": "0.1.10-personal-classic",
+  "date": "2026-10-30",
+  "version": "0.1.12-personal-classic",
   "base_source_commit": "f1c24573bdc0326cbf8800ba5feab544838e60d7",
   "github_base_commit": "581a5e38fa72b85900f8a6a1ad0a4b39720b6f70",
   "upstream_hideck_commit": "3fd3d6aaf55924c338c2cf3f092e1af1f588d152",
@@ -9,11 +9,11 @@
     "3cbb6c1aa0e9bd77a1da98f6c4d60cd866b4e4c1",
     "a1273f0281cf74b288bab329d734c83c5afc3f48"
   ],
-  "running_binary_sha256": "c41b4707d71e7f08a29168210e63ca849a963e627d99399302471fbf8bfd4677",
-  "source_correspondence": "Fresh per-file correspondence to candidate tracked sources; classic frontend reused byte for byte; controlled deployment receipt confirms running hash.",
-  "secret_scan": "Passed: five current sensitive values (credentials and private SIM identity) absent from full source, new release files and decompressed package; original recovery assets unchanged.",
+  "running_binary_sha256": "57477aa2ef462ef9ae6b3309ce0cf880acf495b12f6007052c986802175c7a96",
+  "source_correspondence": "Fresh per-file comparison against 2598 candidate tracked files; controlled deployment receipt matches running binary.",
+  "secret_scan": "Current private values scanned separately before publication, never included here.",
   "file_count": 2641,
-  "total_bytes": 20982877,
+  "total_bytes": 20993227,
   "files": [
     {
       "path": "source/VoHivePlus-unlimited-devices.patch",
@@ -23,7 +23,7 @@
     {
       "path": "source/deployment/Personal.Dockerfile",
       "size": 1211,
-      "sha256": "fa6a8f002acc65ac2adf95a929a1be5ec74be24d89290514be3e24781c0952d4"
+      "sha256": "1216703d7a11dbe7144f311a21328bd3c797fbfca525908c6bb21ccd55447117"
     },
     {
       "path": "source/deployment/vohive-plus-run",
@@ -317,8 +317,8 @@
     },
     {
       "path": "source/vohive-plus/PERSONAL-NOTICE.md",
-      "size": 5840,
-      "sha256": "fad8c5f3e0c7b584f99a4be3134b33285c6c764af4d9ac630ba2baf4b3bfa00e"
+      "size": 6417,
+      "sha256": "cd35d9142747f75d666fcf8898c808237715ff7806d4b81d907720662eb7caaf"
     },
     {
       "path": "source/vohive-plus/README.md",
@@ -338,7 +338,7 @@
     {
       "path": "source/vohive-plus/build-personal.sh",
       "size": 744,
-      "sha256": "b74c0720c17bd868c7ef5ab5bd076ff313b79a5f5ee559953bcba76191cc8a4e"
+      "sha256": "80e5bc2f7091bb5117453b298e3e7f2b935c0e32dcf60e1bf8e9d73502d59b99"
     },
     {
       "path": "source/vohive-plus/caddy-dns/alidns.caddy",
@@ -577,8 +577,8 @@
     },
     {
       "path": "source/vohive-plus/internal/api/auth_security_test.go",
-      "size": 2220,
-      "sha256": "72cfa711dfba4ec17c9e3b3a9cbf6ff4c06b11f9253c4d82fa2f9a58021660a8"
+      "size": 8990,
+      "sha256": "6c88f067763f1c77cd661ddeee580faa93c9b975206c120868ca7ac6cb387415"
     },
     {
       "path": "source/vohive-plus/internal/api/automatic_tasks.go",
@@ -622,8 +622,8 @@
     },
     {
       "path": "source/vohive-plus/internal/api/command_center_test.go",
-      "size": 20617,
-      "sha256": "0e39a11b80f4212fc4536deb9f8d9e37c4318034ec5582eabddcf88276c6bdaf"
+      "size": 20872,
+      "sha256": "00087392d7029c47fc63a64ac1efdc009de0946653f6c8a884ac0d5564b3ab1c"
     },
     {
       "path": "source/vohive-plus/internal/api/device_backend_switch.go",
@@ -962,8 +962,8 @@
     },
     {
       "path": "source/vohive-plus/internal/api/phone_test.go",
-      "size": 14330,
-      "sha256": "17968f7cf5f7f0a07cbd4287657a6ed617d33d01506817f0fc188c4d076e8344"
+      "size": 14450,
+      "sha256": "06ab6874909cc6d185b1ba804e990386478e2279e8dd83d6aa324a7d34214892"
     },
     {
       "path": "source/vohive-plus/internal/api/proxy.go",
@@ -982,8 +982,8 @@
     },
     {
       "path": "source/vohive-plus/internal/api/server.go",
-      "size": 65203,
-      "sha256": "26a39729193a24eb374c8742b0bd4c616e13ddfd0e63695395943ae74a734bf8"
+      "size": 67831,
+      "sha256": "f9a767b923507caa7c9e9ecc5bff2be5eed7f84d53f8c070d0ea5edd3c46f844"
     },
     {
       "path": "source/vohive-plus/internal/api/server_tls.go",
@@ -13383,20 +13383,29 @@
       "sha": "f61966015fd6ce1f1f24466637cf4c5eb060eeeb",
       "subject": "fix(swu): name received payloads when IKE rekey response is rejected",
       "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+    },
+    {
+      "sha": "8845a93045f71c858feab7d5bb066056115a3509",
+      "subject": "fix(api): lock out repeated failed logins",
+      "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+    },
+    {
+      "sha": "087afaf0107c047cf46c45a697b6c3f6ba649edb",
+      "subject": "test(api): cover concurrent login lockout reservations",
+      "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>"
     }
   ],
-  "reference_hideck_release": "v2.1.35",
-  "reference_hideck_main": "df9eaed7b856bcc3ea0041e6d290cd87436cbadc",
-  "reference_vocat_main": "a18dceba109205b4b115445a5ca456fd00acf57b",
+  "reference_hideck_release": "v2.1.38",
+  "reference_hideck_main": "087afaf0107c047cf46c45a697b6c3f6ba649edb",
+  "reference_vocat_main": "33ecd4ca3fe595766ed598bcde7c6bc00fb536de",
   "personal_roaming_feature": "source/vohive-plus/ROAMING-OPERATORS.md",
-  "local_candidate_commit": "336ea9628e8a935ebbe049e06f20b94147445249",
-  "github_previous_commit": "3df3ba1dad4b3a50521d0c0cb4a7b3c106ac491a",
+  "local_candidate_commit": "232b95ba2c1aa64ba36c1dd54ef9c19a6ac301b0",
+  "github_previous_commit": "8c55f36f2b950ff0998f663c26e154ded104ece3",
   "partial_diagnostic_dependencies": [
     {
       "sha": "6e4f7b1627a072c61b225eea7fe0068948bd8eb9",
       "author": "BFNOC <15773134+BFNOC@users.noreply.github.com>",
       "scope": "Only create_child_sa_offer.go formatter, no negotiation/SA lifecycle changes"
     }
-  ],
-  "publication_code_commit": "e54d0cf2d1512e610ead0fd050d987f2ed91e40c"
+  ]
 }
