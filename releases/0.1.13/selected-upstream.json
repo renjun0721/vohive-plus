@@ -1,0 +1,20 @@
+{
+  "version":"0.1.13-personal-classic",
+  "date":"2026-10-31",
+  "base_personal_version":"0.1.12-personal-classic",
+  "evaluated_heads":{"hideck":"087afaf0107c047cf46c45a697b6c3f6ba649edb","vocat":"d1968d1c3fb88258d86a6e2e69f9c3304d160711"},
+  "selected_vocat_commits":["d1968d1c3fb88258d86a6e2e69f9c3304d160711"],
+  "upstream_author":"MengMengCode",
+  "scope":"Independent SOCKS5 relay DNS failure sanitization, adapted to existing personal readSocks5Reply and DecodeSocks5UDPDatagram paths. Retain safe context/DNS classification without untrusted names, resolver details or original error chains. No successful-path, DNS selection, proxy lifecycle or operator policy changes.",
+  "regression":"Offline injected resolver exercises both existing parsers: unchanged 0.1.12 fails both information-leak assertions; candidate security and classification regressions pass 20 race repetitions. No external DNS, proxy, modem, or messaging service contacted by security regressions.",
+  "deferred":[
+    "VoCat 01087de89dbd97e29db86d67c9aa9951d1a6f4ce: typed AT capability profiles, unknown USB/ZXIC discovery, AT port leases, Manager ownership, data paths, APDU CSIM/CGLA dialect and eSIM/ISIM integration need a separate design against personal Pool/Worker generations, ICCID checks and roaming whitelist. No target ZXIC hardware evidence or physical acceptance.",
+    "Prior IMS/SA/carrier, SOCKS5 NAT-T reassociation/control generations, API Token/MCP, notification configuration, eSIM recovery and QMI/remoteproc architecture deferrals remain. Undeployed 0.1.11 candidate is not inherited."
+  ],
+  "limitations":[
+    "No physical SMS, call, recording, notification sending, SIM swap, modem reset, balance task, target external proxy or carrier acceptance. Offline and loopback tests do not constitute physical business acceptance.",
+    "Full imscore suite not rerun: prior baseline MSS ENOPROTOOPT and UDP-stop concurrency failures remain unresolved. Only engine/ipsec runtime error handling changes.",
+    "Classic frontend source (288 files) and embedded artifact (112 files) byte-identical and reused; frontend tests, typecheck and build not rerun.",
+    "Initial independent-worktree backend/vet setup failed due to absent ignored embedded frontend artifact; original artifact restored and final checks run without removing or skipping assertions."
+  ]
+}

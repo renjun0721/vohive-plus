@@ -1,10 +1,10 @@
 # VoHive Plus 个人版
 
-本版本由用户授权，为其个人 iStoreOS 环境定制。版本：0.1.10-personal-classic，2026-10-26。
+本版本由用户授权，为其个人 iStoreOS 环境定制。版本：0.1.13-personal-classic，2026-10-31。
 
 基础源码来自 [HiDeck](https://github.com/yibaiba/hideck)，固定提交 `3fd3d6aaf55924c338c2cf3f092e1af1f588d152`（v2.1.23 之后的源码快照）。HiDeck 继承 VoHive，项目原有作者声明、LICENSE 与 THIRD_PARTY_NOTICES.md 均保留；third_party 中的组件仍适用各自的许可，包括 vowifi-go 的 AGPL-3.0。
 
-[VoCat](https://github.com/MengMengCode/VoCat) 的环境诊断思路用于设计个人版只读检查；本次没有复制 VoCat 的代码，也没有把两个项目的数据库或通信核心直接混合。
+[VoCat](https://github.com/MengMengCode/VoCat) 的环境诊断思路用于设计个人版只读检查；早期只读诊断未复制 VoCat 代码；后续选择性适配详见下文，保留各自作者与许可。
 
 个人版以原版 VoHive UI 与布局为基础增加功能。前端基线为 VoHive 提交 `f240894e763cf7f0cf74c88562bb9b55f0d573b1`；保留原侧栏、首页统计与设备卡片、设备列表和详情页、短信三栏、代理页、登录和系统设置布局，并保留升级后的后台与数据。新增通话、自动任务、指令与余额入口，以及 Telegram/QQ 编辑器、只读环境诊断。个人版新增：无周期确认弹窗的控制台启动、关闭网页自卸载、独立 SQLite 副本迁移、登录保护的环境诊断、AMR/AMR-WB/MP3 库检测，以及避免官方镜像覆盖个人定制版的更新提示。短信、eSIM、电话、代理、通知、任务等主功能来自完整 HiDeck 源码。按用户选择，设置页只展示 Telegram 和 QQ Bot 提醒；其余提醒关闭，相关源码仍保留以便后续维护。
 
@@ -31,3 +31,5 @@
 0.1.10：选择性适配 BFNOC 的 HiDeck 55c46b7690b6b094dbed8ad62697ef3e83cc2fa7 和 f61966015fd6ce1f1f24466637cf4c5eb060eeeb：SWu/IKE 引擎复用主程序日志文件、日志等级和 SSE 输出，IKE 重协商拒绝错误附加返回载荷类型。仅提取 6e4f7b1627a072c61b225eea7fe0068948bd8eb9 中无密钥内容的诊断格式化函数作为依赖；不纳入该提交的 CHILD_SA 协商或生命周期变化。保留上述作者、许可及原有保护；不更改运营商策略、短信确认路径、MCP、前端、用户配置。单元/模拟与只读实机检查不代表真实短信、通话或运营商重协商验收。
 
 0.1.12：以已部署 0.1.10 为基线，独立选择 BFNOC 的 HiDeck 8845a93045f71c858feab7d5bb066056115a3509（登录失败锁定）和 087afaf0107c047cf46c45a697b6c3f6ba649edb（并发预留回归）。成功登录和正确的 rotate 认证只归还自身名额；连续失败的真实连接 IP 锁定十分钟，返回 Retry-After，过期计数清理并隔离旧窗口归还。未纳入未部署的 0.1.11 短信候选、IMS/SA/运营商策略、SIM/QMI 架构、前端或用户配置变更。rotate 仅在隔离单元测试中调用认证函数，未实机切换 IP。
+
+0.1.13：选择性适配 MengMengCode 的 VoCat d1968d1c3fb88258d86a6e2e69f9c3304d160711：将 SOCKS5 代理返回的 relay 域名和 DNS 原始错误链从失败日志中移除，保留取消、超时与 DNS 安全分类。按个人版现有接口同时保护 UDP ASSOCIATE/CONNECT 回复和 UDP 数据报域名解析失败；不改变 DNS 解析成功、路由、传输生命周期或运营商行为。新增离线解析器回归覆盖两条真实解析路径，旧版可复现泄露；不纳入 ZXIC/未知 USB 探测、APDU 方言或设备 Manager 重构。未进行真实短信、通话或通知发送验收。

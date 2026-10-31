@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-30",
-  "version": "0.1.12-personal-classic",
+  "date": "2026-10-31",
+  "version": "0.1.13-personal-classic",
   "base_source_commit": "f1c24573bdc0326cbf8800ba5feab544838e60d7",
   "github_base_commit": "581a5e38fa72b85900f8a6a1ad0a4b39720b6f70",
   "upstream_hideck_commit": "3fd3d6aaf55924c338c2cf3f092e1af1f588d152",
@@ -9,11 +9,11 @@
     "3cbb6c1aa0e9bd77a1da98f6c4d60cd866b4e4c1",
     "a1273f0281cf74b288bab329d734c83c5afc3f48"
   ],
-  "running_binary_sha256": "57477aa2ef462ef9ae6b3309ce0cf880acf495b12f6007052c986802175c7a96",
-  "source_correspondence": "Fresh per-file comparison against 2598 candidate tracked files; controlled deployment receipt matches running binary.",
-  "secret_scan": "Current private values scanned separately before publication, never included here.",
-  "file_count": 2641,
-  "total_bytes": 20993227,
+  "running_binary_sha256": "7fc007719b02d41e4d508a5d6f104388c466567b605d674e69c174bd743b7e24",
+  "source_correspondence": "Fresh per-file comparison against 2600 candidate tracked files; controlled deployment receipt matches running binary.",
+  "secret_scan": "Current private values scanned separately before publication; values never included here.",
+  "file_count": 2643,
+  "total_bytes": 20999372,
   "files": [
     {
       "path": "source/VoHivePlus-unlimited-devices.patch",
@@ -23,7 +23,7 @@
     {
       "path": "source/deployment/Personal.Dockerfile",
       "size": 1211,
-      "sha256": "1216703d7a11dbe7144f311a21328bd3c797fbfca525908c6bb21ccd55447117"
+      "sha256": "068728600a25ba1d1a20ae4f2b12a1b6fc18372cbcf4cd3ea955287d2f69da9e"
     },
     {
       "path": "source/deployment/vohive-plus-run",
@@ -317,8 +317,8 @@
     },
     {
       "path": "source/vohive-plus/PERSONAL-NOTICE.md",
-      "size": 6417,
-      "sha256": "cd35d9142747f75d666fcf8898c808237715ff7806d4b81d907720662eb7caaf"
+      "size": 7040,
+      "sha256": "aa90ce8d82c5fdfc38c334c0f2683d65c06d1d2ab119c73a29d469ca1571ecd7"
     },
     {
       "path": "source/vohive-plus/README.md",
@@ -338,7 +338,7 @@
     {
       "path": "source/vohive-plus/build-personal.sh",
       "size": 744,
-      "sha256": "80e5bc2f7091bb5117453b298e3e7f2b935c0e32dcf60e1bf8e9d73502d59b99"
+      "sha256": "4796c3430117611bc834be8c9e7ce986d203abb191cddcbd9f9c28df286b380f"
     },
     {
       "path": "source/vohive-plus/caddy-dns/alidns.caddy",
@@ -6886,6 +6886,16 @@
       "sha256": "591a1370693dd8fc3ad4ad0605fe28384e00099ed4fe75158cdd752cdc2ab61d"
     },
     {
+      "path": "source/vohive-plus/third_party/vowifi-go/engine/ipsec/relay_lookup_regression_test.go",
+      "size": 2043,
+      "sha256": "1ff24401aff6e12800545b62a555950e56ae1aae83882edea9da5c2c4bbbcbb8"
+    },
+    {
+      "path": "source/vohive-plus/third_party/vowifi-go/engine/ipsec/relay_lookup_security_test.go",
+      "size": 2595,
+      "sha256": "4369694afca1f68652694b4046419175c564d0dc681b1da73128e5831fa66a27"
+    },
+    {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/ipsec/resolver.go",
       "size": 1416,
       "sha256": "0dde462fc026b6ab3f82b1b6ff79938e7eecb2e68e1a28fdc6ea9b3f90318b59"
@@ -6957,8 +6967,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/ipsec/socks5_protocol.go",
-      "size": 9605,
-      "sha256": "55b3682d976d0ada3a40e83ac7b96430d0d01224358debf690385ddf1d4e43a8"
+      "size": 10489,
+      "sha256": "e30ecc23810de3eca4dad2db967ce94b950c0f43abfa618572b4963bb5db78e6"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/engine/ipsec/socks5_test_helpers_test.go",
@@ -13397,10 +13407,10 @@
   ],
   "reference_hideck_release": "v2.1.38",
   "reference_hideck_main": "087afaf0107c047cf46c45a697b6c3f6ba649edb",
-  "reference_vocat_main": "33ecd4ca3fe595766ed598bcde7c6bc00fb536de",
+  "reference_vocat_main": "d1968d1c3fb88258d86a6e2e69f9c3304d160711",
   "personal_roaming_feature": "source/vohive-plus/ROAMING-OPERATORS.md",
-  "local_candidate_commit": "232b95ba2c1aa64ba36c1dd54ef9c19a6ac301b0",
-  "github_previous_commit": "8c55f36f2b950ff0998f663c26e154ded104ece3",
+  "local_candidate_commit": "c442f8e177de24a44af729c933f6800f9239e469",
+  "github_previous_commit": "1cefb7301c4d2fa8fcc14d004c5add164ed355cc",
   "partial_diagnostic_dependencies": [
     {
       "sha": "6e4f7b1627a072c61b225eea7fe0068948bd8eb9",
@@ -13408,5 +13418,13 @@
       "scope": "Only create_child_sa_offer.go formatter, no negotiation/SA lifecycle changes"
     }
   ],
-  "publication_code_commit": "61a9607836ea073d821f4c230d14311527a3abc4"
+  "reference_vocat_release": "v0.3.36",
+  "selected_vocat_commits": [
+    {
+      "sha": "d1968d1c3fb88258d86a6e2e69f9c3304d160711",
+      "subject": "fix(ike): sanitize SOCKS5 relay lookup failures",
+      "author": "MengMengCode <227010654+MengMengCode@users.noreply.github.com>",
+      "adaptation": "Existing personal SOCKS5 reply and UDP datagram error paths, without VoCat IKE lifecycle changes."
+    }
+  ]
 }

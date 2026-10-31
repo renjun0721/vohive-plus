@@ -1,0 +1,28 @@
+Toolchain: Go 1.27.1; vohive-plus-013-build; GOWORK=off; GOCACHE=/build/go-cache; GOMODCACHE=/build/go-mod-cache.
+Baseline: /build/baseline-013-dns, unchanged 0.1.12 runtime at 232b95ba2c1aa64ba36c1dd54ef9c19a6ac301b0 plus only the regression file.
+Candidate: /build/candidate-013, codex/scheduled-013-socks-dns.
+No production devices, private config or publication credentials supplied to test/build commands.
+
+Baseline reproduction (third_party/vowifi-go):
+go test ./engine/ipsec -run TestSOCKS5RelayLookupDoesNotExposeProxyData -count=1 -timeout=45s -v
+Both associate reply and UDP datagram fail because untrusted domain/resolver data escape. Expected failure log is not passed proof.
+
+Candidate security regression (third_party/vowifi-go):
+go test -race ./engine/ipsec -run 'TestSOCKS5RelayLookupDoesNotExposeProxyData|TestSanitizeSOCKS5RelayLookupError' -count=20 -timeout=90s -v
+
+Backend:
+go test -p 2 -tags 'with_utls nomsgpack' ./cmd/hideck ./pkg/logger ./internal/backend ./internal/api ./internal/device ./internal/db ./internal/notify ./internal/esim ./internal/vowifihost ./internal/phone ./internal/volte ./internal/qmi ./internal/personal -count=1 -timeout=180s
+
+Engine (third_party/vowifi-go):
+go test -p 2 ./engine/ipsec ./engine/swu ./engine/logger ./runtimehost/... -count=1 -timeout=180s
+go test -race -p 2 ./engine/ipsec ./engine/swu -count=2 -timeout=180s
+
+Host/API/media races:
+go test -race -p 2 -tags 'with_utls nomsgpack' ./internal/api ./internal/phone ./internal/volte ./internal/vowifihost -count=2 -timeout=180s
+
+Roaming/registration races:
+go test -race -p 2 -tags 'with_utls nomsgpack' ./internal/device ./internal/qmi -run 'Roaming|Registration' -count=2 -timeout=90s
+
+Vet: same backend packages with go vet -p 2 -tags 'with_utls nomsgpack'; engine/ipsec, engine/swu, engine/logger and runtimehost/... with go vet -p 2.
+Independent worktree initially lacked ignored internal/web/dist: retain initial setup failures, copy the exact existing 112-file embedded artifact from current 0.1.12 and run final backend/host-race/vet checks. No assertions removed or skipped.
+Frontend unchanged, reuse source/embedded assets; no frontend tests/typecheck/build. Full imscore suite not rerun; previous MSS/UDP-stop failures remain unresolved. Package logger with no tests is not claimed as unit tested.

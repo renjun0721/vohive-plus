@@ -1,6 +1,7 @@
 package ipsec
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -177,7 +178,7 @@ func readSocks5Reply(conn io.Reader) (*net.UDPAddr, error) {
 		}
 		resolved, err := net.ResolveIPAddr("ip", string(host))
 		if err != nil {
-			return nil, fmt.Errorf("resolve %q: %w", host, err)
+			return nil, sanitizeSOCKS5RelayLookupError(err)
 		}
 		ip = resolved.IP
 	case socks5ATYPIPv6:
@@ -278,7 +279,7 @@ func DecodeSocks5UDPDatagram(dgram []byte) (*Socks5UDPDatagram, error) {
 		host := string(dgram[5 : 5+n])
 		resolved, err := net.ResolveIPAddr("ip", host)
 		if err != nil {
-			return nil, fmt.Errorf("resolve %q: %w", host, err)
+			return nil, sanitizeSOCKS5RelayLookupError(err)
 		}
 		ip = resolved.IP
 		hdrLen = 5 + n + 2
@@ -313,4 +314,27 @@ func parseSocks5Addr(addr string) (string, int, error) {
 		return "", 0, errors.New("invalid socks5 address")
 	}
 	return addr, socks5DefaultPort, nil
+}
+
+// The proxy controls the relay name and can echo credentials in it. DNS errors
+// also embed that name and resolver details, so neither text nor the original
+// error chain may escape into lifecycle logs or persisted failure states.
+func sanitizeSOCKS5RelayLookupError(err error) error {
+	const message = "ike: resolve SOCKS5 UDP relay domain"
+	switch {
+	case errors.Is(err, context.Canceled):
+		return fmt.Errorf("%s: %w", message, context.Canceled)
+	case errors.Is(err, context.DeadlineExceeded):
+		return fmt.Errorf("%s: %w", message, context.DeadlineExceeded)
+	}
+	var dnsError *net.DNSError
+	if errors.As(err, &dnsError) {
+		return fmt.Errorf("%s: %w", message, &net.DNSError{
+			Err:         "DNS lookup failed",
+			IsTimeout:   dnsError.IsTimeout,
+			IsTemporary: dnsError.IsTemporary,
+			IsNotFound:  dnsError.IsNotFound,
+		})
+	}
+	return errors.New(message + " failed")
 }
