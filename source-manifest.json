@@ -12,9 +12,14 @@
   "running_binary_sha256": "7fc007719b02d41e4d508a5d6f104388c466567b605d674e69c174bd743b7e24",
   "source_correspondence": "Fresh per-file comparison against 2600 candidate tracked files; controlled deployment receipt matches running binary.",
   "secret_scan": "Current private values scanned separately before publication; values never included here.",
-  "file_count": 2643,
-  "total_bytes": 20999372,
+  "file_count": 2645,
+  "total_bytes": 21009990,
   "files": [
+    {
+      "path": "source/VoCat-SOCKS5-NOTICE.md",
+      "size": 1110,
+      "sha256": "f1e34a418af3eecb06558bb13feaa22eda3a081db5dd3636f553dc215e0c3dc2"
+    },
     {
       "path": "source/VoHivePlus-unlimited-devices.patch",
       "size": 10023,
@@ -229,6 +234,11 @@
       "path": "source/router-ui/vohive.js",
       "size": 20766,
       "sha256": "9a061c45ab6b25b53f1aef84316f183cf9d4e97970c8461b01905c9684c55438"
+    },
+    {
+      "path": "source/third-party-licenses/VoCat-Research-Evaluation-License.md",
+      "size": 9508,
+      "sha256": "64227b4ac03cba637a2550edea084a512e20d1111aa9629d2880b6167d26fd33"
     },
     {
       "path": "source/vohive-plus/.dockerignore",
@@ -13427,5 +13437,7 @@
       "adaptation": "Existing personal SOCKS5 reply and UDP datagram error paths, without VoCat IKE lifecycle changes."
     }
   ],
-  "publication_code_commit": "0260671095c8fdebddd3fda59af5b74cc4abd683"
+  "publication_code_commit": "0260671095c8fdebddd3fda59af5b74cc4abd683",
+  "vocat_adaptation_license": "source/third-party-licenses/VoCat-Research-Evaluation-License.md",
+  "vocat_adaptation_notice": "source/VoCat-SOCKS5-NOTICE.md"
 }
