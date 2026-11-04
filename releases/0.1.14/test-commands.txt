@@ -1,0 +1,30 @@
+Toolchain: Go 1.27.1; GOWORK=off; GOCACHE=/build/go-cache; GOMODCACHE=/build/go-mod-cache.
+Baseline: c442f8e177de24a44af729c933f6800f9239e469 in /build/baseline-0.1.14-dns plus only same regression file; expected both Create regressions fail.
+Candidate: 3e78a77dee80b7390b39a05e8c93eba1f9ff0b9e in /build/candidate-0.1.14-scheduled.
+No modem devices, private config, or publication credentials supplied to test/build commands.
+
+Baseline: go test -tags "with_utls nomsgpack" ./internal/phone -run "TestPublicHostDNS.*ThroughCreate" -count=1 -timeout=45s -v
+Candidate DNS: go test -race -tags "with_utls nomsgpack" ./internal/phone -run "PublicHost|PublicIPs|SameIPSet" -count=10 -timeout=180s -v
+
+backend-tests (/build/candidate-0.1.14-scheduled):
+go test -p 2 -tags 'with_utls nomsgpack' ./cmd/hideck ./pkg/logger ./internal/backend ./internal/api ./internal/device ./internal/db ./internal/notify ./internal/esim ./internal/vowifihost ./internal/phone ./internal/volte ./internal/qmi ./internal/personal -count=1 -timeout=180s
+
+engine-tests (/build/candidate-0.1.14-scheduled/third_party/vowifi-go):
+go test -p 2 ./engine/ipsec ./engine/swu ./engine/logger ./runtimehost/... -count=1 -timeout=180s
+
+engine-race (/build/candidate-0.1.14-scheduled/third_party/vowifi-go):
+go test -race -p 2 ./engine/ipsec ./engine/swu -count=2 -timeout=180s
+
+host-race (/build/candidate-0.1.14-scheduled):
+go test -race -p 2 -tags 'with_utls nomsgpack' ./internal/api ./internal/phone ./internal/volte ./internal/vowifihost -count=2 -timeout=180s
+
+roaming-race (/build/candidate-0.1.14-scheduled):
+go test -race -p 2 -tags 'with_utls nomsgpack' ./internal/device ./internal/qmi -run 'Roaming|Registration' -count=2 -timeout=90s
+
+vet (/build/candidate-0.1.14-scheduled):
+go vet -p 2 -tags 'with_utls nomsgpack' ./cmd/hideck ./pkg/logger ./internal/backend ./internal/api ./internal/device ./internal/db ./internal/notify ./internal/esim ./internal/vowifihost ./internal/phone ./internal/volte ./internal/qmi ./internal/personal
+
+engine-vet (/build/candidate-0.1.14-scheduled/third_party/vowifi-go):
+go vet -p 2 ./engine/ipsec ./engine/swu ./engine/logger ./runtimehost/...
+
+Frontend unchanged and original embedded assets reused; no frontend tests/typecheck/build. Full imscore suite not rerun; prior MSS/UDP-stop failures unresolved. Initial unused strings import compile failure and loopback-only ICE fixture failure retained; final tests pass without changing assertions or skipping failures.

@@ -1,0 +1,21 @@
+{
+  "version":"0.1.14-personal-classic",
+  "date":"2026-11-04",
+  "base_personal_version":"0.1.13-personal-classic",
+  "evaluated_heads":{"hideck":"f6c73f9b7d99396aceb6c378041e0fa49374d754","vocat":"384a44711ee0352ab12baeb498f65441088170c6"},
+  "selected_hideck_commits":["02227007f9c7ae4b3bf29502db1fef364f49524b","e707733d412deca224a5bed1302e06bbc58edb79","71dd3804747efc94d0446fc0559d763d232f31ac","cbb71f33cbde478ded78a0e130f656de08a9a19e"],
+  "upstream_authors":["yibaiba <946100224@qq.com>","BFNOC <15773134+BFNOC@users.noreply.github.com>"],
+  "scope":"Final integrated per-session WebRTC public hostname resolution. New sessions use current DNS and isolated ICE rewrite APIs sharing the existing UDP mux; existing sessions retain original addresses. DNS failures propagate without stale-IP fallback; lookup inherits caller context and deadline. Startup validation and address-change logging remain. Empty host and literal IP do not add DNS queries. Adapt only personal three-argument Create interface; preserve all licenses and author notices.",
+  "regression":"Same baseline-compatible tests exercise real MediaManager.Create with an in-process loopback DNS fixture. Installed 0.1.13 fails both changed-address and DNS-failure assertions. Candidate and upstream DNS/cancellation/deadline regressions pass 10 race repetitions. No external resolver, modem or message service used by these regressions.",
+  "deferred":[
+    "HiDeck aa194cf1 and f6c73f9: PCM takeover/rebind and blocked teardown depend on newer adaptive buffering, arrival generations, I/O lock/bridge lifetime and Controller/Mux update paths absent from this personal PCMBridge. Require independent adaptation plus concurrent/bidirectional audio regression and separately authorized physical takeover/hangup acceptance.",
+    "Prior AT host-data, ZXIC, IMS/SA/carrier, SOCKS5 NAT-T reassociation/control generations, API Token/MCP, notification configuration, eSIM recovery and QMI/remoteproc architecture deferrals remain. Undeployed 0.1.11 candidate is not inherited."
+  ],
+  "not_applicable":["VoCat 4ad7662/fb59ba6/384a447 SSO, JWKS/JOSE dependency security and redirect changes apply to its new OIDC/OAuth2 auth/store/schema29/React modules. Personal source and module graph do not contain SSO/go-jose/go-oidc; do not introduce this authentication/database/frontend architecture solely to adopt those fixes."],
+  "limitations":[
+    "No real SMS, call, recording, notification sending, USSD, SIM swap, modem reset, balance task or carrier acceptance. Loopback media tests and read-only production health checks are distinct from physical business acceptance.",
+    "Full imscore suite not rerun: prior baseline MSS ENOPROTOOPT and UDP-stop concurrency failures remain unresolved. No IMS runtime changes in this version.",
+    "Classic frontend source (288 files) and embedded artifact (112 files) byte-identical and reused; frontend tests, typecheck and build not rerun.",
+    "Initial candidate compile failed on an unused strings import after helper extraction; removed import and reran without changing assertions. Initial extra regression fixture bound mux only to loopback, which has no advertised ICE candidate; retained logs and corrected fixture to upstream's :0 binding. Final baseline then reproduces both actual faults; no failing assertions removed or skipped."
+  ]
+}

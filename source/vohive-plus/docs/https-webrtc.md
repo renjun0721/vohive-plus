@@ -526,3 +526,7 @@ CADDY_VERSION=2.11.4 docker compose build --push
 - [Caddy Automatic HTTPS](https://caddyserver.com/docs/automatic-https)
 - [Caddy bind](https://caddyserver.com/docs/caddyfile/directives/bind)
 - [Caddy protocols](https://caddyserver.com/docs/caddyfile/options#protocols)
+
+## 个人版 0.1.14 公网域名刷新
+
+设置 `server.webrtc_public_host` 为域名时，启动仍检查解析，每次新建 WebRTC 媒体会话重新解析 IPv4/IPv6，并为该会话独立配置 ICE 地址。新会话采用当前地址，已有会话保持原地址；解析失败明确报错，不沿用缓存 IP。调用方取消或超时会取消本次解析。配置为 IP 字面量或留空时不增加 DNS 查询。此行为不修改 DNS/路由或用户配置。

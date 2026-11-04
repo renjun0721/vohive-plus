@@ -1,0 +1,50 @@
+{
+  "version": "0.1.14-personal-classic",
+  "binary_sha256": "0e32729ebeb5add2ebfea636018cd5d84482296a335615564900691f791f2002",
+  "local_candidate_commit": "3e78a77dee80b7390b39a05e8c93eba1f9ff0b9e",
+  "build_time": "2026-11-04T02:06:05Z",
+  "tests": [
+    {
+      "name": "backend",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261104-100000-847/backend-tests.log",
+      "log_sha256": "77fefe712d3159c0fe8b9f24099c82194c09916978d7f3013264a9c51d3d2046"
+    },
+    {
+      "name": "targeted-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261104-100000-847/host-race.log",
+      "log_sha256": "3b73090ff4a09d231cc8cecd591ad4404cce012d769aff3220e4edb6d94cde24"
+    },
+    {
+      "name": "vet",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261104-100000-847/vet-combined.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "dns-regression",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261104-100000-847/dns-regression.log",
+      "log_sha256": "22cbbfb6e235bc2999b778607ab349e0353f44d12cf6b0c341dc3a05c5733436"
+    },
+    {
+      "name": "engine",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261104-100000-847/engine-tests.log",
+      "log_sha256": "5b17b386a5ca4f9d6682461f8e71ddd343a23813682b8aa3b35d6e26b16158d6"
+    },
+    {
+      "name": "engine-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261104-100000-847/engine-race.log",
+      "log_sha256": "b4656804141f94514183f46d09b35b6e6d6cfeb45251f5b80455dc42d5d4b129"
+    },
+    {
+      "name": "roaming-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261104-100000-847/roaming-race.log",
+      "log_sha256": "1e60285d4a6f92dc760915882d375652814624341c8c9384e3bb71d552e0d0fd"
+    }
+  ]
+}

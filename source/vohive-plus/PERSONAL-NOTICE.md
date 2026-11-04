@@ -1,6 +1,6 @@
 # VoHive Plus 个人版
 
-本版本由用户授权，为其个人 iStoreOS 环境定制。版本：0.1.13-personal-classic，2026-10-31。
+本版本由用户授权，为其个人 iStoreOS 环境定制。版本：0.1.14-personal-classic，2026-11-04。
 
 基础源码来自 [HiDeck](https://github.com/yibaiba/hideck)，固定提交 `3fd3d6aaf55924c338c2cf3f092e1af1f588d152`（v2.1.23 之后的源码快照）。HiDeck 继承 VoHive，项目原有作者声明、LICENSE 与 THIRD_PARTY_NOTICES.md 均保留；third_party 中的组件仍适用各自的许可，包括 vowifi-go 的 AGPL-3.0。
 
@@ -33,3 +33,5 @@
 0.1.12：以已部署 0.1.10 为基线，独立选择 BFNOC 的 HiDeck 8845a93045f71c858feab7d5bb066056115a3509（登录失败锁定）和 087afaf0107c047cf46c45a697b6c3f6ba649edb（并发预留回归）。成功登录和正确的 rotate 认证只归还自身名额；连续失败的真实连接 IP 锁定十分钟，返回 Retry-After，过期计数清理并隔离旧窗口归还。未纳入未部署的 0.1.11 短信候选、IMS/SA/运营商策略、SIM/QMI 架构、前端或用户配置变更。rotate 仅在隔离单元测试中调用认证函数，未实机切换 IP。
 
 0.1.13：选择性适配 MengMengCode 的 VoCat d1968d1c3fb88258d86a6e2e69f9c3304d160711：将 SOCKS5 代理返回的 relay 域名和 DNS 原始错误链从失败日志中移除，保留取消、超时与 DNS 安全分类。按个人版现有接口同时保护 UDP ASSOCIATE/CONNECT 回复和 UDP 数据报域名解析失败；不改变 DNS 解析成功、路由、传输生命周期或运营商行为。新增离线解析器回归覆盖两条真实解析路径，旧版可复现泄露；不纳入 ZXIC/未知 USB 探测、APDU 方言或设备 Manager 重构。未进行真实短信、通话或通知发送验收。
+
+0.1.14：选择性适配 HiDeck 的每会话 WebRTC 公网域名解析：02227007f9c7ae4b3bf29502db1fef364f49524b（yibaiba <946100224@qq.com>）、e707733d412deca224a5bed1302e06bbc58edb79（BFNOC <15773134+BFNOC@users.noreply.github.com>）和整合后修正 cbb71f33cbde478ded78a0e130f656de08a9a19e（yibaiba），采用 f6c73f9b7d99396aceb6c378041e0fa49374d754 中这一路径的最终代码。新媒体会话重新解析并独立生成 ICE 配置，已有会话不迁移；解析失败直接返回，不使用缓存旧地址，继承调用者取消和截止时间。保留启动及地址变化中文日志。个人版 Create 仍为原有三参数接口，未引入上游 AccessHost、PCM 接管/重绑定或 VoCat SSO。离线/回环回归与只读实机健康检查不代表真实通话验收。所有上游作者及原有许可保留。
