@@ -1,6 +1,6 @@
 {
-  "date": "2026-11-04",
-  "version": "0.1.14-personal-classic",
+  "date": "2026-11-08",
+  "version": "0.1.15-personal-classic",
   "base_source_commit": "f1c24573bdc0326cbf8800ba5feab544838e60d7",
   "github_base_commit": "581a5e38fa72b85900f8a6a1ad0a4b39720b6f70",
   "upstream_hideck_commit": "3fd3d6aaf55924c338c2cf3f092e1af1f588d152",
@@ -9,11 +9,11 @@
     "3cbb6c1aa0e9bd77a1da98f6c4d60cd866b4e4c1",
     "a1273f0281cf74b288bab329d734c83c5afc3f48"
   ],
-  "running_binary_sha256": "0e32729ebeb5add2ebfea636018cd5d84482296a335615564900691f791f2002",
-  "source_correspondence": "Fresh byte comparison of 2602 candidate tracked files; controlled deployment receipt matches production binary.",
+  "running_binary_sha256": "08a99a83e177ec350fb4b6f42387c95616454150e18f4afcdeb6a318a45ab056",
+  "source_correspondence": "Fresh byte comparison of 2606 candidate tracked files; controlled deployment receipt matches production binary.",
   "secret_scan": "Current private values scanned separately before publication; values never included here.",
-  "file_count": 2647,
-  "total_bytes": 21021207,
+  "file_count": 2651,
+  "total_bytes": 21051282,
   "files": [
     {
       "path": "source/VoCat-SOCKS5-NOTICE.md",
@@ -28,7 +28,7 @@
     {
       "path": "source/deployment/Personal.Dockerfile",
       "size": 1211,
-      "sha256": "afb00dd10cac3916adb5295d14a1cd22e6b085ea13f7b76d8378ce03f717bb46"
+      "sha256": "a9e3defb184f65b5538a34fd938c25b01de3738a3e2636ed6c9f4272f47ce86f"
     },
     {
       "path": "source/deployment/vohive-plus-run",
@@ -327,8 +327,8 @@
     },
     {
       "path": "source/vohive-plus/PERSONAL-NOTICE.md",
-      "size": 7884,
-      "sha256": "f2b65930feb81f62a578cba94cc5e5213d8bb5e7ca59a1f90777d27fc6ae2e1f"
+      "size": 8466,
+      "sha256": "99df02596eb9aa87a56798ae88e9ded9d31ad16e7c486d01684af8bba13651d7"
     },
     {
       "path": "source/vohive-plus/README.md",
@@ -348,7 +348,7 @@
     {
       "path": "source/vohive-plus/build-personal.sh",
       "size": 744,
-      "sha256": "4ded52c9ce4430e91b849dfaf0f5c3c420742251a4e8d29038588c34c2fa0e0b"
+      "sha256": "1834aeec6779942709988e75ca9b9f51e10c1867f3a36209493339a31f861de5"
     },
     {
       "path": "source/vohive-plus/caddy-dns/alidns.caddy",
@@ -507,8 +507,8 @@
     },
     {
       "path": "source/vohive-plus/docs/vowifi-protocol-alignment.md",
-      "size": 24507,
-      "sha256": "8ed43596e5070ee325447b816ae4f35205d5f36d55c55b64cbb19b6b226f22d0"
+      "size": 25326,
+      "sha256": "0f68421f17ce37fd79c8ef232c80c42432f0a49509f9723d9d0d9d552c74e4ba"
     },
     {
       "path": "source/vohive-plus/go.mod",
@@ -2347,8 +2347,8 @@
     },
     {
       "path": "source/vohive-plus/internal/device/pool.go",
-      "size": 85337,
-      "sha256": "5bc4bc2d5be15d42a69ab08ca42f990d95ee04076bf13d97fb8ee24afd97dbd1"
+      "size": 85494,
+      "sha256": "aa78158bb4c4365e571a86108defbac472869c1b59e444ffefcd8cfb5553525f"
     },
     {
       "path": "source/vohive-plus/internal/device/pool_apdu_cleanup.go",
@@ -2702,13 +2702,13 @@
     },
     {
       "path": "source/vohive-plus/internal/device/qmi_usb_unstick.go",
-      "size": 7313,
-      "sha256": "2851a80403adce11db92d26d6d126931de173c76bd5cf15f9da81ff63019813a"
+      "size": 9318,
+      "sha256": "17264689c8d478b8f73f4788bec7ddde2c0c422e4fa8d7ec5866af0c86a4ab28"
     },
     {
       "path": "source/vohive-plus/internal/device/qmi_usb_unstick_test.go",
-      "size": 6771,
-      "sha256": "c7afdb10e59955e8e79b154bfaf1b2eec1a9badffe309534a93afdf659124b16"
+      "size": 10124,
+      "sha256": "70058f4d8dab560e6f3da49cc1353bf0721d002cafc467d9d8422f86154f25b1"
     },
     {
       "path": "source/vohive-plus/internal/device/roaming_operators.go",
@@ -6252,13 +6252,13 @@
     },
     {
       "path": "source/vohive-plus/third_party/quectel-qmi-go/pkg/manager/service_recovery.go",
-      "size": 22749,
-      "sha256": "70ccbf3cce0a8aa63b8d9eda9f73eb3d80b84390b8043bf62645b2b3954f3355"
+      "size": 23072,
+      "sha256": "10dafe47e1980c2b33928469ccedd5a56a7bb1c11e7c8db22663cf5fcf901273"
     },
     {
       "path": "source/vohive-plus/third_party/quectel-qmi-go/pkg/manager/service_recovery_test.go",
-      "size": 27446,
-      "sha256": "1ec9159526f1c045d881bc4e47c7cabbf6907d00b03840246da274cc6da9a941"
+      "size": 28445,
+      "sha256": "37c43fc2d90731f68c061611d1e58571c2a4fbdd877bfa07e27ea2e76c33966e"
     },
     {
       "path": "source/vohive-plus/third_party/quectel-qmi-go/pkg/manager/sms_send_encoding_test.go",
@@ -8361,6 +8361,11 @@
       "sha256": "f8f36f96777514e85287aaf1a6159766b793b92db2f3d973879a759e4d52d388"
     },
     {
+      "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/personal_subscription_regression_test.go",
+      "size": 770,
+      "sha256": "ce01c08493695186aba9f739c22045de708d83e1f257df1d172d28f3bb82333b"
+    },
+    {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/port_s_close_recovery_test.go",
       "size": 8429,
       "sha256": "cb2a26aba61f094368d9d560424aa393fcee1441dfaee69e4c6ff5a20c9b5dd5"
@@ -9042,8 +9047,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/subscription_exchange.go",
-      "size": 5775,
-      "sha256": "8724df5905f7daef15798e066022a8ca51ccaf9beb07413b096ce11f71ebd3e6"
+      "size": 5800,
+      "sha256": "48f76d5ee0f750b9600a9663d4745d4e152dfa8d2a79c804df18b78375547ef6"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/subscription_headers.go",
@@ -9052,8 +9057,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/subscription_lifecycle.go",
-      "size": 5866,
-      "sha256": "e52d7744a06d6711340351cd6b497d39057da50e7678ca4a3f778ac188f686bf"
+      "size": 5983,
+      "sha256": "4cacef7f18562257c60823ed73fada8d2cecdefe0dd3bc6a18f1ebc8e70906a9"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/subscription_lifecycle_test.go",
@@ -9062,8 +9067,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/subscription_notify.go",
-      "size": 6281,
-      "sha256": "06bba2da38a38c9cc5b6abf2433ebb9b921583ac1d932fe73ac256502e95855a"
+      "size": 6983,
+      "sha256": "ee7ca4b4b41215cf240b1ab13ef37744fba8129afb1d9e3eb2170a5e94742055"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/subscription_notify_queue.go",
@@ -9087,8 +9092,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/subscription_registration_store.go",
-      "size": 6892,
-      "sha256": "8427bb1bc629872f8788829598adb82f48029524215acd80064e939e34847d81"
+      "size": 6939,
+      "sha256": "049f305609583fd0de302b4fffc5142fc6e391397741de0b2d7931d477f4ee1c"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/subscription_registration_store_test.go",
@@ -9099,6 +9104,16 @@
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/subscription_request.go",
       "size": 9155,
       "sha256": "033ade2f640261bbc70bd968fcd6af151b07f164990518b0cda99602709d94a4"
+    },
+    {
+      "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/subscription_retry_backoff.go",
+      "size": 6348,
+      "sha256": "908626c7c0460a3b338da8716460be5f7092d1080529cc9e60a294652b802886"
+    },
+    {
+      "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/subscription_retry_backoff_test.go",
+      "size": 11626,
+      "sha256": "04f805d25596364fcc398b29fe8f8cc1ea8ec1ba1e649ca41d69dc2ff86e3ffc"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/subscription_self_route.go",
@@ -9122,8 +9137,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/subscription_timers.go",
-      "size": 3949,
-      "sha256": "a0e63573bcd60480e7b8e210078a4cba60bbb9806064e91714ff1b714a17b02b"
+      "size": 4236,
+      "sha256": "dddfacf305844192afb45a4ddd4920dd9f0af7119fd63a63b210a5e3b3939a94"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/subscription_wire_protocol_test.go",
@@ -9551,6 +9566,11 @@
       "sha256": "d4fa002e2fe8ce09b959df9138836f022c25b21878a11d991d85b6dc72ee27c4"
     },
     {
+      "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/override_clone_fields_test.go",
+      "size": 1828,
+      "sha256": "a19500169404b764806824bab222e82db1bd089cbfcfd9165de648eebb91ea49"
+    },
+    {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/override_loader.go",
       "size": 3022,
       "sha256": "c7cc858ce110309dc1efdc2b5d8d5c9ab742d5571a73a1c2cb99d0492b599956"
@@ -9562,8 +9582,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/override_store.go",
-      "size": 5158,
-      "sha256": "0d4b1f9404dade65ffbbc5ac844debce93ff336504a483c81694f5031458c6bc"
+      "size": 5245,
+      "sha256": "37b35659827da44d56f8b06f38e2fbc5e15e5a48efa0dcdfcdc20857384445af"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/policy/pdn.go",
@@ -13455,14 +13475,42 @@
         "yibaiba <946100224@qq.com>",
         "BFNOC <15773134+BFNOC@users.noreply.github.com>"
       ]
+    },
+    {
+      "sha": "58626e48856dc0fcbb148ebb578b5135f2b6c687",
+      "scope": "Selective QMI diagnostics/cooldown, handover pointer deep copy and IMS subscription failure backoff; no RF fallback, carrier preset or per-SIM MWI policy changes.",
+      "authors": [
+        "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+      ]
+    },
+    {
+      "sha": "be94e4ae313345883b9e1234869f04dc3be17948",
+      "scope": "Selective QMI diagnostics/cooldown, handover pointer deep copy and IMS subscription failure backoff; no RF fallback, carrier preset or per-SIM MWI policy changes.",
+      "authors": [
+        "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+      ]
+    },
+    {
+      "sha": "92125e041c1c72828993738b33d5e0e14266519e",
+      "scope": "Selective QMI diagnostics/cooldown, handover pointer deep copy and IMS subscription failure backoff; no RF fallback, carrier preset or per-SIM MWI policy changes.",
+      "authors": [
+        "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+      ]
+    },
+    {
+      "sha": "fcf91b6c75d64fb2d94bc04b09de9fc860d9bb0f",
+      "scope": "Selective QMI diagnostics/cooldown, handover pointer deep copy and IMS subscription failure backoff; no RF fallback, carrier preset or per-SIM MWI policy changes.",
+      "authors": [
+        "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+      ]
     }
   ],
-  "reference_hideck_release": "v2.1.39",
-  "reference_hideck_main": "f6c73f9b7d99396aceb6c378041e0fa49374d754",
-  "reference_vocat_main": "384a44711ee0352ab12baeb498f65441088170c6",
+  "reference_hideck_release": "v2.1.40",
+  "reference_hideck_main": "f47296d0adbdda4e15dbd3e1979920547fde393b",
+  "reference_vocat_main": "9919d14a444b8c1049c02a538f114d883710aee3",
   "personal_roaming_feature": "source/vohive-plus/ROAMING-OPERATORS.md",
-  "local_candidate_commit": "3e78a77dee80b7390b39a05e8c93eba1f9ff0b9e",
-  "github_previous_commit": "2654b91301b18abed94f76c50e8eb98c7feefaaf",
+  "local_candidate_commit": "0abfef2aa85ace85b7e99d7d1aa51f90b0fa0881",
+  "github_previous_commit": "8221661efd78301351930a5830e08909040c2362",
   "partial_diagnostic_dependencies": [
     {
       "sha": "6e4f7b1627a072c61b225eea7fe0068948bd8eb9",
@@ -13470,7 +13518,7 @@
       "scope": "Only create_child_sa_offer.go formatter, no negotiation/SA lifecycle changes"
     }
   ],
-  "reference_vocat_release": "v0.3.41",
+  "reference_vocat_release": "v0.3.42",
   "selected_vocat_commits": [
     {
       "sha": "d1968d1c3fb88258d86a6e2e69f9c3304d160711",
@@ -13480,6 +13528,5 @@
     }
   ],
   "vocat_adaptation_license": "source/third-party-licenses/VoCat-Research-Evaluation-License.md",
-  "vocat_adaptation_notice": "source/VoCat-SOCKS5-NOTICE.md",
-  "publication_code_commit": "63d29a20686cf37f81ed321c2828785b3580d2e6"
+  "vocat_adaptation_notice": "source/VoCat-SOCKS5-NOTICE.md"
 }

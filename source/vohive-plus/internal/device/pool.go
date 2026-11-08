@@ -179,6 +179,10 @@ type workerLifecycleOwner struct {
 }
 
 type Pool struct {
+	// Keep the modem USB reset cooldown across Worker replacement (hideck#94).
+	qmiUSBUnsticksMu sync.Mutex
+	qmiUSBUnsticks   map[string]*qmiUSBUnstickRecord
+
 	policyTransitions sync.Map // device ID -> *sync.Mutex; retained across worker replacements
 	workers           map[string]*Worker
 	rebuilding        map[string]bool // 标记设备是否正在重载

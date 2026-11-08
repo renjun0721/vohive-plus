@@ -35,3 +35,7 @@
 0.1.13：选择性适配 MengMengCode 的 VoCat d1968d1c3fb88258d86a6e2e69f9c3304d160711：将 SOCKS5 代理返回的 relay 域名和 DNS 原始错误链从失败日志中移除，保留取消、超时与 DNS 安全分类。按个人版现有接口同时保护 UDP ASSOCIATE/CONNECT 回复和 UDP 数据报域名解析失败；不改变 DNS 解析成功、路由、传输生命周期或运营商行为。新增离线解析器回归覆盖两条真实解析路径，旧版可复现泄露；不纳入 ZXIC/未知 USB 探测、APDU 方言或设备 Manager 重构。未进行真实短信、通话或通知发送验收。
 
 0.1.14：选择性适配 HiDeck 的每会话 WebRTC 公网域名解析：02227007f9c7ae4b3bf29502db1fef364f49524b（yibaiba <946100224@qq.com>）、e707733d412deca224a5bed1302e06bbc58edb79（BFNOC <15773134+BFNOC@users.noreply.github.com>）和整合后修正 cbb71f33cbde478ded78a0e130f656de08a9a19e（yibaiba），采用 f6c73f9b7d99396aceb6c378041e0fa49374d754 中这一路径的最终代码。新媒体会话重新解析并独立生成 ICE 配置，已有会话不迁移；解析失败直接返回，不使用缓存旧地址，继承调用者取消和截止时间。保留启动及地址变化中文日志。个人版 Create 仍为原有三参数接口，未引入上游 AccessHost、PCM 接管/重绑定或 VoCat SSO。离线/回环回归与只读实机健康检查不代表真实通话验收。所有上游作者及原有许可保留。
+
+## 2026-11-08 selective recovery fixes (0.1.15)
+
+Adapted HiDeck fixes authored by BFNOC: 58626e48856d (QMI timeout diagnostics), be94e4ae3133 (USB reset cooldown across Worker rebuilds), 92125e041c1c (deep-copy handover override pointer), fcf91b6c75d6 / f47296d0adbd (SUBSCRIBE failure backoff independent of Expires). Pool fields were inserted beside the existing personal lifecycle guards; protocol logic and upstream regression assertions retained. No RF fallback, MWI per-SIM settings/presets, database migration or frontend change. All original notices and licenses retained.

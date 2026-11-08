@@ -1,0 +1,38 @@
+{
+  "version": "0.1.15-personal-classic",
+  "date": "2026-11-08",
+  "base_personal_version": "0.1.14-personal-classic",
+  "evaluated_heads": {
+    "hideck": "f47296d0adbdda4e15dbd3e1979920547fde393b",
+    "vocat": "9919d14a444b8c1049c02a538f114d883710aee3"
+  },
+  "selected_hideck_commits": [
+    "58626e48856dc0fcbb148ebb578b5135f2b6c687",
+    "be94e4ae313345883b9e1234869f04dc3be17948",
+    "92125e041c1c72828993738b33d5e0e14266519e",
+    "fcf91b6c75d64fb2d94bc04b09de9fc860d9bb0f"
+  ],
+  "upstream_authors": [
+    "BFNOC <15773134+BFNOC@users.noreply.github.com>"
+  ],
+  "scope": [
+    "QMI timeout storm log captures sorted services before clearing the window.",
+    "USB reset cooldown follows physical USB path across Worker replacement, existing personal lifecycle/roaming guards preserved.",
+    "Deep copy AllowHandoverPDNWLANAndEPS override pointer; no configured carrier value changed.",
+    "Per-identity and per-event-package SUBSCRIBE failure backoff, matching NOTIFY confirmation, preserved network Retry-After minima and new-initial-reg exception. No MWI setting or carrier preset change."
+  ],
+  "equivalent_existing": [
+    "VoCat 9919d14a: exact 5ber AID already present; discovery stops after first usable non-eSTK AID; omitted switch AID uses findAIDForICCID, not standard-AID fallback. Existing eSTK dual-SE exception retained."
+  ],
+  "deferred": [
+    "HiDeck 72ebf9d: AT+CFUN=4 radio-off fallback changes RF recovery behavior and AT/Worker gating absent locally; needs independent identity/timeout adaptation and separately authorized physical radio-failure acceptance.",
+    "HiDeck 0238c99/beabc334: new per-SIM MWI on/off/auto, non-expiring DB rejection persistence, Vodafone-DE preset and reconnect/UI behavior change existing carrier/user policy; not included in periodic selective fixes.",
+    "Previous PCM takeover/teardown, AT data/ZXIC, IMS/SA, NAT-T generation and architectural deferrals remain."
+  ],
+  "limitations": [
+    "No real SMS/call/notification/USSD/SIM swap/reset/balance task acceptance. New QMI USB/AT regressions are mocked; subscription tests use local fixtures.",
+    "Classic frontend and embedded artifacts unchanged; no frontend tests/typecheck/build. Full imscore suite has known baseline MSS ENOPROTOOPT/UDP-stop concurrency limitations; targeted subscription tests only.",
+    "Initial worktree omitted ignored embedded web/dist assets and backend cmd setup failed. Exact baseline assets copied byte-for-byte and checks rerun; no source/assertions skipped.",
+    "Additional five-repeat phone suite failed on both current 0.1.14 and candidate at unchanged AMR-WB 3-second ICE connecting timeout. Same 35 phone source/test files are byte-identical; host race suite passed twice. This intermittent media fixture limitation remains unresolved; repeated full phone suite is not reported as passed."
+  ]
+}

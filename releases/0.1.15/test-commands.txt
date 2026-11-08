@@ -1,0 +1,54 @@
+Go 1.27.1; GOWORK=off; GOCACHE=/build/go-cache; GOMODCACHE=/build/go-mod-cache; GOMAXPROCS=2. No modem devices, private config or publication credentials supplied.
+
+baseline-pointer (exit 1): /build/baseline-015-regression/third_party/vowifi-go
+go ['test', './internal/vowifi/policy', '-run', 'TestCloneCarrierOverrideCopiesEveryPointer', '-count=1', '-v']
+
+baseline-usb (exit 1): /build/baseline-015-regression
+go ['test', '-tags', 'with_utls nomsgpack', './internal/device', '-run', 'TestQMIUSBUnstickCooldownSurvivesWorkerRebuild', '-count=1', '-v', '-timeout=60s']
+
+baseline-storm (exit 1): /build/baseline-015-regression/third_party/quectel-qmi-go
+go ['test', './pkg/manager', '-run', 'TestTimeoutStormLogNamesTheServices', '-count=1', '-v']
+
+baseline-subscription (exit 1): /build/baseline-015-regression/third_party/vowifi-go
+go ['test', './internal/vowifi/imscore', '-run', 'TestPersonalSubscriptionFailureDelayIndependentOfExpires', '-count=1', '-v', '-timeout=60s']
+
+candidate-subscription (exit 0): /build/candidate-015-scheduled/third_party/vowifi-go
+go ['test', '-race', './internal/vowifi/imscore', '-run', 'Subscription|Subscribe|MWI|REGISTERRefresh', '-count=3', '-v', '-timeout=180s']
+
+candidate-policy (exit 0): /build/candidate-015-scheduled/third_party/vowifi-go
+go ['test', '-race', './internal/vowifi/policy', '-count=3', '-timeout=90s']
+
+candidate-qmi (exit 0): /build/candidate-015-scheduled/third_party/quectel-qmi-go
+go ['test', '-race', './pkg/manager', '-count=2', '-timeout=180s']
+
+backend-tests (exit 1): /build/candidate-015-scheduled
+go ['test', '-p', '2', '-tags', 'with_utls nomsgpack', './cmd/hideck', './pkg/logger', './internal/backend', './internal/api', './internal/device', './internal/db', './internal/notify', './internal/esim', './internal/vowifihost', './internal/phone', './internal/volte', './internal/qmi', './internal/personal', '-count=1', '-timeout=180s']
+
+engine-tests (exit 0): /build/candidate-015-scheduled/third_party/vowifi-go
+go ['test', '-p', '2', './engine/ipsec', './engine/swu', './engine/logger', './runtimehost/...', '-count=1', '-timeout=180s']
+
+host-race (exit 0): /build/candidate-015-scheduled
+go ['test', '-race', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/api', './internal/phone', './internal/volte', './internal/vowifihost', '-count=2', '-timeout=180s']
+
+roaming-usb-race (exit 0): /build/candidate-015-scheduled
+go ['test', '-race', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/device', './internal/qmi', '-run', 'Roaming|Registration|QMIUSB|QMIError|QMITransportDown', '-count=3', '-timeout=120s']
+
+vet (exit 0): /build/candidate-015-scheduled
+go ['vet', '-p', '2', '-tags', 'with_utls nomsgpack', './cmd/hideck', './pkg/logger', './internal/backend', './internal/api', './internal/device', './internal/db', './internal/notify', './internal/esim', './internal/vowifihost', './internal/phone', './internal/volte', './internal/qmi', './internal/personal']
+
+engine-vet (exit 0): /build/candidate-015-scheduled/third_party/vowifi-go
+go ['vet', '-p', '2', './engine/ipsec', './engine/swu', './engine/logger', './runtimehost/...', './internal/vowifi/imscore', './internal/vowifi/policy']
+
+qmi-vet (exit 0): /build/candidate-015-scheduled/third_party/quectel-qmi-go
+go ['vet', '-p', '2', './pkg/manager']
+
+baseline-phone-control (exit 1): /build/candidate-0.1.14-scheduled
+go ['test', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/phone', '-count=5', '-timeout=90s']
+
+candidate-phone-control (exit 1): /build/candidate-015-scheduled
+go ['test', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/phone', '-count=5', '-timeout=90s']
+
+backend-recheck (exit 0): /build/candidate-015-scheduled
+go ['test', '-p', '2', '-tags', 'with_utls nomsgpack', './cmd/hideck', './pkg/logger', './internal/backend', './internal/api', './internal/device', './internal/db', './internal/notify', './internal/esim', './internal/vowifihost', './internal/phone', './internal/volte', './internal/qmi', './internal/personal', '-count=1', '-timeout=180s']
+
+Baseline four new regressions intentionally fail. Initial backend cmd setup lacked ignored assets; artifacts copied unchanged and backend-recheck passed. Five-repeat unchanged phone suite fails on both current and candidate at AMR-WB 3-second ICE connecting timeout; full two-repeat host race passed. No assertions removed or skipped; no claim repeated full phone suite or full imscore passed. Frontend assets unchanged and no frontend tests/typecheck/build.
