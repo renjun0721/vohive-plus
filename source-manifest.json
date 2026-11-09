@@ -13554,5 +13554,6 @@
     }
   ],
   "vocat_adaptation_license": "source/third-party-licenses/VoCat-Research-Evaluation-License.md",
-  "vocat_adaptation_notice": "source/VoCat-SOCKS5-NOTICE.md"
+  "vocat_adaptation_notice": "source/VoCat-SOCKS5-NOTICE.md",
+  "publication_code_commit": "5b35692ab6a71d94f9ce6e5bf7cf7069f5a9f049"
 }
