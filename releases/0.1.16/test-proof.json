@@ -1,0 +1,48 @@
+{
+  "version": "0.1.16-personal-classic",
+  "binary_sha256": "847078f72a95ab1cebc4dd08a51a33986b6b7785780d22ef0ecd278d58714144",
+  "source_commit": "dde8a064298dc853840636325b49936dae3a4e37",
+  "tests": [
+    {
+      "name": "backend",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261109-100000-13250/backend.log",
+      "log_sha256": "5b4635120d901b574ef4890bc2394ecd474b0a530255b16b0e5dfe63f943b3e4"
+    },
+    {
+      "name": "targeted-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261109-100000-13250/targeted-race.log",
+      "log_sha256": "428b71fdb7decbf9a03a0238c683156f35f59763e49ad1b7802f3d36561ecc7b"
+    },
+    {
+      "name": "engine",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261109-100000-13250/engine.log",
+      "log_sha256": "edf19965d23e7fe9214992eb97e4cb733cfa7a098f26b1f206dd3e95284b2af9"
+    },
+    {
+      "name": "host-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261109-100000-13250/host-race.log",
+      "log_sha256": "7be32d8f90b3090af0cf2dece02d21b63b1fceceb333aa92cdd97aea2731d171"
+    },
+    {
+      "name": "roaming-usb-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261109-100000-13250/roaming-usb-race.log",
+      "log_sha256": "a9d18ad680aec9039fb9b2fe70d86313d3a87702370819a9d08ca68b48acc83d"
+    },
+    {
+      "name": "vet",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261109-100000-13250/vet.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limitations": [
+    "未执行真实短信、通话、通知、USSD、切卡或模组复位验收；订阅协议测试使用本地模拟。",
+    "前端及内嵌页面未变，未运行前端测试/类型检查/构建。完整 imscore 套件未运行；此前 MSS ENOPROTOOPT/UDP-stop 与媒体 ICE 超时限制不宣称解决。",
+    "仍沿用既有退避存储生命周期；完整 runtime 停止再启动后的退避延续待独立适配。"
+  ]
+}

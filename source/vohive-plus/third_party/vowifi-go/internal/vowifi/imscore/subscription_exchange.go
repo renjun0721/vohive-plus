@@ -66,6 +66,10 @@ func (s *Service) subscriptionSent(result subscriptionResult, mwi bool) error {
 		return errSubscriptionUsageChanged
 	}
 	at := time.Now()
+	// Snapshot at dispatch, not queue time: an old usage's NOTIFY must not
+	// confirm a newer failure recorded by another Service.
+	f.lifecycle.retryRevision = s.subscriptionRegistrations.subscriptionRetry(
+		result.context.binding.identity, subscriptionEventPackage(mwi)).revision
 	f.lifecycle.sentAt = at
 	// A NOTIFY received while this refresh was queued only updates the old
 	// lifetime; it cannot override the not-yet-sent refresh's response.

@@ -1,0 +1,34 @@
+{
+  "version": "0.1.16-personal-classic",
+  "date": "2026-11-09",
+  "base_personal_version": "0.1.15-personal-classic",
+  "evaluated_heads": {
+    "hideck": "9f2cdefb292eca3200082e4208868f59c15f27dc",
+    "vocat": "9919d14a444b8c1049c02a538f114d883710aee3"
+  },
+  "selected_hideck_commits": [
+    "1598da47796321792b6698c5bb30b42686f36e2b",
+    "9f2cdefb292eca3200082e4208868f59c15f27dc"
+  ],
+  "upstream_authors": [
+    "BFNOC <15773134+BFNOC@users.noreply.github.com>",
+    "yibaiba <946100224@qq.com>"
+  ],
+  "scope": [
+    "Preserve existing MWI stop states and network retry minima when another Service confirms.",
+    "Monotonic shared failure revisions captured at dispatch, preserving newer failures from old/queued NOTIFYs, including after retry record deletion.",
+    "Keep personal combined retry store; no per-SIM settings, carrier/RF/SA changes or schema changes."
+  ],
+  "equivalent_existing": [
+    "VoCat 9919d14a: exact 5ber AID already present; discovery stops after first usable non-eSTK AID; omitted switch AID uses findAIDForICCID, not standard-AID fallback. Existing eSTK dual-SE exception retained."
+  ],
+  "deferred": [
+    "HiDeck 4f02691/4d6415a: old-SA port-s close classification and SA cleanup sequencing depend on refresh_security_switch/saRetirement, absent in the personal version. The current IMS/SA architecture deferral remains; do not transplant without independent lifecycle adaptation and acceptance.",
+    "HiDeck 8b50ee2/e4c9d74: Vodafone DE Security-Client refresh offer is a carrier policy and SA behavior change; no configured operator values are changed.",
+    "HiDeck f44c733/2305ed4/cb65e67: policy-stopped MWI restart, per-card reset and redetection involve the previously deferred MWI settings/API lifecycle. No such setting or API is added.",
+    "HiDeck 49b6152: process-lifetime retry-store separation and default/custom runtime host wiring require a separate lifecycle adaptation rather than whole-file replacement. This candidate keeps existing store lifetime; full runtime stop/start backoff preservation remains unimplemented.",
+    "HiDeck 72ebf9d: AT+CFUN=4 radio-off fallback changes RF recovery behavior and AT/Worker gating absent locally; needs independent identity/timeout adaptation and separately authorized physical radio-failure acceptance.",
+    "HiDeck 0238c99/beabc334: new per-SIM MWI on/off/auto, non-expiring DB rejection persistence, Vodafone-DE preset and reconnect/UI behavior change existing carrier/user policy; not included in periodic selective fixes.",
+    "Previous PCM takeover/teardown, AT data/ZXIC, IMS/SA, NAT-T generation and architectural deferrals remain."
+  ]
+}

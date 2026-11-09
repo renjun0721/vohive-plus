@@ -25,6 +25,7 @@ var (
 // identity deregisters, and the failure count must survive Service rebuilds.
 // It stays in memory, so a new process starts from the first step.
 type subscriptionRetryState struct {
+	revision  uint64
 	failures  int
 	localAt   time.Time // Local backoff.
 	networkAt time.Time // Retry-After / retry-after; local pacing never shortens it.
@@ -62,6 +63,8 @@ func (store *SubscriptionRegistrationStore) subscriptionFailed(
 	}
 	key := subscriptionRetryKey(identity, eventPackage)
 	state := store.retries[key]
+	store.nextRetryRevision++
+	state.revision = store.nextRetryRevision
 	state.failures++
 	state.localAt = now.Add(subscriptionBackoffDelay(eventPackage, state.failures))
 	if at := now.Add(networkWait); networkWait > 0 && at.After(state.networkAt) {
@@ -89,19 +92,30 @@ func (store *SubscriptionRegistrationStore) subscriptionStopped(identity, eventP
 	store.retries[key] = state
 }
 
-// subscriptionConfirmed ends the local backoff and returns the failures it
-// cleared. A network wait that has not run out stays in force.
-func (store *SubscriptionRegistrationStore) subscriptionConfirmed(identity, eventPackage string, now time.Time) int {
+type subscriptionConfirmation struct {
+	revision uint64
+	now      time.Time
+}
+
+// subscriptionConfirmed clears only failures visible when this attempt was
+// dispatched. Overlapping Services cannot confirm each other's later failures;
+// network waits and MWI stop states stay in force.
+func (store *SubscriptionRegistrationStore) subscriptionConfirmed(identity, eventPackage string, confirmation subscriptionConfirmation) int {
 	store.mu.Lock()
 	defer store.mu.Unlock()
 	key := subscriptionRetryKey(identity, eventPackage)
 	state := store.retries[key]
-	if state.networkAt.After(now) {
-		store.retries[key] = subscriptionRetryState{networkAt: state.networkAt}
+	if state.revision != confirmation.revision {
+		return 0
+	}
+	failures := state.failures
+	if state.networkAt.After(confirmation.now) || state.stopped != "" {
+		state.failures, state.localAt = 0, time.Time{}
+		store.retries[key] = state
 	} else {
 		delete(store.retries, key)
 	}
-	return state.failures
+	return failures
 }
 
 // subscriptionFailureRetryLocked counts one temporary failure of f and returns

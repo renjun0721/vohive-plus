@@ -1,0 +1,35 @@
+Go 1.27.1; GOWORK=off; GOCACHE=/build/go-cache; GOMODCACHE=/build/go-mod-cache; GOMAXPROCS=2. No devices, private configuration or publication credentials supplied.
+
+baseline-regressions (exit 1, 9.54s)
+cwd: /build/baseline-016-regression/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', './internal/vowifi/imscore', '-run', 'TestPersonal(OldServiceNotify|QueuedRefresh|OldNotifyKeeps|RetryRevision)', '-count=1', '-v', '-timeout=90s']
+
+targeted-race (exit 0, 16.97s)
+cwd: /build/candidate-016-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', './internal/vowifi/imscore', '-run', 'Subscription|Subscribe|MWI|REGISTERRefresh|TestPersonal(OldServiceNotify|QueuedRefresh|OldNotifyKeeps|RetryRevision)', '-count=3', '-v', '-timeout=180s']
+
+backend (exit 0, 74.75s)
+cwd: /build/candidate-016-scheduled
+argv: ['/build/toolchain/go/bin/go', 'test', '-p', '2', '-tags', 'with_utls nomsgpack', './cmd/hideck', './pkg/logger', './internal/backend', './internal/api', './internal/device', './internal/db', './internal/notify', './internal/esim', './internal/vowifihost', './internal/phone', './internal/volte', './internal/qmi', './internal/personal', '-count=1', '-timeout=180s']
+
+engine (exit 0, 13.54s)
+cwd: /build/candidate-016-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', '-p', '2', './engine/ipsec', './engine/swu', './engine/logger', './runtimehost/...', './internal/vowifi/runtimecore', './internal/vowifi/policy', '-count=1', '-timeout=180s']
+
+host-race (exit 0, 52.53s)
+cwd: /build/candidate-016-scheduled
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/api', './internal/phone', './internal/volte', './internal/vowifihost', '-count=1', '-timeout=180s']
+
+roaming-usb-race (exit 0, 13.49s)
+cwd: /build/candidate-016-scheduled
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/device', './internal/qmi', '-run', 'Roaming|Registration|QMIUSB|QMIError|QMITransportDown', '-count=2', '-timeout=180s']
+
+vet-backend (exit 0, 3.98s)
+cwd: /build/candidate-016-scheduled
+argv: ['/build/toolchain/go/bin/go', 'vet', '-p', '2', '-tags', 'with_utls nomsgpack', './cmd/hideck', './pkg/logger', './internal/backend', './internal/api', './internal/device', './internal/db', './internal/notify', './internal/esim', './internal/vowifihost', './internal/phone', './internal/volte', './internal/qmi', './internal/personal']
+
+vet-engine (exit 0, 2.21s)
+cwd: /build/candidate-016-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'vet', '-p', '2', './engine/ipsec', './engine/swu', './runtimehost/...', './internal/vowifi/imscore', './internal/vowifi/runtimecore', './internal/vowifi/policy']
+
+Baseline expected regressions fail; all candidate jobs pass. The final additional source commit only updates the public build script version from 0.1.15 to 0.1.16; runtime source/tests unchanged. Final binary rebuilt at recorded timestamp. No assertions skipped or changed.

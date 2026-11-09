@@ -19,11 +19,12 @@ type SubscriptionRejectionPersistence interface {
 // SubscriptionRegistrationStore follows IMS identity registration lifetimes,
 // not TCP or Service lifetimes. It is shared across runtime recovery attempts.
 type SubscriptionRegistrationStore struct {
-	mu          sync.Mutex
-	nextEpoch   uint64
-	identities  map[string]*subscriptionRegistrationEntry
-	retries     map[string]subscriptionRetryState
-	persistence SubscriptionRejectionPersistence
+	mu                sync.Mutex
+	nextEpoch         uint64
+	nextRetryRevision uint64 // Monotonic even when a confirmed retry record is deleted.
+	identities        map[string]*subscriptionRegistrationEntry
+	retries           map[string]subscriptionRetryState
+	persistence       SubscriptionRejectionPersistence
 }
 
 type subscriptionRegistrationEntry struct {
