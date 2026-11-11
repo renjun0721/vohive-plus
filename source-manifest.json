@@ -1,6 +1,6 @@
 {
-  "date": "2026-11-09",
-  "version": "0.1.16-personal-classic",
+  "date": "2026-11-11",
+  "version": "0.1.17-personal-classic",
   "base_source_commit": "f1c24573bdc0326cbf8800ba5feab544838e60d7",
   "github_base_commit": "581a5e38fa72b85900f8a6a1ad0a4b39720b6f70",
   "upstream_hideck_commit": "3fd3d6aaf55924c338c2cf3f092e1af1f588d152",
@@ -9,11 +9,11 @@
     "3cbb6c1aa0e9bd77a1da98f6c4d60cd866b4e4c1",
     "a1273f0281cf74b288bab329d734c83c5afc3f48"
   ],
-  "running_binary_sha256": "847078f72a95ab1cebc4dd08a51a33986b6b7785780d22ef0ecd278d58714144",
-  "source_correspondence": "Fresh byte comparison of 2608 candidate tracked files; controlled deployment receipt matches production binary.",
+  "running_binary_sha256": "069299d16922aeb59ab519f1873d29249fab46699d22a3cc3e8b6244e6429faa",
+  "source_correspondence": "Fresh byte comparison of 2609 candidate tracked files; controlled deployment receipt matches production binary.",
   "secret_scan": "Current private values scanned separately before publication; values never included here.",
-  "file_count": 2653,
-  "total_bytes": 21059047,
+  "file_count": 2654,
+  "total_bytes": 21064794,
   "files": [
     {
       "path": "source/VoCat-SOCKS5-NOTICE.md",
@@ -28,7 +28,7 @@
     {
       "path": "source/deployment/Personal.Dockerfile",
       "size": 1211,
-      "sha256": "425ed5ff4cb45d9450100cac0a005a101cb854be4cea878d50b3b844c0cf816f"
+      "sha256": "e55c13892d78e089f68aede8698613170403aae184bfe5e02726336e5d269f17"
     },
     {
       "path": "source/deployment/vohive-plus-run",
@@ -336,6 +336,11 @@
       "sha256": "5c58005ca1a35b224e1e5c8c06f0c6292abd886d674bc912fd7597a50ae4b6d8"
     },
     {
+      "path": "source/vohive-plus/PERSONAL-UPSTREAM-017.md",
+      "size": 807,
+      "sha256": "02738e7970f4e24ed20fe4b712d805f86c44263f267f37a8c873434456014c5c"
+    },
+    {
       "path": "source/vohive-plus/README.md",
       "size": 6432,
       "sha256": "705f399eafe81377dde5343eb17af5fbc3de616ff8cc9d7c269c1fa17aa19a3d"
@@ -353,7 +358,7 @@
     {
       "path": "source/vohive-plus/build-personal.sh",
       "size": 744,
-      "sha256": "d86d02fb3d84fa5f07c6addcb562b72595b3b6ba0a73be54b3ad007129ab90c1"
+      "sha256": "1c553b064596aaabdcb5e4acb1eadc9a46a4cf47157f05316cefebac668f8eed"
     },
     {
       "path": "source/vohive-plus/caddy-dns/alidns.caddy",
@@ -9457,23 +9462,23 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/netstack/gvisor_network_test.go",
-      "size": 10948,
-      "sha256": "77723dfb4c5d27055bea2ae0d25e5079855eac8f70eb51b881d22284768739f7"
+      "size": 15316,
+      "sha256": "b58deaace23b9ed8db2108e8914bfbc54851bdd28d199b8938ef975b3868dd75"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/netstack/gvisor_tcp.go",
-      "size": 5987,
-      "sha256": "102f2aa466281f07bdbabca25e547e11a1f4f0a3bbd2ef91b6ff4343183fe899"
+      "size": 5959,
+      "sha256": "553d30dedf90095bde83524f4bf857114abcabfe902a38c6cd12ae6bcfb82534"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/netstack/gvisor_tcp_errors.go",
-      "size": 1262,
-      "sha256": "354b65a93a83f3890a8f5be2afa10605801a058f5886ab249ea1846317d017d9"
+      "size": 1853,
+      "sha256": "e164c7b152b432d397ad05c17545a6254691f7002f556cd0d0e96212fc1ea7f4"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/netstack/gvisor_tcp_errors_test.go",
-      "size": 2969,
-      "sha256": "332b271d4de2fc7f727152c6fbe31995cdc4a06b7f4d768e871ae3f384051cf7"
+      "size": 2978,
+      "sha256": "7ea6ebd84b24673f1da8cf3b3658935156d3e26e170994369a6915b1531f3681"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/netstack/ims_adapter.go",
@@ -13529,14 +13534,25 @@
         "BFNOC <15773134+BFNOC@users.noreply.github.com>",
         "yibaiba <946100224@qq.com>"
       ]
+    },
+    {
+      "sha": "aa5b7ce334cfc0fd48cea37d716805a0011f0599",
+      "scope": "Snapshot peer addresses at dial/accept; keep them after reset for IPv4/IPv6; no SA, carrier, RF, configuration or frontend changes.",
+      "authors": [
+        {
+          "name": "BFNOC",
+          "email": "15773134+BFNOC@users.noreply.github.com",
+          "date": "2026-11-09T14:20:52Z"
+        }
+      ]
     }
   ],
-  "reference_hideck_release": "v2.1.41",
-  "reference_hideck_main": "9f2cdefb292eca3200082e4208868f59c15f27dc",
+  "reference_hideck_release": "v2.1.42",
+  "reference_hideck_main": "9e017722b51c812734494b4a3f2ae89870d23ce2",
   "reference_vocat_main": "9919d14a444b8c1049c02a538f114d883710aee3",
   "personal_roaming_feature": "source/vohive-plus/ROAMING-OPERATORS.md",
-  "local_candidate_commit": "dde8a064298dc853840636325b49936dae3a4e37",
-  "github_previous_commit": "8772bdb8de32bc120e14304ea4051b267de31ae9",
+  "local_candidate_commit": "a928afdfd2818c1263ab51a9e39b4024db1d1dff",
+  "github_previous_commit": "20aeb3ad0807a93c92b711c80ba5177c9347f960",
   "partial_diagnostic_dependencies": [
     {
       "sha": "6e4f7b1627a072c61b225eea7fe0068948bd8eb9",
@@ -13554,6 +13570,5 @@
     }
   ],
   "vocat_adaptation_license": "source/third-party-licenses/VoCat-Research-Evaluation-License.md",
-  "vocat_adaptation_notice": "source/VoCat-SOCKS5-NOTICE.md",
-  "publication_code_commit": "5b35692ab6a71d94f9ce6e5bf7cf7069f5a9f049"
+  "vocat_adaptation_notice": "source/VoCat-SOCKS5-NOTICE.md"
 }

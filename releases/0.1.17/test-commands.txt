@@ -1,0 +1,39 @@
+Go 1.27.1; GOWORK=off; GOCACHE=/build/go-cache; GOMODCACHE=/build/go-mod-cache; GOMAXPROCS=2. No devices, private configuration or publication credentials supplied.
+
+baseline-regressions (exit 1, 8.0s)
+cwd: /build/baseline-017-regression/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', './internal/vowifi/netstack', '-run', 'TestIMSTCPConnKeepsRemoteAddrAfterPeerReset', '-count=1', '-v', '-timeout=90s']
+
+targeted-race (exit 0, 13.99s)
+cwd: /build/candidate-017-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', './internal/vowifi/netstack', '-count=3', '-v', '-timeout=180s']
+
+backend (exit 0, 75.28s)
+cwd: /build/candidate-017-scheduled
+argv: ['/build/toolchain/go/bin/go', 'test', '-p', '2', '-tags', 'with_utls nomsgpack', './cmd/hideck', './pkg/logger', './internal/backend', './internal/api', './internal/device', './internal/db', './internal/notify', './internal/esim', './internal/vowifihost', './internal/phone', './internal/volte', './internal/qmi', './internal/personal', '-count=1', '-timeout=180s']
+
+engine (exit 0, 13.41s)
+cwd: /build/candidate-017-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', '-p', '2', './engine/ipsec', './engine/swu', './engine/logger', './runtimehost/...', './internal/vowifi/runtimecore', './internal/vowifi/policy', '-count=1', '-timeout=180s']
+
+ims-race (exit 0, 10.67s)
+cwd: /build/candidate-017-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', './internal/vowifi/imscore', '-run', 'PortS|Subscription|Subscribe|MWI|REGISTERRefresh', '-count=2', '-v', '-timeout=180s']
+
+host-race (exit 0, 47.13s)
+cwd: /build/candidate-017-scheduled
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/api', './internal/phone', './internal/volte', './internal/vowifihost', '-count=1', '-timeout=180s']
+
+roaming-usb-race (exit 0, 12.76s)
+cwd: /build/candidate-017-scheduled
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/device', './internal/qmi', '-run', 'Roaming|Registration|QMIUSB|QMIError|QMITransportDown', '-count=2', '-timeout=180s']
+
+vet-backend (exit 0, 4.08s)
+cwd: /build/candidate-017-scheduled
+argv: ['/build/toolchain/go/bin/go', 'vet', '-p', '2', '-tags', 'with_utls nomsgpack', './cmd/hideck', './pkg/logger', './internal/backend', './internal/api', './internal/device', './internal/db', './internal/notify', './internal/esim', './internal/vowifihost', './internal/phone', './internal/volte', './internal/qmi', './internal/personal']
+
+vet-engine (exit 0, 2.2s)
+cwd: /build/candidate-017-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'vet', '-p', '2', './engine/ipsec', './engine/swu', './runtimehost/...', './internal/vowifi/imscore', './internal/vowifi/netstack', './internal/vowifi/runtimecore', './internal/vowifi/policy']
+
+Baseline: IPv4/IPv6 dialled/accepted/reset-before-accept regressions fail. All candidate jobs pass; no assertions skipped or removed. netstack full package race count=3; selected IMS race count=2.

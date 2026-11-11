@@ -9,9 +9,9 @@ RUN sed -i 's|http://deb.debian.org/debian|http://mirrors.tuna.tsinghua.edu.cn/d
 COPY vohive-plus_linux_amd64 /usr/local/bin/vohive-plus
 RUN chmod 0755 /usr/local/bin/vohive-plus
 LABEL org.opencontainers.image.title="VoHive Plus Personal" \
-      org.opencontainers.image.version="0.1.16-personal-classic" \
+      org.opencontainers.image.version="0.1.17-personal-classic" \
       org.opencontainers.image.source="https://github.com/renjun0721/vohive-plus" \
-      org.opencontainers.image.revision="dde8a064298dc853840636325b49936dae3a4e37"
+      org.opencontainers.image.revision="a928afdfd2818c1263ab51a9e39b4024db1d1dff"
 ENV TZ=Asia/Shanghai
 EXPOSE 7575/tcp 7576/tcp 61580/udp
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 CMD wget -q -T 3 -O /dev/null http://127.0.0.1:7575/ping || exit 1

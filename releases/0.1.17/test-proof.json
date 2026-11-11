@@ -1,0 +1,54 @@
+{
+  "version": "0.1.17-personal-classic",
+  "binary_sha256": "069299d16922aeb59ab519f1873d29249fab46699d22a3cc3e8b6244e6429faa",
+  "source_commit": "a928afdfd2818c1263ab51a9e39b4024db1d1dff",
+  "tests": [
+    {
+      "name": "backend",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261111-100000-6050/backend.log",
+      "log_sha256": "ad6cd2d97506dc9d1044390e0b02efa6dad474145652c5717e26698ecea99568"
+    },
+    {
+      "name": "targeted-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261111-100000-6050/targeted-race.log",
+      "log_sha256": "1c497800a26ae679be37b0465fb0922bbe5ff83a4e90d3e44dbe3f8676a1ae37"
+    },
+    {
+      "name": "engine",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261111-100000-6050/engine.log",
+      "log_sha256": "a7bff66038117b7723cc9d2ab106e0caad812e9387c878a8f55dec0d87fabbfc"
+    },
+    {
+      "name": "ims-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261111-100000-6050/ims-race.log",
+      "log_sha256": "7ed4dbb27b4d15877374369fa05c01895a1c4433b585ff7efdef743ab66df20e"
+    },
+    {
+      "name": "host-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261111-100000-6050/host-race.log",
+      "log_sha256": "f755d259f4b22270c840d5636684eaaa869437c8af320f51379468a79d15dd47"
+    },
+    {
+      "name": "roaming-usb-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261111-100000-6050/roaming-usb-race.log",
+      "log_sha256": "db803281135ad423d03877b5e23bacf30e1d56e29ba291aa0dbebe012caa8aa1"
+    },
+    {
+      "name": "vet",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261111-100000-6050/vet.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limitations": [
+    "未执行真实短信、通话或通知验收；复位回归使用本地 gVisor loopback。",
+    "前端和嵌入资产未变，未运行前端测试、类型检查或构建；完整 imscore 套件未运行，既有 MSS/UDP-stop 与媒体限制未宣称解决。",
+    "旧 SA 生命周期、运营商和射频策略继续暂缓。"
+  ]
+}
