@@ -1,6 +1,6 @@
 {
-  "date": "2026-11-11",
-  "version": "0.1.17-personal-classic",
+  "date": "2026-11-18",
+  "version": "0.1.18-personal-classic",
   "base_source_commit": "f1c24573bdc0326cbf8800ba5feab544838e60d7",
   "github_base_commit": "581a5e38fa72b85900f8a6a1ad0a4b39720b6f70",
   "upstream_hideck_commit": "3fd3d6aaf55924c338c2cf3f092e1af1f588d152",
@@ -9,11 +9,11 @@
     "3cbb6c1aa0e9bd77a1da98f6c4d60cd866b4e4c1",
     "a1273f0281cf74b288bab329d734c83c5afc3f48"
   ],
-  "running_binary_sha256": "069299d16922aeb59ab519f1873d29249fab46699d22a3cc3e8b6244e6429faa",
-  "source_correspondence": "Fresh byte comparison of 2609 candidate tracked files; controlled deployment receipt matches production binary.",
+  "running_binary_sha256": "9ed951fdc619089f77584b6210913c5136a6a7835b35759621d3bb6f3b0d602d",
+  "source_correspondence": "Fresh byte comparison of 2612 candidate tracked files; controlled deployment receipt matches production binary.",
   "secret_scan": "Current private values scanned separately before publication; values never included here.",
-  "file_count": 2654,
-  "total_bytes": 21064794,
+  "file_count": 2657,
+  "total_bytes": 21074537,
   "files": [
     {
       "path": "source/VoCat-SOCKS5-NOTICE.md",
@@ -28,7 +28,7 @@
     {
       "path": "source/deployment/Personal.Dockerfile",
       "size": 1211,
-      "sha256": "e55c13892d78e089f68aede8698613170403aae184bfe5e02726336e5d269f17"
+      "sha256": "146c5ffc3512857fc861332a3637907c30d607589662e2bb517b6ec0f43d21a1"
     },
     {
       "path": "source/deployment/vohive-plus-run",
@@ -341,6 +341,11 @@
       "sha256": "02738e7970f4e24ed20fe4b712d805f86c44263f267f37a8c873434456014c5c"
     },
     {
+      "path": "source/vohive-plus/PERSONAL-UPSTREAM-018.md",
+      "size": 1575,
+      "sha256": "0f2055928c5ed286a8a1a8d59a460d79ee3cb739137f6dd69b4ee6e91def52cf"
+    },
+    {
       "path": "source/vohive-plus/README.md",
       "size": 6432,
       "sha256": "705f399eafe81377dde5343eb17af5fbc3de616ff8cc9d7c269c1fa17aa19a3d"
@@ -358,7 +363,7 @@
     {
       "path": "source/vohive-plus/build-personal.sh",
       "size": 744,
-      "sha256": "1c553b064596aaabdcb5e4acb1eadc9a46a4cf47157f05316cefebac668f8eed"
+      "sha256": "a645ab85316e341f4915172faebc8d8961082153d84de57ee1919203210d0281"
     },
     {
       "path": "source/vohive-plus/caddy-dns/alidns.caddy",
@@ -3266,9 +3271,14 @@
       "sha256": "18351e2552cf4c1205f04399b6506c6a318dff2c7777373360f22fe53239b7f8"
     },
     {
+      "path": "source/vohive-plus/internal/modem/imei_cache_test.go",
+      "size": 919,
+      "sha256": "64c822e55fe779211c6944d4a056249a52f689033059c0df9f2792ba1ea4035b"
+    },
+    {
       "path": "source/vohive-plus/internal/modem/imei_probe.go",
-      "size": 4635,
-      "sha256": "2929ae105d922f185af5844af821f97da90e1031260827c0d05b65beb723165c"
+      "size": 5018,
+      "sha256": "46ba3d5c038fc1682069114a89842ae02cb3d2f570ca2be57aef0a158d7301bc"
     },
     {
       "path": "source/vohive-plus/internal/modem/manager.go",
@@ -8147,8 +8157,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/fragment.go",
-      "size": 11589,
-      "sha256": "1529bff811bd31f03a027afb705eafb8442b2f63238bc01a97e6cad1c3cf0887"
+      "size": 11683,
+      "sha256": "8f1525879b64e737d62286f218a2283cb7fccddab26fa058a9f7e1c280a2aa69"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/fragment_audit.go",
@@ -8164,6 +8174,11 @@
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/fragment_persistence_test.go",
       "size": 14967,
       "sha256": "479e423e15806fb7a2f1d100e7c7172590cc8a4458253333dc761415c12624f5"
+    },
+    {
+      "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/fragment_smsc_test.go",
+      "size": 6789,
+      "sha256": "0acc60c557878b10876631d04074095908f0dc4a647365851a491d5fbb91640c"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/fragment_store.go",
@@ -8987,8 +9002,8 @@
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/sms_restore_test.go",
-      "size": 30687,
-      "sha256": "65e69bf2ef47ee36f11335266213e7fbbf4b3e1a68577c6f38800c933e117254"
+      "size": 30670,
+      "sha256": "d8abbd0e5e54404384e6e165fccde28d5386db9912b464211668d6078895fa6b"
     },
     {
       "path": "source/vohive-plus/third_party/vowifi-go/internal/vowifi/imscore/sms_runtime.go",
@@ -13545,14 +13560,62 @@
           "date": "2026-11-09T14:20:52Z"
         }
       ]
+    },
+    {
+      "sha": "267496fc8dbd1c659e3925c1bfab33e20b22f507",
+      "scope": [
+        "Remove SMSC from multipart identity; retain recipient/reference and existing DeviceID/IMSI scope; no ICCID schema migration and legacy groups.",
+        "Invalidate IMEI cache if serial node identity or modification time changes; retain personal cancellable probe."
+      ],
+      "authors": [
+        {
+          "name": "杨伟杰",
+          "email": "weijie.yang443@gmail.com",
+          "date": "2026-11-17T01:26:51Z"
+        },
+        {
+          "name": "杨伟杰",
+          "email": "weijie.yang443@gmail.com",
+          "date": "2026-11-17T01:32:27Z"
+        },
+        {
+          "name": "yibaiba",
+          "email": "946100224@qq.com",
+          "date": "2026-11-17T08:11:31Z"
+        }
+      ]
+    },
+    {
+      "sha": "157e75885d62e1938699cde42e59a3c17d95c5e8",
+      "scope": [
+        "Remove SMSC from multipart identity; retain recipient/reference and existing DeviceID/IMSI scope; no ICCID schema migration and legacy groups.",
+        "Invalidate IMEI cache if serial node identity or modification time changes; retain personal cancellable probe."
+      ],
+      "authors": [
+        {
+          "name": "杨伟杰",
+          "email": "weijie.yang443@gmail.com",
+          "date": "2026-11-17T01:26:51Z"
+        },
+        {
+          "name": "杨伟杰",
+          "email": "weijie.yang443@gmail.com",
+          "date": "2026-11-17T01:32:27Z"
+        },
+        {
+          "name": "yibaiba",
+          "email": "946100224@qq.com",
+          "date": "2026-11-17T08:11:31Z"
+        }
+      ]
     }
   ],
-  "reference_hideck_release": "v2.1.42",
-  "reference_hideck_main": "9e017722b51c812734494b4a3f2ae89870d23ce2",
-  "reference_vocat_main": "9919d14a444b8c1049c02a538f114d883710aee3",
+  "reference_hideck_release": "v2.1.43",
+  "reference_hideck_main": "d5dcae677fc68e20843145b0101742a6f765fdff",
+  "reference_vocat_main": "d745a950790181741de0fb193609fa2605c224c8",
   "personal_roaming_feature": "source/vohive-plus/ROAMING-OPERATORS.md",
-  "local_candidate_commit": "a928afdfd2818c1263ab51a9e39b4024db1d1dff",
-  "github_previous_commit": "20aeb3ad0807a93c92b711c80ba5177c9347f960",
+  "local_candidate_commit": "f38aac22a36984d77463539d3d0be3168f36cd4c",
+  "github_previous_commit": "6362e9162abd0188cade3af03c3f2899c3fd12cb",
   "partial_diagnostic_dependencies": [
     {
       "sha": "6e4f7b1627a072c61b225eea7fe0068948bd8eb9",
@@ -13560,7 +13623,7 @@
       "scope": "Only create_child_sa_offer.go formatter, no negotiation/SA lifecycle changes"
     }
   ],
-  "reference_vocat_release": "v0.3.42",
+  "reference_vocat_release": "v0.3.46",
   "selected_vocat_commits": [
     {
       "sha": "d1968d1c3fb88258d86a6e2e69f9c3304d160711",
@@ -13571,5 +13634,13 @@
   ],
   "vocat_adaptation_license": "source/third-party-licenses/VoCat-Research-Evaluation-License.md",
   "vocat_adaptation_notice": "source/VoCat-SOCKS5-NOTICE.md",
-  "publication_code_commit": "d9e533bcaeebae6d16a2bfae49c8785db4d2b585"
+  "partial_hideck_commits": [
+    {
+      "sha": "5e30475b3ee44ceb5b73621db1a02f4cee4115fa",
+      "files": [
+        "internal/modem/imei_probe.go",
+        "internal/modem/imei_cache_test.go"
+      ]
+    }
+  ]
 }

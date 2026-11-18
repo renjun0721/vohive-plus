@@ -1,0 +1,47 @@
+Go 1.27.1; GOWORK=off; GOCACHE=/build/go-cache; GOMODCACHE=/build/go-mod-cache; GOMAXPROCS=2. No devices, private configuration or publication credentials supplied.
+
+baseline-smsc (exit 1, 15.52s)
+cwd: /build/baseline-018-regression/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', './internal/vowifi/imscore', '-run', 'TestMultipartSMSAssemblesAcrossSMSCenters|TestMixedSMSCenterFragmentsRecoverAfterRestart', '-count=1', '-v', '-timeout=90s']
+
+baseline-imei (exit 1, 4.53s)
+cwd: /build/baseline-018-regression
+argv: ['/build/toolchain/go/bin/go', 'test', '-tags', 'with_utls nomsgpack', './internal/modem', '-run', 'TestIMEICacheRejectsReusedSerialNode', '-count=1', '-v', '-timeout=90s']
+
+targeted-race (exit 0, 45.0s)
+cwd: /build/candidate-018-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', './internal/vowifi/imscore', '-run', 'Fragment|Multipart|MixedSMS|LegacySMSCenter|InboundSMS|SMSRestore', '-count=3', '-v', '-timeout=180s']
+
+cache-race (exit 0, 7.97s)
+cwd: /build/candidate-018-scheduled
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/modem', '-count=2', '-timeout=180s']
+
+backend (exit 0, 129.33s)
+cwd: /build/candidate-018-scheduled
+argv: ['/build/toolchain/go/bin/go', 'test', '-p', '2', '-tags', 'with_utls nomsgpack', './cmd/hideck', './pkg/logger', './internal/backend', './internal/api', './internal/device', './internal/db', './internal/notify', './internal/esim', './internal/vowifihost', './internal/phone', './internal/volte', './internal/qmi', './internal/personal', './internal/modem', '-count=1', '-timeout=180s']
+
+engine (exit 0, 19.51s)
+cwd: /build/candidate-018-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', '-p', '2', './engine/ipsec', './engine/swu', './engine/logger', './runtimehost/...', './internal/vowifi/runtimecore', './internal/vowifi/policy', './internal/vowifi/smsdelivery', './internal/vowifi/netstack', '-count=1', '-timeout=180s']
+
+ims-race (exit 0, 4.05s)
+cwd: /build/candidate-018-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', './internal/vowifi/imscore', '-run', 'PortS|Subscription|Subscribe|MWI|REGISTERRefresh', '-count=2', '-timeout=180s']
+
+host-race (exit 0, 148.01s)
+cwd: /build/candidate-018-scheduled
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/api', './internal/phone', './internal/volte', './internal/vowifihost', './internal/db', '-count=1', '-timeout=180s']
+
+roaming-usb-race (exit 0, 23.47s)
+cwd: /build/candidate-018-scheduled
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/device', './internal/qmi', '-run', 'Roaming|Registration|QMIUSB|QMIError|QMITransportDown|Rescan|Recovery', '-count=2', '-timeout=180s']
+
+vet-backend (exit 0, 16.4s)
+cwd: /build/candidate-018-scheduled
+argv: ['/build/toolchain/go/bin/go', 'vet', '-p', '2', '-tags', 'with_utls nomsgpack', './cmd/hideck', './pkg/logger', './internal/backend', './internal/api', './internal/device', './internal/db', './internal/notify', './internal/esim', './internal/vowifihost', './internal/phone', './internal/volte', './internal/qmi', './internal/personal', './internal/modem']
+
+vet-engine (exit 0, 6.33s)
+cwd: /build/candidate-018-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'vet', '-p', '2', './engine/ipsec', './engine/swu', './runtimehost/...', './internal/vowifi/imscore', './internal/vowifi/netstack', './internal/vowifi/runtimecore', './internal/vowifi/policy', './internal/vowifi/smsdelivery']
+
+Old version: four cross-SMSC assembly variants plus restart recovery fail; replaced serial-node cache test fails. Tests-only worktree adapts old cache setter signature. Candidate SMS fixtures omit absent ICCID config field; all assertions retained. DB ICCID tests not imported because personal schema has DeviceID/IMSI. No new failures skipped or suppressed.

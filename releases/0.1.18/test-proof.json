@@ -1,0 +1,61 @@
+{
+  "version": "0.1.18-personal-classic",
+  "binary_sha256": "9ed951fdc619089f77584b6210913c5136a6a7835b35759621d3bb6f3b0d602d",
+  "source_commit": "f38aac22a36984d77463539d3d0be3168f36cd4c",
+  "tests": [
+    {
+      "name": "backend",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261118-100000-21099/backend.log",
+      "log_sha256": "1bf420e0cb52a5ef0db7f0f88f9f690b10e04d7deb3fd396b9c598e68d3138a7"
+    },
+    {
+      "name": "targeted-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261118-100000-21099/targeted-race.log",
+      "log_sha256": "81fc4c92c09aea8eac431a983c6fc2cd3baee97b858ad6a563231db68a8fba74"
+    },
+    {
+      "name": "cache-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261118-100000-21099/cache-race.log",
+      "log_sha256": "a83f6abc899071b7b38a9b45646db07d67b8ee348af014a6816258f3a3c2df21"
+    },
+    {
+      "name": "engine",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261118-100000-21099/engine.log",
+      "log_sha256": "a5408ca419e5270aa85c05e6ebd19b20e42b5b47def451e8207bf3e60f0781da"
+    },
+    {
+      "name": "ims-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261118-100000-21099/ims-race.log",
+      "log_sha256": "ef7265f79d87b81c66b177843be2b8fd90df968cc2ac97262c3749916716eadf"
+    },
+    {
+      "name": "host-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261118-100000-21099/host-race.log",
+      "log_sha256": "4e87788e38e1af391e2a78a0e8560c42771c7ea38fde6f63b5568b5390a450f7"
+    },
+    {
+      "name": "roaming-usb-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261118-100000-21099/roaming-usb-race.log",
+      "log_sha256": "e27a34a75ce343b7710ed10f5868ced6ec674e8b92bdc5ce07793bac8365efd9"
+    },
+    {
+      "name": "vet",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261118-100000-21099/vet.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limitations": [
+    "测试均为真实执行的本地模拟/单元与并发测试；实机只读验证，未执行真实短信、通话、QQ/TG 通知验收。",
+    "经典前端及嵌入资产未变，未运行前端测试、类型检查或构建；完整 imscore 未运行，既有 MSS/UDP-stop/媒体限制保留。",
+    "保留个人版 DeviceID/IMSI 存储模型；未迁移上游 ICCID schema。旧 sc 分组隔离保留，未完成分组可能按原 TTL 过期。",
+    "实时重探测/原生 PCM/等待呼叫/early media 及此前 WWAN/TUN/IMS-SA/运营商/RF 架构继续暂缓。"
+  ]
+}
