@@ -1,0 +1,36 @@
+{
+  "version": "0.1.19-personal-classic",
+  "date": "2026-11-24",
+  "base_personal_version": "0.1.18-personal-classic",
+  "evaluated_heads": {
+    "hideck": "8a1c29d85fa7f5df2e801aa9627ef46dab92a31a",
+    "vocat": "e8e5d1c2b2b775e137ea4f4a5f524a65bb44cf0f"
+  },
+  "selected_hideck_commits": [
+    "7b1c7413a77834c4bedc03d63dedd05920037b2e"
+  ],
+  "partial_hideck_commits": [],
+  "upstream_authors": [
+    {
+      "name": "Jiahui Zhu",
+      "email": "zjhjack123@gmail.com",
+      "date": "2026-11-19T05:52:25Z"
+    }
+  ],
+  "scope": [
+    "Classify recognized SI/SL/MMS content before shared port 2948 OMA fallback; explicit known content type overrides conflicting body heuristics. Preserve raw bytes and other classification.",
+    "Apply the identical upstream classifier diff to the personal embedded VoWiFi decoder; both old decoders reproduce failure, both final full codec suites get three race runs."
+  ],
+  "equivalent_existing": [
+    "Device limit remains unlimited (0); do not import upstream default ten."
+  ],
+  "deferred": [
+    "ML307 AT profile/discovery/startup IMEI, +CCHO parser dialect and RF-off eSIM profile reload form a hardware-specific chain; no ML307 configured. Personal Queue/Worker/QMI topology differs; requires isolated adapter and separately authorized hardware acceptance.",
+    "AT stored inbox scanning/deletion receipts, cross-SCTS multipart recovery and PDU fingerprints require full intake/persistence and identity model adaptation. Personal multipart DB retains DeviceID/IMSI; do not import ICCID schema/slot deletion side effects without migration and crash/replug validation.",
+    "Uncertain SMS submission, command/balance results, HTTP write deadline and selected-SIM guards span modem/Pool/API/notify/balance plus web status semantics. Personal API is still monolithic server.go; retain as a separate candidate with end-to-end identity/partial-send protocol regressions and UI adaptation, rather than copying only status code or retry behavior. No live sends/balance tasks allowed this run.",
+    "Shared media/waiting-call recovery and AT-only phone capability gates depend on the previously deferred modemvoice host and effective-card-policy runtime; local media/controller differs. Requires distinct lifecycle race adaptation and authorized calls.",
+    "SIM PIN/removal/prewarm generation convergence touches atDeviceRules/strictSIMIdentity and newer phone-runtime retirement absent locally; do not weaken existing personal roaming/Worker identity guards with a partial port. Requires separate hotplug/PIN/eSIM acceptance.",
+    "VoCat PCSC reader replacement and optional Bark encrypted notification remain deferred as on 2026-11-22: no PCSC hardware configured, Bark disabled, no replug or notification-send authorization.",
+    "Prior IMS/SA, MWI, carrier, RF, WWAN/TUN and NAT-T architecture/policy deferrals remain unchanged."
+  ]
+}

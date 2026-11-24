@@ -1,20 +1,20 @@
 # 完整源码与个人版恢复
 
-当前源码为 **VoHive Plus 0.1.18-personal-classic（2026-11-18）**。此次基于完整 0.1.17 个人版，独立适配跨短信中心长短信与串口 IMEI 缓存失效修复；保留按 SIM 漫游白名单、有界切换、退避、换卡隔离和实时身份校验。原有 eSIM/USSD、无限设备、QQ/TG、经典 UI、LuCI 和网络定制保留。
+当前源码为 **VoHive Plus 0.1.19-personal-classic（2026-11-24）**。此次基于完整 0.1.18 个人版，独立适配 WAP 短信分类优先级修复；保留按 SIM 漫游白名单、有界切换、退避、换卡隔离和实时身份校验。原有 eSIM/USSD、无限设备、QQ/TG、经典 UI、LuCI 和网络定制保留。
 
 | 路径 | 内容 |
 | --- | --- |
 | `source/vohive-plus/` | 完整 Go 后端、Vue 前端、锁文件、第三方源码与许可、个人版构建脚本 |
 | `source/router-ui/` | 当前 LuCI 美化、中文日志、本地管理 / HTTPS 通话入口和服务状态开关与重启 |
 | `source/https/` | 公网反代、局域网/Tailscale DNS、HAProxy、隧道及证书同步脚本；不包含实际证书、私钥或隧道口令 |
-| `source/deployment/` | 0.1.18 Dockerfile、iStoreOS 启动器和 procd 服务 |
+| `source/deployment/` | 0.1.19 Dockerfile、iStoreOS 启动器和 procd 服务 |
 | `source/router-network/` | 奇游/PassWall 兼容及 Tailscale 对端路由保护；2026-10-04 补齐出口客户端规则 |
 | `source-manifest.json` | 源码文件大小、SHA-256 及本次程序信息 |
-| `releases/0.1.18/` | 更新说明、构建与验证记录 |
+| `releases/0.1.19/` | 更新说明、构建与验证记录 |
 
 后端基线保留 HiDeck `3fd3d6aaf55924c338c2cf3f092e1af1f588d152`，前端布局基线保留 VoHive `f240894e763cf7f0cf74c88562bb9b55f0d573b1`。原有许可和作者声明保留；本次没有整体同步 VoCat，也没有更换通信核心。
 
-运行程序 SHA-256：`9ed951fdc619089f77584b6210913c5136a6a7835b35759621d3bb6f3b0d602d`。现存容器沿用原挂载目录和容器文件层，程序已替换为 0.1.18；本地另外构建 `vohive-plus-personal:0.1.18` 镜像供后续重建使用。原 2026-10-01 的恢复附件仍是历史快照。
+运行程序 SHA-256：`eb5a72a2fcd0cab62ded88e4900a984212d5670f35efc64ccf7f22c0c4151804`。现存容器沿用原挂载目录和容器文件层，程序已替换为 0.1.19；本地另外构建 `vohive-plus-personal:0.1.19` 镜像供后续重建使用。原 2026-10-01 的恢复附件仍是历史快照。
 
 ## 构建
 
@@ -25,10 +25,10 @@ cd source/vohive-plus
 sh build-personal.sh
 cd ../deployment
 cp ../vohive-plus/personal-dist/vohive-plus_linux_amd64 .
-docker build -f Personal.Dockerfile -t vohive-plus-personal:0.1.18 .
+docker build -f Personal.Dockerfile -t vohive-plus-personal:0.1.19 .
 ```
 
-数据库名称沿用 `vohive-plus-final.db`，容器需要原配置、数据和日志挂载以及设备访问权限。不要同时启动两个管理同一模组的实例。升级前使用 SQLite 在线备份或停止服务后备份数据。若使用 Release 中的编译产物，先 `gzip -d vohive-plus_0.1.18_linux_amd64.gz` 并核对 SHA-256，再按 Dockerfile 构建。
+数据库名称沿用 `vohive-plus-final.db`，容器需要原配置、数据和日志挂载以及设备访问权限。不要同时启动两个管理同一模组的实例。升级前使用 SQLite 在线备份或停止服务后备份数据。若使用 Release 中的编译产物，先 `gzip -d vohive-plus_0.1.19_linux_amd64.gz` 并核对 SHA-256，再按 Dockerfile 构建。
 
 已有安装可停止 `/etc/init.d/vohive`，将新程序复制到 `vohive-plus:/usr/local/bin/vohive-plus` 后启动服务；原程序、配置及数据库快照应先保存。仅替换容器程序时，重建容器需选择新镜像。
 
@@ -38,7 +38,7 @@ docker build -f Personal.Dockerfile -t vohive-plus-personal:0.1.18 .
 
 LuCI 可用 `sh source/router-ui/install.sh` 安装；中文日志验证运行 `lua source/router-ui/check-logs.lua`。HTTPS 和网络脚本部署前核对实际接口、域名和证书路径；参见各目录说明。
 
-本次验证记录见 [0.1.18 更新说明](releases/0.1.18/README.md)。本轮真实短信、Bot 送达、SIM 切换及拨号未执行。
+本次验证记录见 [0.1.19 更新说明](releases/0.1.19/README.md)。本轮真实短信、Bot 送达、SIM 切换及拨号未执行。
 
 ## 2026-10-05 LuCI 管理入口与电源操作
 
@@ -99,3 +99,7 @@ IPv4/IPv6 拨出、接受和接受前复位回归在旧版复现，候选 netsta
 ## 0.1.18 跨短信中心长短信与串口缓存
 
 跨短信中心合并及节点复用缓存回归在旧版复现；候选短信分片三轮 race、modem、后端、关键 IMS/host/device race 和 vet 通过。个人版 DeviceID/IMSI 存储模型及旧未完成分组保留，没有 ICCID schema 迁移。前端和内嵌资产不变。实机仅只读验证，未执行真实短信、通话或通知验收。旧 SA 生命周期及既有运营商/射频策略变更继续暂缓。详见 [0.1.18 更新说明](releases/0.1.18/README.md)。
+
+## 0.1.19 WAP 短信分类
+
+识别 SI/SL/彩信内容后再使用 2948 共用端口的 OMA 回退；已识别类型优先于冲突的内容特征。保留原始数据、OMA 与 SIM OTA 行为。旧版复现分类失败，候选协议回归三轮 race、后端、引擎、关键 IMS/host/device race 和 vet 通过。前端和内嵌资产不变；实机仅只读验证，未执行真实短信、通话或通知验收。详见 [0.1.19 更新说明](releases/0.1.19/README.md)。

@@ -1,0 +1,51 @@
+Go 1.27.1; GOWORK=off; GOCACHE=/build/go-cache; GOMODCACHE=/build/go-mod-cache; GOMAXPROCS=2. No physical devices, private configuration or publication credentials supplied.
+
+baseline-wap (exit 1, expected 1, 0.16s)
+cwd: /build/baseline-019-regression
+argv: ['/build/toolchain/go/bin/go', 'test', '-tags', 'with_utls nomsgpack', './pkg/smscodec', '-run', 'TestWAPPushClassificationPrecedence|TestDecodeDeliverTPDUWAPSharedPort|TestClassifyBinarySMS_MMSNotification', '-count=1', '-v', '-timeout=90s']
+
+baseline-ims-wap (exit 1, expected 1, 0.41s)
+cwd: /build/baseline-019-regression/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', './internal/smscodec', '-run', 'TestWAPPushClassificationPrecedence|TestDecodeDeliverTPDUWAPSharedPort', '-count=1', '-v', '-timeout=90s']
+
+targeted-race (exit 0, expected 0, 1.27s)
+cwd: /build/candidate-019-scheduled
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', '-p', '2', '-tags', 'with_utls nomsgpack', './pkg/smscodec', '-count=3', '-v', '-timeout=180s']
+
+ims-codec-race (exit 0, expected 0, 1.7s)
+cwd: /build/candidate-019-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', './internal/smscodec', '-count=3', '-v', '-timeout=180s']
+
+backend (exit 0, expected 0, 56.64s)
+cwd: /build/candidate-019-scheduled
+argv: ['/build/toolchain/go/bin/go', 'test', '-p', '2', '-tags', 'with_utls nomsgpack', './cmd/hideck', './pkg/smscodec', './pkg/logger', './internal/backend', './internal/api', './internal/device', './internal/db', './internal/notify', './internal/esim', './internal/vowifihost', './internal/phone', './internal/volte', './internal/qmi', './internal/personal', './internal/modem', '-count=1', '-timeout=180s']
+
+engine (exit 0, expected 0, 6.33s)
+cwd: /build/candidate-019-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', '-p', '2', './engine/ipsec', './engine/swu', './engine/logger', './runtimehost/...', './internal/vowifi/runtimecore', './internal/vowifi/policy', './internal/vowifi/smsdelivery', './internal/vowifi/netstack', '-count=1', '-timeout=180s']
+
+ims-race (exit 0, expected 0, 10.95s)
+cwd: /build/candidate-019-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', './internal/vowifi/imscore', '-run', 'PortS|Subscription|Subscribe|MWI|REGISTERRefresh', '-count=2', '-timeout=180s']
+
+host-race (exit 0, expected 0, 40.71s)
+cwd: /build/candidate-019-scheduled
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/api', './internal/phone', './internal/volte', './internal/vowifihost', './internal/db', '-count=1', '-timeout=180s']
+
+roaming-usb-race (exit 0, expected 0, 17.47s)
+cwd: /build/candidate-019-scheduled
+argv: ['/build/toolchain/go/bin/go', 'test', '-race', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/device', './internal/qmi', '-run', 'Roaming|Registration|QMIUSB|QMIError|QMITransportDown|Rescan|Recovery', '-count=2', '-timeout=180s']
+
+vet-backend (exit 0, expected 0, 0.69s)
+cwd: /build/candidate-019-scheduled
+argv: ['/build/toolchain/go/bin/go', 'vet', '-p', '2', '-tags', 'with_utls nomsgpack', './cmd/hideck', './pkg/smscodec', './pkg/logger', './internal/backend', './internal/api', './internal/device', './internal/db', './internal/notify', './internal/esim', './internal/vowifihost', './internal/phone', './internal/volte', './internal/qmi', './internal/personal', './internal/modem']
+
+vet-engine (exit 0, expected 0, 0.83s)
+cwd: /build/candidate-019-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'vet', '-p', '2', './engine/ipsec', './engine/swu', './runtimehost/...', './internal/vowifi/imscore', './internal/vowifi/netstack', './internal/vowifi/runtimecore', './internal/vowifi/policy', './internal/vowifi/smsdelivery']
+
+vet-codec (exit 0, expected 0, 0.1s)
+cwd: /build/candidate-019-scheduled/third_party/vowifi-go
+argv: ['/build/toolchain/go/bin/go', 'vet', '-p', '2', './internal/smscodec']
+
+Baseline is a tests-only worktree of 0.1.18: shared-port SI/SL/MMS classification, conflicting explicit types and full SMS-DELIVER wire decoding reproduce failures. Both candidate full codec suites including existing OMA, SIM OTA, unknown and multipart cases passes three race runs. First backend preparation failure is preserved in initial-backend.log and initial-test-results.json; missing ignored dist assets were copied byte-for-byte from current baseline, then backend rerun in full. No assertions removed and no new failures skipped.

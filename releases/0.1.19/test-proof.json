@@ -1,0 +1,61 @@
+{
+  "version": "0.1.19-personal-classic",
+  "binary_sha256": "eb5a72a2fcd0cab62ded88e4900a984212d5670f35efc64ccf7f22c0c4151804",
+  "source_commit": "164dd1c3f0c642c494610321f5c32784a251700e",
+  "tests": [
+    {
+      "name": "backend",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261124-100000-19400/backend.log",
+      "log_sha256": "27844498d584248028c8d97e0a885fc8416d29c015f17e8e27907d3a8a4a821c"
+    },
+    {
+      "name": "targeted-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261124-100000-19400/targeted-race.log",
+      "log_sha256": "a31e2f867386bb217aadf06b7452a8859f9b97d91959ac604337b54619434cd3"
+    },
+    {
+      "name": "ims-codec-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261124-100000-19400/ims-codec-race.log",
+      "log_sha256": "71df44338161db9b5195005567252453e20a80111769b021e368f47aeab7fc2a"
+    },
+    {
+      "name": "engine",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261124-100000-19400/engine.log",
+      "log_sha256": "e82ec7cdcd3272ce4381b48dab3e9aebb943678c90102d326d3b5ab2de9b3049"
+    },
+    {
+      "name": "ims-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261124-100000-19400/ims-race.log",
+      "log_sha256": "b82f54d9cbb278385e8bc7592568885555cc8626395ff37378ead24a38b55848"
+    },
+    {
+      "name": "host-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261124-100000-19400/host-race.log",
+      "log_sha256": "67ff316241edabfe946b6d5db956b007c8eb3d558d9e43f534c85048237e0256"
+    },
+    {
+      "name": "roaming-usb-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261124-100000-19400/roaming-usb-race.log",
+      "log_sha256": "d2e146356333aacaf11c060e143379ebe7cd91b282a4d70dc6510f07c25ee86f"
+    },
+    {
+      "name": "vet",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261124-100000-19400/vet.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limitations": [
+    "全部为实际执行的本地模拟、单元与并发测试；真实短信、通话及通知送达未验收。",
+    "经典前端及 112 个内嵌资产与当前版逐字节一致，未运行前端测试、类型检查或构建；完整 imscore 未运行，既有环境限制未宣称解决。",
+    "首次后端检查因新 Git checkout 缺少被忽略的内嵌 dist 而失败；保留 initial-backend.log，复制当前版相同资产后完整重跑通过。测试断言未删除或跳过。",
+    "ML307/AT 收件箱迁移、发送结果及选卡链路、语音和 SIM 生命周期需独立跨入口适配及另行授权实机验收；以前暂缓项保留。"
+  ]
+}
