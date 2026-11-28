@@ -1,0 +1,17 @@
+{
+  "assets": 112,
+  "unchanged": 102,
+  "changed_after_build": [
+    "index.html",
+    "assets/AutomaticTasks-HASH.js",
+    "assets/index-HASH.js",
+    "assets/Phone-HASH.js",
+    "assets/Login-HASH.js",
+    "assets/route-sms-HASH.css",
+    "assets/UnauthenticatedShell-HASH.js",
+    "assets/route-sms-HASH.js",
+    "assets/Settings-HASH.js",
+    "assets/AuthenticatedShell-HASH.js"
+  ],
+  "normalized_difference_only_sms_bubble_class_and_generated_hashes": true
+}

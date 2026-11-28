@@ -1,0 +1,54 @@
+Go 1.27.1, Node 24.21.0; GOWORK=off, GOPROXY=off, GOCACHE=/build/go-cache, GOMODCACHE=/build/go-mod-cache, GOMAXPROCS=2. No device/config/credential supplied to build/test.
+
+frontend-tests (exit 0, 8.72s)
+cwd: /build/candidate-020-scheduled/web
+argv: ['pnpm', 'test']
+
+frontend-typecheck (exit 0, 12.45s)
+cwd: /build/candidate-020-scheduled/web
+argv: ['pnpm', 'exec', 'vue-tsc', '--noEmit']
+
+frontend-build (exit 0, 6.0s)
+cwd: /build/candidate-020-scheduled/web
+argv: ['pnpm', 'exec', 'vite', 'build']
+
+initial-backend (exit 1, 78.8s)
+cwd: /build/candidate-020-scheduled
+argv: ['go', 'test', '-p', '2', '-tags', 'with_utls nomsgpack', './cmd/hideck', './pkg/smscodec', './pkg/logger', './internal/backend', './internal/api', './internal/device', './internal/db', './internal/notify', './internal/esim', './internal/vowifihost', './internal/phone', './internal/volte', './internal/qmi', './internal/personal', './internal/modem', '-count=1', '-timeout=180s']
+
+baseline-phone (exit 1, 10.32s)
+cwd: /build/candidate-019-scheduled
+argv: ['go', 'test', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/phone', '-count=5', '-timeout=180s']
+
+backend (exit 0, 57.63s)
+cwd: /build/candidate-020-scheduled
+argv: ['go', 'test', '-p', '2', '-tags', 'with_utls nomsgpack', './cmd/hideck', './pkg/smscodec', './pkg/logger', './internal/backend', './internal/api', './internal/device', './internal/db', './internal/notify', './internal/esim', './internal/vowifihost', './internal/phone', './internal/volte', './internal/qmi', './internal/personal', './internal/modem', '-count=1', '-timeout=180s']
+
+engine (exit 0, 15.05s)
+cwd: /build/candidate-020-scheduled/third_party/vowifi-go
+argv: ['go', 'test', '-p', '2', './engine/ipsec', './engine/swu', './engine/logger', './runtimehost/...', './internal/vowifi/runtimecore', './internal/vowifi/policy', './internal/vowifi/smsdelivery', './internal/vowifi/netstack', './internal/smscodec', '-count=1', '-timeout=180s']
+
+targeted-race (exit 0, 66.78s)
+cwd: /build/candidate-020-scheduled
+argv: ['go', 'test', '-race', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/api', './internal/phone', './internal/volte', './internal/vowifihost', './internal/db', './pkg/smscodec', '-count=1', '-timeout=180s']
+
+roaming-usb-race (exit 0, 22.52s)
+cwd: /build/candidate-020-scheduled
+argv: ['go', 'test', '-race', '-p', '2', '-tags', 'with_utls nomsgpack', './internal/device', './internal/qmi', '-run', 'Roaming|Registration|QMIUSB|QMIError|QMITransportDown|Rescan|Recovery', '-count=2', '-timeout=180s']
+
+ims-race (exit 0, 16.02s)
+cwd: /build/candidate-020-scheduled/third_party/vowifi-go
+argv: ['go', 'test', '-race', './internal/vowifi/imscore', '-run', 'PortS|Subscription|Subscribe|MWI|REGISTERRefresh', '-count=2', '-timeout=180s']
+
+vet-backend (exit 0, 4.09s)
+cwd: /build/candidate-020-scheduled
+argv: ['go', 'vet', '-p', '2', '-tags', 'with_utls nomsgpack', './cmd/hideck', './pkg/smscodec', './pkg/logger', './internal/backend', './internal/api', './internal/device', './internal/db', './internal/notify', './internal/esim', './internal/vowifihost', './internal/phone', './internal/volte', './internal/qmi', './internal/personal', './internal/modem']
+
+vet-engine (exit 0, 2.31s)
+cwd: /build/candidate-020-scheduled/third_party/vowifi-go
+argv: ['go', 'vet', '-p', '2', './engine/ipsec', './engine/swu', './engine/logger', './runtimehost/...', './internal/vowifi/runtimecore', './internal/vowifi/policy', './internal/vowifi/smsdelivery', './internal/vowifi/netstack', './internal/smscodec', './internal/vowifi/imscore']
+
+首次候选 backend 的 AMR WebRTC 用例出现三秒 ICE connecting 超时；旧版同机完整 phone 五轮对照的 PCMU 用例也出现同类三秒超时；候选完整 backend 原命令复跑通过。原日志/退出码保留，未改断言或跳过测试。
+首次离线布局核对脚本误抓元信息行的 class，断言失败；将定位收紧到实际 px-5 py-4 气泡后原断言全部通过。该脚本不属于维护证明校验器，未修改受保护入口/校验器。
+执行本地单元、模拟并发和离线浏览器布局检查；实机只做只读管理健康检查，未执行真实短信、通话或通知送达验收。
+完整 imscore 套件未运行；既有真实硬件/运营商及高风险通信栈暂缓项保持。

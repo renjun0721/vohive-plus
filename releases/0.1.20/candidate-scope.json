@@ -1,0 +1,12 @@
+{
+  "changed_files": [
+    "PERSONAL-0.1.20.md",
+    "build-personal.sh",
+    "web/src/views/Sms.vue"
+  ],
+  "all_other_tracked_files_unchanged": true,
+  "runtime_changes_only": [
+    "web/src/views/Sms.vue"
+  ],
+  "backend_and_third_party_runtime_unchanged": true
+}

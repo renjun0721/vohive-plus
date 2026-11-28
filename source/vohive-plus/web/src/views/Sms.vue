@@ -1059,7 +1059,7 @@ watch(() => [messageTarget.value?.message.id, threadMessages.value.length], asyn
                       </el-button>
                     </div>
                     <div
-                      class="px-5 py-4 rounded-2xl text-sm leading-[1.75] shadow-sm border"
+                      class="whitespace-pre-wrap break-words px-5 py-4 rounded-2xl text-sm leading-[1.75] shadow-sm border"
                       :class="m.type === 1
                         ? 'bg-white/90 dark:bg-white/5 text-gray-700 dark:text-gray-200 border-gray-100 dark:border-white/10'
                         : 'bg-indigo-50 dark:bg-indigo-500/10 text-gray-800 dark:text-gray-100 border-indigo-100 dark:border-indigo-500/20'"

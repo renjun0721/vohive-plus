@@ -1,0 +1,83 @@
+{
+  "status": "passed",
+  "scope": "离线实际经典气泡 class 与产物 CSS 的 Chromium 布局；不加载生产 API，不发送短信",
+  "baseline_defect_reproduced": true,
+  "fixtures": {
+    "baseline": [
+      {
+        "name": "received-newlines",
+        "whiteSpace": "normal",
+        "overflowWrap": "normal",
+        "textPreserved": false,
+        "clientWidth": 258,
+        "scrollWidth": 258,
+        "height": 58.5
+      },
+      {
+        "name": "sent-newlines",
+        "whiteSpace": "normal",
+        "overflowWrap": "normal",
+        "textPreserved": false,
+        "clientWidth": 258,
+        "scrollWidth": 258,
+        "height": 58.5
+      },
+      {
+        "name": "blank-lines-spaces",
+        "whiteSpace": "normal",
+        "overflowWrap": "normal",
+        "textPreserved": false,
+        "clientWidth": 258,
+        "scrollWidth": 258,
+        "height": 58.5
+      },
+      {
+        "name": "long-word",
+        "whiteSpace": "normal",
+        "overflowWrap": "normal",
+        "textPreserved": true,
+        "clientWidth": 258,
+        "scrollWidth": 4172,
+        "height": 58.5
+      }
+    ],
+    "candidate": [
+      {
+        "name": "received-newlines",
+        "whiteSpace": "pre-wrap",
+        "overflowWrap": "break-word",
+        "textPreserved": true,
+        "clientWidth": 258,
+        "scrollWidth": 258,
+        "height": 83
+      },
+      {
+        "name": "sent-newlines",
+        "whiteSpace": "pre-wrap",
+        "overflowWrap": "break-word",
+        "textPreserved": true,
+        "clientWidth": 258,
+        "scrollWidth": 258,
+        "height": 83
+      },
+      {
+        "name": "blank-lines-spaces",
+        "whiteSpace": "pre-wrap",
+        "overflowWrap": "break-word",
+        "textPreserved": true,
+        "clientWidth": 258,
+        "scrollWidth": 258,
+        "height": 107.5
+      },
+      {
+        "name": "long-word",
+        "whiteSpace": "pre-wrap",
+        "overflowWrap": "break-word",
+        "textPreserved": true,
+        "clientWidth": 258,
+        "scrollWidth": 258,
+        "height": 524
+      }
+    ]
+  }
+}

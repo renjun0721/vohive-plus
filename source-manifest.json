@@ -1,6 +1,6 @@
 {
-  "date": "2026-11-24",
-  "version": "0.1.19-personal-classic",
+  "date": "2026-11-28",
+  "version": "0.1.20-personal-classic",
   "base_source_commit": "f1c24573bdc0326cbf8800ba5feab544838e60d7",
   "github_base_commit": "581a5e38fa72b85900f8a6a1ad0a4b39720b6f70",
   "upstream_hideck_commit": "3fd3d6aaf55924c338c2cf3f092e1af1f588d152",
@@ -9,12 +9,17 @@
     "3cbb6c1aa0e9bd77a1da98f6c4d60cd866b4e4c1",
     "a1273f0281cf74b288bab329d734c83c5afc3f48"
   ],
-  "running_binary_sha256": "eb5a72a2fcd0cab62ded88e4900a984212d5670f35efc64ccf7f22c0c4151804",
-  "source_correspondence": "Fresh byte comparison of 2615 candidate tracked files; controlled deployment receipt matches production binary.",
+  "running_binary_sha256": "0088dc43e25a5247893dd2eb21cb49212ded9319a7b69e062760f8175392fab6",
+  "source_correspondence": "Fresh byte comparison of 2616 candidate tracked files; controlled deployment receipt matches production binary.",
   "secret_scan": "Current private values scanned separately before publication; values never included here.",
-  "file_count": 2660,
-  "total_bytes": 21084053,
+  "file_count": 2662,
+  "total_bytes": 21086596,
   "files": [
+    {
+      "path": "source/VoCat-SMS-NOTICE.md",
+      "size": 841,
+      "sha256": "7c7412154eabcb89e62733d4ed3b0ba6a505859f6347aa30ac8cb2c336686ac1"
+    },
     {
       "path": "source/VoCat-SOCKS5-NOTICE.md",
       "size": 1110,
@@ -28,7 +33,7 @@
     {
       "path": "source/deployment/Personal.Dockerfile",
       "size": 1211,
-      "sha256": "54cafc8e0fa39ef8685cdac2d8592c10d49d4a7c90686a9910dab569649a9129"
+      "sha256": "7a2950703b34dda35a6be219b1abdac530ae215b3fec81c5020408b1ae5fc90f"
     },
     {
       "path": "source/deployment/vohive-plus-run",
@@ -331,6 +336,11 @@
       "sha256": "689cc88b4e8b72def75e65711b92f0f334a58a823595ff775e8b51f05dbf2647"
     },
     {
+      "path": "source/vohive-plus/PERSONAL-0.1.20.md",
+      "size": 1670,
+      "sha256": "1adc2532e03ac80d62c92051e4a88d007ab67bc2523700034a7b997b4fb47d72"
+    },
+    {
       "path": "source/vohive-plus/PERSONAL-NOTICE.md",
       "size": 8466,
       "sha256": "99df02596eb9aa87a56798ae88e9ded9d31ad16e7c486d01684af8bba13651d7"
@@ -368,7 +378,7 @@
     {
       "path": "source/vohive-plus/build-personal.sh",
       "size": 744,
-      "sha256": "6ed4c5374c956cbee3ad73b2db2091d6cd9e77aa741624c325d9ae817a7a0bfb"
+      "sha256": "a4b83f0ddf3c00f17c798e0f069cf2f1ac0158d6bfba561d4e17df21baff673e"
     },
     {
       "path": "source/vohive-plus/caddy-dns/alidns.caddy",
@@ -12937,8 +12947,8 @@
     },
     {
       "path": "source/vohive-plus/web/src/views/Sms.vue",
-      "size": 47667,
-      "sha256": "5ccd602e1c5fe501b0c25bcea50da90f3b219c6ba3427f716003d2b16ecbe19f"
+      "size": 47699,
+      "sha256": "869b05347907119035862ec313c007f512414d1cd3da591063580763bee43b44"
     },
     {
       "path": "source/vohive-plus/web/src/views/UtServices.vue",
@@ -13639,12 +13649,12 @@
       ]
     }
   ],
-  "reference_hideck_release": "v2.1.43",
+  "reference_hideck_release": "v2.1.44",
   "reference_hideck_main": "8a1c29d85fa7f5df2e801aa9627ef46dab92a31a",
-  "reference_vocat_main": "e8e5d1c2b2b775e137ea4f4a5f524a65bb44cf0f",
+  "reference_vocat_main": "3db888b7ad381274b816c4b77b48c6a434a99992",
   "personal_roaming_feature": "source/vohive-plus/ROAMING-OPERATORS.md",
-  "local_candidate_commit": "164dd1c3f0c642c494610321f5c32784a251700e",
-  "github_previous_commit": "2b1793a9a2e4a94d407d4ceaff3463d1975e3e97",
+  "local_candidate_commit": "d1161487dd2adc7f91cc161b8fb01a1069a72fbd",
+  "github_previous_commit": "3dcd20fa73613b046e1da7642061323901a25626",
   "partial_diagnostic_dependencies": [
     {
       "sha": "6e4f7b1627a072c61b225eea7fe0068948bd8eb9",
@@ -13652,13 +13662,26 @@
       "scope": "Only create_child_sa_offer.go formatter, no negotiation/SA lifecycle changes"
     }
   ],
-  "reference_vocat_release": "v0.4.2",
+  "reference_vocat_release": "v0.4.3",
   "selected_vocat_commits": [
     {
       "sha": "d1968d1c3fb88258d86a6e2e69f9c3304d160711",
       "subject": "fix(ike): sanitize SOCKS5 relay lookup failures",
       "author": "MengMengCode <227010654+MengMengCode@users.noreply.github.com>",
       "adaptation": "Existing personal SOCKS5 reply and UDP datagram error paths, without VoCat IKE lifecycle changes."
+    },
+    {
+      "sha": "3db888b7ad381274b816c4b77b48c6a434a99992",
+      "scope": [
+        "Add whitespace-pre-wrap and break-words to the active inline classic Vue SMS bubble; keep received/sent message text, blank lines and consecutive spaces while wrapping long words. No backend runtime changes."
+      ],
+      "authors": [
+        {
+          "name": "Tardisyuan",
+          "email": "66050966+Tardisyuan@users.noreply.github.com",
+          "date": "2026-11-27T13:41:42Z"
+        }
+      ]
     }
   ],
   "vocat_adaptation_license": "source/third-party-licenses/VoCat-Research-Evaluation-License.md",
@@ -13672,5 +13695,5 @@
       ]
     }
   ],
-  "publication_code_commit": "a34d88b06171e32935ea674ee35335ebf676ad73"
+  "vocat_sms_adaptation_notice": "source/VoCat-SMS-NOTICE.md"
 }

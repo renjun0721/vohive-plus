@@ -1,0 +1,73 @@
+{
+  "version": "0.1.20-personal-classic",
+  "binary_sha256": "0088dc43e25a5247893dd2eb21cb49212ded9319a7b69e062760f8175392fab6",
+  "source_commit": "d1161487dd2adc7f91cc161b8fb01a1069a72fbd",
+  "tests": [
+    {
+      "name": "frontend-tests",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261128-100000-17927/frontend-tests.log",
+      "log_sha256": "b25baea173d77e8561bc830921fd3fed00183142273fdde9ae8136e2ac4ef063"
+    },
+    {
+      "name": "frontend-typecheck-result",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261128-100000-17927/frontend-typecheck-result.log",
+      "log_sha256": "4b315ab596f1ab3e416b2eff562df124ca9bc95413df7ac14565302f558c26e4"
+    },
+    {
+      "name": "frontend-build",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261128-100000-17927/frontend-build.log",
+      "log_sha256": "b4c61b5e5569772434c639442692cea5383433a0c2a69640359c16be6aee537b"
+    },
+    {
+      "name": "backend",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261128-100000-17927/backend.log",
+      "log_sha256": "d3213e49f4920e7cc3e9ab872fd979a6439f8fe203e5146d602396793b8aef35"
+    },
+    {
+      "name": "engine",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261128-100000-17927/engine.log",
+      "log_sha256": "2985868f1eb7d669a1e65707b5716e5cfb93566996931c74cfb74ccf3f0f0751"
+    },
+    {
+      "name": "targeted-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261128-100000-17927/targeted-race.log",
+      "log_sha256": "c7c933991ca6d63b1408251098892bbbf0b8fbe80e90274af9ffabe1ceb27314"
+    },
+    {
+      "name": "roaming-usb-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261128-100000-17927/roaming-usb-race.log",
+      "log_sha256": "b489c9d19049d29e025a7cb93ecf6dc3956693e4afea1e111fe220d7983e7ed9"
+    },
+    {
+      "name": "ims-race",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261128-100000-17927/ims-race.log",
+      "log_sha256": "aa7c5f3e55449b85cc11af2b67e40761fbc6626bb10bfe94fddd639a37f76244"
+    },
+    {
+      "name": "browser-sms-layout",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261128-100000-17927/browser-sms-layout.json",
+      "log_sha256": "03dd4a5332e76aa5a6d7ca89ccf85073b24bca717bb561eab7502a2a17f70803"
+    },
+    {
+      "name": "vet",
+      "passed": true,
+      "log": "/mnt/sata2-4/vohive-maintenance/runs/20261128-100000-17927/vet.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limitations": [
+    "首次候选 backend 的 AMR WebRTC 用例出现三秒 ICE connecting 超时；旧版同机完整 phone 五轮对照的 PCMU 用例也出现同类三秒超时；候选完整 backend 原命令复跑通过。原日志/退出码保留，未改断言或跳过测试。",
+    "首次离线布局核对脚本误抓元信息行的 class，断言失败；将定位收紧到实际 px-5 py-4 气泡后原断言全部通过。该脚本不属于维护证明校验器，未修改受保护入口/校验器。",
+    "执行本地单元、模拟并发和离线浏览器布局检查；实机只做只读管理健康检查，未执行真实短信、通话或通知送达验收。",
+    "完整 imscore 套件未运行；既有真实硬件/运营商及高风险通信栈暂缓项保持。"
+  ]
+}
