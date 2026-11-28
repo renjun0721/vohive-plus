@@ -1,0 +1,17 @@
+{
+  "version": "0.1.20-personal-classic",
+  "date": "2026-11-28",
+  "build_time": "2026-11-28T02:05:38Z",
+  "platform": "linux/amd64",
+  "go": "1.27.1",
+  "local_candidate_commit": "d1161487dd2adc7f91cc161b8fb01a1069a72fbd",
+  "binary_sha256": "0088dc43e25a5247893dd2eb21cb49212ded9319a7b69e062760f8175392fab6",
+  "binary_bytes": 78545159,
+  "archive_sha256": "bcc886bcb30e1fe5c77117ffdf3753daff16247b2b5d4e0e498186a78abfbe15",
+  "archive_bytes": 27555347,
+  "image": "vohive-plus-personal:0.1.20",
+  "frontend": "269 existing tests, typecheck and Vite build; actual classic bubble pre-wrap/break-words; offline Chromium baseline comparison.",
+  "codec_runtime": "Use source/deployment/Personal.Dockerfile; native iStoreOS musl execution unsupported.",
+  "image_id": "sha256:ad54ca023b0cfbb5f2949f1233dbd9268bb979e25b08af126f870ec575a1a993",
+  "source_commit": "4b2e4870667204e54452870a236f5f72d4b8166b"
+}

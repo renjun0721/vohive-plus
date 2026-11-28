@@ -13695,5 +13695,6 @@
       ]
     }
   ],
-  "vocat_sms_adaptation_notice": "source/VoCat-SMS-NOTICE.md"
+  "vocat_sms_adaptation_notice": "source/VoCat-SMS-NOTICE.md",
+  "publication_code_commit": "4b2e4870667204e54452870a236f5f72d4b8166b"
 }
